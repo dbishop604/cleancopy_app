@@ -123,4 +123,94 @@ def success():
     # TODO: Update user plan in real DB after webhook confirmation
     current_user.plan = "paid"
     flash("🎉 Subscription successful! You now have Pro access.")
-    return render_template(_
+    return render_template("success.html", plan=current_user.plan)
+
+@app.route("/cancel")
+@login_required
+def cancel():
+    # Downgrade back to free plan
+    current_user.plan = "free"
+    flash("⚠️ Subscription canceled. You now have Free plan (5MB limit per file).")
+    return render_template("cancel.html", plan=current_user.plan)
+
+# -----------------------------
+# TERMS PAGE
+# -----------------------------
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+# -----------------------------
+# FILE CONVERSION
+# -----------------------------
+@app.route("/convert", methods=["POST"])
+@login_required
+def convert():
+    if "file" not in request.files:
+        flash("No file selected")
+        return redirect(url_for("index"))
+
+    f = request.files["file"]
+    if f.filename == "":
+        flash("No selected file")
+        return redirect(url_for("index"))
+    if not allowed_file(f.filename):
+        flash("Unsupported file type")
+        return redirect(url_for("index"))
+
+    # Enforce plan limits
+    f.seek(0, os.SEEK_END)
+    file_size = f.tell()
+    f.seek(0)
+    size_mb = file_size / (1024 * 1024)
+
+    if current_user.plan == "free" and size_mb > 5:
+        flash("❌ Free plan limit is 5MB. Upgrade to Pro ($16/month) for files up to 50MB.")
+        return redirect(url_for("index"))
+
+    if current_user.plan == "paid" and size_mb > 50:
+        flash("❌ Pro plan limit is 50MB. Please reduce file size.")
+        return redirect(url_for("index"))
+
+    # Save file temporarily
+    os.makedirs("uploads", exist_ok=True)
+    filename = secure_filename(f.filename)
+    tmp_path = os.path.join("uploads", filename)
+    f.save(tmp_path)
+
+    try:
+        text = process_file_to_text(tmp_path, join_strategy=request.form.get("join_strategy", "smart"))
+
+        output_fmt = request.form.get("format", "docx")
+        if output_fmt == "txt":
+            buf = io.BytesIO(text.encode("utf-8"))
+            return send_file(
+                buf,
+                as_attachment=True,
+                download_name=f"{os.path.splitext(filename)[0]}_cleancopy.txt",
+                mimetype="text/plain"
+            )
+        else:
+            docx_buf = text_to_docx(text)
+            return send_file(
+                docx_buf,
+                as_attachment=True,
+                download_name=f"{os.path.splitext(filename)[0]}_cleancopy.docx",
+                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+    except Exception as e:
+        app.logger.exception("Conversion failed")
+        flash(f"Conversion failed: {e}")
+        return redirect(url_for("index"))
+    finally:
+        try:
+            os.remove(tmp_path)
+        except Exception:
+            pass
+
+# -----------------------------
+# RUN APP
+# -----------------------------
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
