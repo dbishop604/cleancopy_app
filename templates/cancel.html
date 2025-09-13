@@ -3,73 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Subscription Canceled</title>
+  <title>Subscription Canceled – SeamlessDocs Online</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9fafb;
-      color: #333;
       max-width: 700px;
-      margin: 40px auto;
-      padding: 20px;
+      margin: 60px auto;
       line-height: 1.6;
+      text-align: center;
+      color: #555;
+      background-color: #fafafa;
     }
     .card {
       background: #fff;
       padding: 30px;
-      border-radius: 16px;
+      border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      text-align: center;
     }
     h1 {
-      font-size: 1.8em;
-      margin-bottom: 16px;
       color: #222;
     }
     p {
-      font-size: 1em;
-      margin: 10px 0;
+      margin-top: 12px;
     }
-    .notice {
-      margin-top: 20px;
-      font-size: 0.9em;
-      color: #555;
-    }
-    a {
-      color: #0077cc;
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
-    .button {
-      margin-top: 25px;
+    a.button {
       display: inline-block;
+      margin-top: 20px;
       padding: 10px 20px;
-      border-radius: 8px;
-      background: #444;
+      background: #00796b;
       color: #fff;
       text-decoration: none;
+      border-radius: 6px;
     }
-    .button:hover {
-      background: #000;
+    a.button:hover {
+      background: #005f52;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Subscription Canceled</h1>
-    <p>⚠️ Your subscription has been canceled.</p>
-    <p>You are now back on the <strong>Free Plan</strong>, which allows uploads up to <strong>5MB</strong>.</p>
-
-    <div class="notice">
-      Files are stored temporarily for up to <strong>8 hours</strong> and are then automatically deleted.  
-      We never read, store, or sell your content or personal information. By uploading, you confirm you own your material and indemnify us from any future claims of similarity or copyright infringement.
-      <br><br>
-      For details, please review our <a href="/terms" target="_blank">Terms of Use & Privacy Policy</a>.
-    </div>
-
-    <a class="button" href="{{ url_for('index') }}">Return to Home</a>
+    <h1>❌ Subscription Canceled</h1>
+    <p>Your upgrade has been canceled. You’re now back on the <strong>Free Plan</strong>, which allows uploads up to <strong>5MB</strong>.</p>
+    <p>If you’d like to convert larger files (up to 50MB), you can upgrade anytime.</p>
+    <a class="button" href="{{ url_for('upgrade') }}">Upgrade to Pro</a>
+    <br><br>
+    <a href="{{ url_for('index') }}">⬅ Back to Home</a>
   </div>
 </body>
 </html>
