@@ -57,6 +57,13 @@
       button:hover {
         background: #0056b3;
       }
+      .upgrade-btn {
+        background: #28a745;
+        margin-top: 1rem;
+      }
+      .upgrade-btn:hover {
+        background: #1e7e34;
+      }
       footer {
         margin-top: 2rem;
         text-align: center;
@@ -107,6 +114,12 @@
 
         <button type="submit">Convert</button>
       </form>
+
+      {% if plan == "free" %}
+        <form action="/upgrade" method="GET">
+          <button type="submit" class="upgrade-btn">🚀 Upgrade to Pro ($16/month)</button>
+        </form>
+      {% endif %}
 
       <footer>
         <small>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</small>
