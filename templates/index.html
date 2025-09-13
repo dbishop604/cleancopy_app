@@ -1,116 +1,92 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CleanCopy OCR — Continuous Text Converter</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background: #f9f9f9;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-      }
-      .container {
-        background: #fff;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        max-width: 600px;
-        width: 100%;
-      }
-      h1 {
-        text-align: center;
-        margin-bottom: 1rem;
-      }
-      p {
-        text-align: center;
-        margin-bottom: 2rem;
-        color: #555;
-      }
-      form {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-      }
-      label {
-        font-weight: bold;
-      }
-      input[type="file"], select {
-        padding: 0.5rem;
-      }
-      button {
-        background: #007bff;
-        color: #fff;
-        border: none;
-        padding: 0.75rem;
-        font-size: 1rem;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background 0.3s;
-      }
-      button:hover {
-        opacity: 0.9;
-      }
-      footer {
-        margin-top: 24px;
-        text-align: center;
-        font-size: 0.8rem;
-        color: #777;
-      }
-      .flash {
-        background: #ffe5e5;
-        color: #900;
-        padding: 0.5rem;
-        margin-bottom: 1rem;
-        border-radius: 4px;
-        text-align: center;
-      }
-      .note {
-        font-size: 0.9rem;
-        color: #666; /* 60% black */
-        text-align: center;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>CleanCopy OCR</h1>
-      <p>Upload a PDF or image. We’ll convert it into clean, continuous text with proper paragraphs — no more broken lines.</p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeamlessDocs Online – CleanCopy OCR</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      line-height: 1.6;
+      color: #555; /* 60% black for softer text */
+      background-color: #fafafa;
+    }
+    h1, h2 {
+      color: #222;
+    }
+    .upload-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .info {
+      font-size: 0.9em;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      color: #555;
+    }
+    .plan-box {
+      margin-bottom: 20px;
+      padding: 10px 15px;
+      background: #eaf6f6;
+      border-radius: 8px;
+      color: #333;
+    }
+    footer {
+      margin-top: 40px;
+      font-size: 0.85em;
+      color: #666;
+      text-align: center;
+    }
+    a {
+      color: #006666;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      background-color: #00796b;
+      color: #fff;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #bbb;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h1>SeamlessDocs Online</h1>
 
-      {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="flash">
-          {% for m in messages %}
-            <div>{{ m }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
-      {% endwith %}
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul style="color: #c00;">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
 
-      <form action="{{ url_for('convert') }}" method="POST" enctype="multipart/form-data">
-        <label for="file">Choose a file:</label>
-        <input type="file" id="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.tiff,.tif,.bmp" required>
+  <div class="plan-box">
+    <p><strong>Your Plan:</strong> {{ plan|capitalize }}</p>
+    {% if plan == "free" %}
+      <p>Free plan limit: <strong>5MB</strong>.  
+      <a href="{{ url_for('upgrade') }}">Upgrade to Pro ($16/month)</a> for up to 50MB uploads.</p>
+    {% else %}
+      <p>Pro plan: upload files up to <strong>50MB</strong>.  
+      <a href="{{ url_for('billing_portal') }}">Manage Subscription</a></p>
+    {% endif %}
+  </div>
 
-        <label for="format">Output format:</label>
-        <select id="format" name="format">
-          <option value="docx" selected>Word (.docx)</option>
-          <option value="txt">Plain Text (.txt)</option>
-        </select>
-
-        <button type="submit">Convert</button>
-      </form>
-
-      <p class="note">ℹ️ Converted files are stored for up to 8 hours. Please download your file before then.</p>
-
-      <footer>
-        <small>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</small>
-      </footer>
-    </div>
-  </body>
-</html>
+  <div class="upload-box">
+    <h2>Upload Your File</h2>
+    <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
