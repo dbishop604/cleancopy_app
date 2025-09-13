@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cancel Subscription — CleanCopy OCR</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f9f9f9;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .container {
+        background: #fff;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        max-width: 500px;
+        text-align: center;
+      }
+      h1 {
+        font-size: 26px;
+        margin-bottom: 1rem;
+      }
+      p {
+        color: #444;
+        margin-bottom: 1.5rem;
+      }
+      a.button {
+        display: inline-block;
+        background: #d9534f;
+        color: #fff;
+        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: background 0.3s;
+      }
+      a.button:hover {
+        background: #b52b27;
+      }
+      a.secondary {
+        display: inline-block;
+        margin-left: 1rem;
+        color: #007bff;
+        text-decoration: none;
+      }
+      a.secondary:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Subscription Canceled</h1>
+      <p>Your upgrade has been canceled. You can still use the free plan with a 5MB upload limit.</p>
+      <a href="/" class="button">Return to Home</a>
+      <a href="/upgrade" class="secondary">Upgrade Again</a>
+    </div>
+  </body>
+</html>
