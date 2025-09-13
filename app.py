@@ -1,4 +1,12 @@
-from flask import Flask, render_template, request, send_file, redirect, url_for, flash
+from flask import (
+    Flask,
+    render_template,
+    request,
+    send_file,
+    redirect,
+    url_for,
+    flash,
+)
 from werkzeug.utils import secure_filename
 from flask_login import (
     LoginManager,
@@ -102,7 +110,7 @@ def upgrade():
             mode="subscription",
             success_url=url_for("success", _external=True),
             cancel_url=url_for("cancel", _external=True),
-            customer_email=f"{current_user.id}@example.com",  # placeholder
+            customer_email=f"{current_user.id}@example.com",  # placeholder for now
         )
         return redirect(checkout_session.url, code=303)
     except Exception as e:
@@ -123,6 +131,21 @@ def cancel():
     flash("❌ Upgrade canceled.")
     return render_template("cancel.html", plan=current_user.plan)
 
+@app.route("/billing-portal")
+@login_required
+def billing_portal():
+    try:
+        # Replace with real customer_id from your DB in production
+        customer_id = f"cus_{current_user.id}"
+        session = stripe.billing_portal.Session.create(
+            customer=customer_id,
+            return_url=url_for("index", _external=True),
+        )
+        return redirect(session.url)
+    except Exception as e:
+        flash(f"Error opening billing portal: {e}")
+        return redirect(url_for("index"))
+
 # -----------------------------
 # FILE CONVERSION
 # -----------------------------
@@ -135,7 +158,7 @@ def convert():
 
     f = request.files["file"]
     if f.filename == "":
-        flash("No file selected")
+        flash("No selected file")
         return redirect(url_for("index"))
     if not allowed_file(f.filename):
         flash("Unsupported file type")
@@ -148,21 +171,52 @@ def convert():
     size_mb = file_size / (1024 * 1024)
 
     if current_user.plan == "free" and size_mb > 5:
-        flash("❌ Free plan limit is 5MB. Upgrade to Pro ($16/month) for up to 50MB.")
+        flash("❌ Free plan limit is 5MB. Upgrade to Pro ($16/month) for files up to 50MB.")
         return redirect(url_for("index"))
 
     if current_user.plan == "paid" and size_mb > 50:
         flash("❌ Pro plan limit is 50MB. Please reduce file size.")
         return redirect(url_for("index"))
 
-    # Process file
-    output_fmt = request.form.get("format", "docx")
-    join_strategy = request.form.get("join_strategy", "smart")
-    filename = secure_filename(f.filename)
-
+    # Save file temporarily
     os.makedirs("uploads", exist_ok=True)
+    filename = secure_filename(f.filename)
     tmp_path = os.path.join("uploads", filename)
     f.save(tmp_path)
 
     try:
-        text =
+        text = process_file_to_text(tmp_path, join_strategy=request.form.get("join_strategy", "smart"))
+
+        output_fmt = request.form.get("format", "docx")
+        if output_fmt == "txt":
+            buf = io.BytesIO(text.encode("utf-8"))
+            return send_file(
+                buf,
+                as_attachment=True,
+                download_name=f"{os.path.splitext(filename)[0]}_cleancopy.txt",
+                mimetype="text/plain"
+            )
+        else:
+            docx_buf = text_to_docx(text)
+            return send_file(
+                docx_buf,
+                as_attachment=True,
+                download_name=f"{os.path.splitext(filename)[0]}_cleancopy.docx",
+                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+    except Exception as e:
+        app.logger.exception("Conversion failed")
+        flash(f"Conversion failed: {e}")
+        return redirect(url_for("index"))
+    finally:
+        try:
+            os.remove(tmp_path)
+        except Exception:
+            pass
+
+# -----------------------------
+# RUN APP
+# -----------------------------
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
