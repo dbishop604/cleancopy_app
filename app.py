@@ -1,29 +1,20 @@
 from flask import Flask, render_template, request, send_file, redirect, url_for, flash
 from werkzeug.utils import secure_filename
-from flask_login import (
-    LoginManager,
-    UserMixin,
-    login_user,
-    login_required,
-    logout_user,
-    current_user,
-)
-import os
-import io
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+import os, io
 
 from processor import process_file_to_text, text_to_docx
 
-# -----------------------------
-# Config
-# -----------------------------
+# Allowed file types
 ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "tiff", "tif", "bmp"}
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# Flask app setup
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key")
-app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB limit
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # Absolute upload cap = 100MB
 
 # -----------------------------
 # LOGIN SETUP
@@ -32,10 +23,10 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-# Simple in-memory user store (replace with DB later)
+# Demo users (replace with real DB later)
 USERS = {
     "freeuser": {"password": "free123", "plan": "free"},
-    "paiduser": {"password": "paid123", "plan": "paid"},
+    "paiduser": {"password": "paid123", "plan": "paid"}
 }
 
 class User(UserMixin):
@@ -57,22 +48,15 @@ def load_user(user_id):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-
-        if not username or not password:
-            flash("Please enter both username and password")
-            return redirect(url_for("login"))
-
+        username = request.form["username"]
+        password = request.form["password"]
         user = USERS.get(username)
         if user and user["password"] == password:
             login_user(User(username, user["plan"]))
-            flash(f"Welcome back, {username}!")
+            flash("Logged in successfully!")
             return redirect(url_for("index"))
         else:
             flash("Invalid username or password")
-            return redirect(url_for("login"))
-
     return render_template("login.html")
 
 @app.route("/logout")
@@ -102,20 +86,27 @@ def convert():
         flash("Unsupported file type.")
         return redirect(url_for("index"))
 
-    # File size check depending on plan
+    # -----------------------------
+    # Enforce size limits by plan
+    # -----------------------------
     f.seek(0, os.SEEK_END)
     file_size = f.tell()
     f.seek(0)
+    size_mb = file_size / (1024 * 1024)
 
-    max_size = 10 * 1024 * 1024 if current_user.plan == "free" else 50 * 1024 * 1024
-    if file_size > max_size:
-        flash(f"{current_user.plan.capitalize()} users can only upload files up to {max_size // (1024*1024)} MB.")
+    if current_user.plan == "free" and size_mb > 5:
+        flash("❌ Free plan limit is 5MB. Please upgrade to Pro ($16/month) for files up to 50MB.")
         return redirect(url_for("index"))
 
+    if current_user.plan == "paid" and size_mb > 50:
+        flash("❌ Pro plan limit is 50MB. Please reduce file size.")
+        return redirect(url_for("index"))
+
+    # Process file
     output_fmt = request.form.get("format", "docx")
     join_strategy = request.form.get("join_strategy", "smart")
-
     filename = secure_filename(f.filename)
+
     os.makedirs("uploads", exist_ok=True)
     tmp_path = os.path.join("uploads", filename)
     f.save(tmp_path)
@@ -148,6 +139,9 @@ def convert():
         except Exception:
             pass
 
+# -----------------------------
+# RUN APP
+# -----------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
