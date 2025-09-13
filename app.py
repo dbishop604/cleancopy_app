@@ -128,7 +128,7 @@ def success():
 @app.route("/cancel")
 @login_required
 def cancel():
-    flash("❌ Upgrade canceled.")
+    flash("❌ Upgrade canceled. You are limited to 5MB file size on the Free plan.")
     return render_template("cancel.html", plan=current_user.plan)
 
 @app.route("/billing-portal")
@@ -176,47 +176,4 @@ def convert():
 
     if current_user.plan == "paid" and size_mb > 50:
         flash("❌ Pro plan limit is 50MB. Please reduce file size.")
-        return redirect(url_for("index"))
-
-    # Save file temporarily
-    os.makedirs("uploads", exist_ok=True)
-    filename = secure_filename(f.filename)
-    tmp_path = os.path.join("uploads", filename)
-    f.save(tmp_path)
-
-    try:
-        text = process_file_to_text(tmp_path, join_strategy=request.form.get("join_strategy", "smart"))
-
-        output_fmt = request.form.get("format", "docx")
-        if output_fmt == "txt":
-            buf = io.BytesIO(text.encode("utf-8"))
-            return send_file(
-                buf,
-                as_attachment=True,
-                download_name=f"{os.path.splitext(filename)[0]}_cleancopy.txt",
-                mimetype="text/plain"
-            )
-        else:
-            docx_buf = text_to_docx(text)
-            return send_file(
-                docx_buf,
-                as_attachment=True,
-                download_name=f"{os.path.splitext(filename)[0]}_cleancopy.docx",
-                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
-    except Exception as e:
-        app.logger.exception("Conversion failed")
-        flash(f"Conversion failed: {e}")
-        return redirect(url_for("index"))
-    finally:
-        try:
-            os.remove(tmp_path)
-        except Exception:
-            pass
-
-# -----------------------------
-# RUN APP
-# -----------------------------
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+        return redirect(url_for_
