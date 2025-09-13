@@ -57,19 +57,11 @@
       button:hover {
         background: #0056b3;
       }
-      .note {
-        background: #f0f9ff;
-        border-left: 4px solid #0ea5e9;
-        padding: 0.75rem;
-        margin-top: 1rem;
-        font-size: 0.95rem;
-        color: #333;
-      }
       footer {
         margin-top: 2rem;
         text-align: center;
         font-size: 0.8rem;
-        color: #555;
+        color: #777;
       }
       .flash {
         background: #ffe5e5;
@@ -84,7 +76,10 @@
   <body>
     <div class="container">
       <h1>CleanCopy OCR</h1>
-      <p>Upload a PDF or image. We’ll convert it into continuous, editable text — no more broken lines.</p>
+      <p>
+        Upload a PDF or image. We’ll convert it into continuous, editable text —
+        broken lines are fixed automatically, and real paragraphs are preserved.
+      </p>
 
       {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -106,24 +101,12 @@
           <option value="txt">Plain Text (.txt)</option>
         </select>
 
-        <label for="join_strategy">Line joining strategy:</label>
-        <select id="join_strategy" name="join_strategy">
-          <option value="smart" selected>Smart (recommended)</option>
-          <option value="aggressive">Aggressive (strip most line-breaks)</option>
-          <option value="none">No joining (raw OCR)</option>
-        </select>
-
         <button type="submit">Convert</button>
       </form>
 
-      <div class="note">
-        🔒 Your uploaded files are stored securely and automatically deleted after <strong>8 hours</strong>.  
-        <br>
-        Free Plan: up to 5MB per file • Pro Plan ($16/mo): up to 50MB per file.
-      </div>
-
       <footer>
-        <small>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</small>
+        <small>Files are automatically deleted after 8 hours.<br>
+        © Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</small>
       </footer>
     </div>
   </body>
