@@ -55,10 +55,10 @@
         transition: background 0.3s;
       }
       button:hover {
-        background: #0056b3;
+        opacity: 0.9;
       }
       footer {
-        margin-top: 2rem;
+        margin-top: 24px;
         text-align: center;
         font-size: 0.8rem;
         color: #777;
@@ -71,15 +71,17 @@
         border-radius: 4px;
         text-align: center;
       }
+      .note {
+        font-size: 0.9rem;
+        color: #666; /* 60% black */
+        text-align: center;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>CleanCopy OCR</h1>
-      <p>
-        Upload a PDF or image. We’ll convert it into continuous, editable text —
-        broken lines are fixed automatically, and real paragraphs are preserved.
-      </p>
+      <p>Upload a PDF or image. We’ll convert it into clean, continuous text with proper paragraphs — no more broken lines.</p>
 
       {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -91,7 +93,7 @@
       {% endif %}
       {% endwith %}
 
-      <form action="/convert" method="POST" enctype="multipart/form-data">
+      <form action="{{ url_for('convert') }}" method="POST" enctype="multipart/form-data">
         <label for="file">Choose a file:</label>
         <input type="file" id="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.tiff,.tif,.bmp" required>
 
@@ -104,9 +106,10 @@
         <button type="submit">Convert</button>
       </form>
 
+      <p class="note">ℹ️ Converted files are stored for up to 8 hours. Please download your file before then.</p>
+
       <footer>
-        <small>Files are automatically deleted after 8 hours.<br>
-        © Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</small>
+        <small>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</small>
       </footer>
     </div>
   </body>
