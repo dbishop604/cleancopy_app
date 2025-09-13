@@ -3,81 +3,70 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Upgrade Canceled — CleanCopy OCR</title>
+    <title>Subscription Canceled — CleanCopy OCR</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
       body {
         font-family: Arial, sans-serif;
-        background: #fef2f2;
+        background: #fff7ed;
+        margin: 0;
+        padding: 0;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        margin: 0;
+        min-height: 100vh;
       }
-      .box {
+      .container {
         background: #fff;
         padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        text-align: center;
-        max-width: 600px;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+        max-width: 500px;
         width: 100%;
+        text-align: center;
       }
       h1 {
-        color: #b91c1c;
+        color: #b45309;
         margin-bottom: 1rem;
       }
       p {
-        color: #444;
         margin-bottom: 1rem;
-        line-height: 1.6;
+        color: #444;
       }
-      .highlight {
-        background: #fef2f2;
-        border-left: 4px solid #dc2626;
-        padding: 0.75rem;
-        border-radius: 6px;
+      a {
+        display: inline-block;
         margin-top: 1rem;
-        font-size: 0.95rem;
-      }
-      a button {
-        background: #b91c1c;
+        padding: 0.6rem 1.2rem;
+        background: #f97316;
         color: #fff;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+      a:hover {
+        background: #ea580c;
+      }
+      .note {
+        background: #fff4e6;
+        border-left: 4px solid #f97316;
+        padding: 0.75rem;
         margin-top: 1.5rem;
-      }
-      a button:hover {
-        background: #991b1b;
-      }
-      footer {
-        margin-top: 2rem;
-        text-align: center;
-        font-size: 0.8rem;
-        color: #555;
+        font-size: 0.9rem;
+        color: #7c2d12;
+        text-align: left;
       }
     </style>
   </head>
   <body>
-    <div class="box">
-      <h1>⚠️ Upgrade Canceled</h1>
-      <p>Your upgrade was canceled, and your account is back on the <strong>Free Plan</strong>.</p>
+    <div class="container">
+      <h1>❌ Subscription Canceled</h1>
+      <p>You’ve canceled the upgrade. You can continue using the <strong>Free Plan</strong>.</p>
+      <a href="{{ url_for('index') }}">Back to CleanCopy</a>
 
-      <div class="highlight">
-        Free Plan includes <strong>5MB max file size</strong> and <strong>8-hour file storage</strong>.  
-        You can upgrade anytime to unlock <strong>50MB uploads</strong> and extended features.
+      <div class="note">
+        ⚠️ Free Plan users can upload files up to <strong>5MB</strong> only.<br>
+        🔒 All uploaded files are stored securely and automatically deleted after <strong>8 hours</strong>.
       </div>
-
-      <a href="{{ url_for('index') }}">
-        <button>Return to Dashboard</button>
-      </a>
     </div>
-
-    <footer>
-      <small>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</small>
-    </footer>
   </body>
 </html>
