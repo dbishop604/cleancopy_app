@@ -1,20 +1,25 @@
 from flask import Flask, render_template, request, send_file, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-import os, io
+import os, io, stripe
 
 from processor import process_file_to_text, text_to_docx
 
-# Allowed file types
+# -----------------------------
+# CONFIG
+# -----------------------------
 ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "tiff", "tif", "bmp"}
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Flask app setup
 app = Flask(__name__)
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key")
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # Absolute upload cap = 100MB
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max upload
+
+# Stripe setup (replace with real keys in Render dashboard env vars)
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "sk_test_placeholder")
+STRIPE_PRICE_ID = os.environ.get("STRIPE_PRICE_ID", "price_placeholder")
 
 # -----------------------------
 # LOGIN SETUP
@@ -23,7 +28,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-# Demo users (replace with real DB later)
+# Temporary users (replace with DB later)
 USERS = {
     "freeuser": {"password": "free123", "plan": "free"},
     "paiduser": {"password": "paid123", "plan": "paid"}
@@ -71,6 +76,39 @@ def logout():
 def index():
     return render_template("index.html", plan=current_user.plan)
 
+# -----------------------------
+# STRIPE CHECKOUT PLACEHOLDER
+# -----------------------------
+@app.route("/upgrade", methods=["GET"])
+@login_required
+def upgrade():
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[{
+                "price": STRIPE_PRICE_ID,
+                "quantity": 1,
+            }],
+            mode="subscription",
+            success_url=url_for("success", _external=True),
+            cancel_url=url_for("index", _external=True),
+            customer_email=f"{current_user.id}@example.com"  # fake email placeholder
+        )
+        return redirect(checkout_session.url, code=303)
+    except Exception as e:
+        flash(f"Error starting checkout: {e}")
+        return redirect(url_for("index"))
+
+@app.route("/success")
+@login_required
+def success():
+    flash("🎉 Subscription successful! You now have Pro access.")
+    # TODO: mark current_user.plan = "paid" in DB
+    return redirect(url_for("index"))
+
+# -----------------------------
+# FILE CONVERSION
+# -----------------------------
 @app.route("/convert", methods=["POST"])
 @login_required
 def convert():
@@ -86,16 +124,14 @@ def convert():
         flash("Unsupported file type.")
         return redirect(url_for("index"))
 
-    # -----------------------------
-    # Enforce size limits by plan
-    # -----------------------------
+    # Enforce plan limits
     f.seek(0, os.SEEK_END)
     file_size = f.tell()
     f.seek(0)
     size_mb = file_size / (1024 * 1024)
 
     if current_user.plan == "free" and size_mb > 5:
-        flash("❌ Free plan limit is 5MB. Please upgrade to Pro ($16/month) for files up to 50MB.")
+        flash("❌ Free plan limit is 5MB. Upgrade to Pro ($16/month) for files up to 50MB.")
         return redirect(url_for("index"))
 
     if current_user.plan == "paid" and size_mb > 50:
