@@ -1,72 +1,75 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Subscription Canceled — CleanCopy OCR</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background: #fff7ed;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-      }
-      .container {
-        background: #fff;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-        max-width: 500px;
-        width: 100%;
-        text-align: center;
-      }
-      h1 {
-        color: #b45309;
-        margin-bottom: 1rem;
-      }
-      p {
-        margin-bottom: 1rem;
-        color: #444;
-      }
-      a {
-        display: inline-block;
-        margin-top: 1rem;
-        padding: 0.6rem 1.2rem;
-        background: #f97316;
-        color: #fff;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: bold;
-      }
-      a:hover {
-        background: #ea580c;
-      }
-      .note {
-        background: #fff4e6;
-        border-left: 4px solid #f97316;
-        padding: 0.75rem;
-        margin-top: 1.5rem;
-        font-size: 0.9rem;
-        color: #7c2d12;
-        text-align: left;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>❌ Subscription Canceled</h1>
-      <p>You’ve canceled the upgrade. You can continue using the <strong>Free Plan</strong>.</p>
-      <a href="{{ url_for('index') }}">Back to CleanCopy</a>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Subscription Canceled</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9fafb;
+      color: #333;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.8em;
+      margin-bottom: 16px;
+      color: #222;
+    }
+    p {
+      font-size: 1em;
+      margin: 10px 0;
+    }
+    .notice {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #555;
+    }
+    a {
+      color: #0077cc;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .button {
+      margin-top: 25px;
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 8px;
+      background: #444;
+      color: #fff;
+      text-decoration: none;
+    }
+    .button:hover {
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Subscription Canceled</h1>
+    <p>⚠️ Your subscription has been canceled.</p>
+    <p>You are now back on the <strong>Free Plan</strong>, which allows uploads up to <strong>5MB</strong>.</p>
 
-      <div class="note">
-        ⚠️ Free Plan users can upload files up to <strong>5MB</strong> only.<br>
-        🔒 All uploaded files are stored securely and automatically deleted after <strong>8 hours</strong>.
-      </div>
+    <div class="notice">
+      Files are stored temporarily for up to <strong>8 hours</strong> and are then automatically deleted.  
+      We never read, store, or sell your content or personal information. By uploading, you confirm you own your material and indemnify us from any future claims of similarity or copyright infringement.
+      <br><br>
+      For details, please review our <a href="/terms" target="_blank">Terms of Use & Privacy Policy</a>.
     </div>
-  </body>
+
+    <a class="button" href="{{ url_for('index') }}">Return to Home</a>
+  </div>
+</body>
 </html>
