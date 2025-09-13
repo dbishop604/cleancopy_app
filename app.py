@@ -90,7 +90,6 @@ def index():
 @app.route("/convert", methods=["POST"])
 @login_required
 def convert():
-    # Enforce limits based on plan
     if "file" not in request.files:
         flash("No file part")
         return redirect(url_for("index"))
@@ -117,4 +116,38 @@ def convert():
     join_strategy = request.form.get("join_strategy", "smart")
 
     filename = secure_filename(f.filename)
-    os.makedirs(
+    os.makedirs("uploads", exist_ok=True)
+    tmp_path = os.path.join("uploads", filename)
+    f.save(tmp_path)
+
+    try:
+        text = process_file_to_text(tmp_path, join_strategy=join_strategy)
+        if output_fmt == "txt":
+            buf = io.BytesIO(text.encode("utf-8"))
+            return send_file(
+                buf,
+                as_attachment=True,
+                download_name=f"{os.path.splitext(filename)[0]}_cleancopy.txt",
+                mimetype="text/plain"
+            )
+        else:
+            docx_buf = text_to_docx(text)
+            return send_file(
+                docx_buf,
+                as_attachment=True,
+                download_name=f"{os.path.splitext(filename)[0]}_cleancopy.docx",
+                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+    except Exception as e:
+        app.logger.exception("Conversion failed")
+        flash(f"Conversion failed: {e}")
+        return redirect(url_for("index"))
+    finally:
+        try:
+            os.remove(tmp_path)
+        except Exception:
+            pass
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
