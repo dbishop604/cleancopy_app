@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login — CleanCopy OCR</title>
+    <title>CleanCopy OCR — Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
       body {
@@ -16,7 +16,7 @@
         align-items: center;
         min-height: 100vh;
       }
-      .login-box {
+      .container {
         background: #fff;
         padding: 2rem;
         border-radius: 8px;
@@ -28,6 +28,11 @@
         text-align: center;
         margin-bottom: 1rem;
       }
+      p {
+        text-align: center;
+        margin-bottom: 2rem;
+        color: #555;
+      }
       form {
         display: flex;
         flex-direction: column;
@@ -36,10 +41,12 @@
       label {
         font-weight: bold;
       }
-      input[type="text"], input[type="password"] {
-        padding: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 4px;
+      input[type="text"],
+      input[type="password"] {
+        padding: 0.6rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
       }
       button {
         background: #007bff;
@@ -63,7 +70,7 @@
         text-align: center;
       }
       footer {
-        margin-top: 1rem;
+        margin-top: 2rem;
         text-align: center;
         font-size: 0.8rem;
         color: #777;
@@ -71,8 +78,9 @@
     </style>
   </head>
   <body>
-    <div class="login-box">
-      <h1>CleanCopy Login</h1>
+    <div class="container">
+      <h1>Welcome Back</h1>
+      <p>Please log in to use CleanCopy OCR</p>
 
       {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -84,6 +92,19 @@
       {% endif %}
       {% endwith %}
 
-      <form method="POST" action="{{ url_for('login') }}">
-        <label for="username">Username:</label>
+      <form method="POST">
+        <label for="username">Username</label>
         <input type="text" id="username" name="username" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+
+        <button type="submit">Log In</button>
+      </form>
+
+      <footer>
+        <small>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</small>
+      </footer>
+    </div>
+  </body>
+</html>
