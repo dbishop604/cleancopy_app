@@ -3,60 +3,74 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Privacy Policy</title>
+  <title>Privacy Policy – SeamlessDocs Online</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       max-width: 800px;
-      margin: 40px auto;
+      margin: 60px auto;
       line-height: 1.6;
       color: #333;
+      background-color: #fafafa;
+      padding: 20px;
     }
-    h1 {
-      font-size: 2em;
-      margin-bottom: 0.5em;
+    .card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
-    h2 {
-      margin-top: 1.5em;
-      color: #111;
+    h1, h2 {
+      color: #222;
     }
-    p {
-      margin-bottom: 1em;
+    a {
+      color: #00796b;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    footer {
+      margin-top: 2rem;
+      font-size: 0.85rem;
+      color: #777;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <h1>Privacy Policy</h1>
-  <p><strong>Last Updated:</strong> [Insert Date]</p>
+  <div class="card">
+    <h1>Privacy Policy</h1>
+    <p><strong>Last Updated:</strong> [Insert Date]</p>
 
-  <h2>Your Privacy Matters</h2>
-  <p>We take your privacy seriously. This page explains how we handle your information when you use our service.</p>
+    <h2>1. Information We Collect</h2>
+    <p>We collect only the information necessary to operate this service, such as your login credentials. We do not collect, store, or sell your uploaded files or personal data for marketing purposes.</p>
 
-  <h2>Files You Upload</h2>
-  <p>
-    Any file you upload is processed automatically by our system.  
-    We <strong>do not read, review, or keep your files</strong>.  
-    Files are stored temporarily only for processing and are automatically deleted within <strong>8 hours</strong>.
-  </p>
+    <h2>2. File Handling</h2>
+    <p>Files you upload are processed automatically to extract text. We do not read or review your content. All uploaded files are automatically deleted within <strong>eight (8) hours</strong> of upload. No permanent copies are kept on our servers.</p>
 
-  <h2>Your Information</h2>
-  <p>
-    We do not sell, rent, or share your personal information.  
-    We only collect the minimum information needed to provide the service.  
-    Your email address is never sold or shared with third parties.
-  </p>
+    <h2>3. Privacy & Data Sharing</h2>
+    <p>We do not sell, rent, or share your personal information. Your email and login details are used only for account access and billing (if you subscribe to the Pro plan). We never share your data with third parties for marketing purposes.</p>
 
-  <h2Independent Content Creation</h2>
-  <p>
-    You always keep full ownership of your work.  
-    By uploading files, you confirm that you have the rights to them, and you agree that we may independently create and publish original content that could be similar in theme or subject matter.  
-    You agree not to hold us responsible for any claims of infringement or plagiarism related to similarities between your work and ours.
-  </p>
+    <h2>4. Your Responsibilities</h2>
+    <p>By uploading files, you confirm that you own the rights or have legal permission to use the content. You agree not to upload materials that infringe on copyrights, trademarks, or other intellectual property rights.</p>
 
-  <h2>Contact</h2>
-  <p>
-    If you have any questions about this Privacy Policy, please contact us at:  
-    <a href="mailto:your@email.com">your@email.com</a>
-  </p>
+    <h2>5. Security</h2>
+    <p>We use industry-standard security practices to protect your data while it is temporarily stored. However, no system is completely secure, and we cannot guarantee absolute protection against all possible threats.</p>
+
+    <h2>6. Changes to This Policy</h2>
+    <p>We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated date.</p>
+
+    <h2>7. Contact</h2>
+    <p>If you have any questions about this Privacy Policy, please contact us at: [your email address]</p>
+  </div>
+
+  <footer>
+    <p>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</p>
+    <p>
+      <a href="{{ url_for('terms') }}">Terms of Use</a> | 
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+    </p>
+  </footer>
 </body>
 </html>
