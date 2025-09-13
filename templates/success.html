@@ -4,44 +4,41 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Subscription Successful — CleanCopy OCR</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
       body {
         font-family: Arial, sans-serif;
-        background: #f9f9f9;
-        margin: 0;
-        padding: 0;
+        background: #f0fdf4;
         display: flex;
         justify-content: center;
         align-items: center;
-        min-height: 100vh;
+        height: 100vh;
+        margin: 0;
       }
       .container {
-        background: #fff;
+        background: #ffffff;
         padding: 2rem;
         border-radius: 8px;
         box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        max-width: 600px;
-        width: 100%;
         text-align: center;
+        max-width: 500px;
       }
       h1 {
-        color: #2d7a2d;
+        color: #0f766e;
         margin-bottom: 1rem;
       }
       p {
-        margin-bottom: 2rem;
-        color: #444;
+        margin: 1rem 0;
+        color: #333;
       }
       a button {
         background: #007bff;
         color: #fff;
         border: none;
-        padding: 0.75rem 1.25rem;
-        font-size: 1rem;
+        padding: 0.75rem 1.5rem;
         border-radius: 4px;
         cursor: pointer;
-        transition: background 0.3s;
+        font-size: 1rem;
+        margin-top: 1rem;
       }
       a button:hover {
         background: #0056b3;
@@ -50,6 +47,15 @@
   </head>
   <body>
     <div class="container">
-      <h1>🎉 Upgrade Successful!</h1>
-      <p>Thank you for supporting <strong>CleanCopy OCR</strong>.<br>
-         You now have <strong>{{ plan|capitalize }}</strong> access with uploads u
+      <h1>🎉 Subscription Activated!</h1>
+      <p>Thank you for upgrading to the <strong>Pro Plan</strong>.<br>
+         You can now upload files up to <strong>50MB</strong> and enjoy premium features.</p>
+      <a href="{{ url_for('index') }}">
+        <button>Start Converting</button>
+      </a>
+      <a href="{{ url_for('billing_portal') }}">
+        <button style="background:#6b7280;">Manage Subscription</button>
+      </a>
+    </div>
+  </body>
+</html>
