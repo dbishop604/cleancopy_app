@@ -35,11 +35,13 @@ def privacy():
 
 @app.route("/success")
 def success():
+    # Success page now shows any flash messages
     return render_template("success.html")
 
 
 @app.route("/cancel")
 def cancel():
+    # Cancel page now shows any flash messages
     return render_template("cancel.html")
 
 
@@ -67,28 +69,11 @@ def convert():
 
         fmt = request.form.get("format", "docx")
         if fmt == "txt":
+            flash("✅ File converted successfully! Your TXT is ready.")
             return send_file(
                 io.BytesIO(text.encode("utf-8")),
                 as_attachment=True,
                 download_name=filename.rsplit(".", 1)[0] + ".txt",
                 mimetype="text/plain"
             )
-        else:
-            buf = text_to_docx(text)
-            return send_file(
-                buf,
-                as_attachment=True,
-                download_name=filename.rsplit(".", 1)[0] + ".docx",
-                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
-
-    except Exception as e:
-        flash(f"❌ Conversion failed: {e}")
-        return redirect(url_for("cancel"))
-
-
-# --- Main entrypoint ---
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+        e
