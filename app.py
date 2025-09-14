@@ -47,8 +47,7 @@ login_manager.login_view = "login"
 
 # Temporary in-memory user store (replace with DB later)
 USERS = {
-    "freeuser": {"password": "free123", "plan": "free"},
-    "paiduser": {"password": "paid123", "plan": "paid"},
+    "paiduser": {"password": "paid123", "plan": "paid"},  # sample paid account
 }
 
 class User(UserMixin):
@@ -84,29 +83,31 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash("👋 Logged out.")
-    return redirect(url_for("login"))
+    flash("👋 Logged out. You are now back on the Free plan (5MB limit).")
+    return redirect(url_for("index"))
 
 @app.route("/", methods=["GET"])
-@login_required
 def index():
-    return render_template("index.html", plan=current_user.plan)
+    # If logged in, show Pro plan UI; if not, show Free plan UI
+    plan = "free"
+    if current_user.is_authenticated:
+        plan = getattr(current_user, "plan", "paid")
+    return render_template("index.html", plan=plan, user=current_user if current_user.is_authenticated else None)
 
 # -----------------------------
 # STRIPE CHECKOUT
 # -----------------------------
 @app.route("/upgrade", methods=["GET"])
-@login_required
 def upgrade():
+    if not current_user.is_authenticated:
+        # Require login before upgrading
+        flash("Please log in or create an account to upgrade.")
+        return redirect(url_for("login"))
+
     try:
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
-            line_items=[
-                {
-                    "price": STRIPE_PRICE_ID,
-                    "quantity": 1,
-                }
-            ],
+            line_items=[{"price": STRIPE_PRICE_ID, "quantity": 1}],
             mode="subscription",
             success_url=url_for("success", _external=True),
             cancel_url=url_for("cancel", _external=True),
@@ -120,15 +121,15 @@ def upgrade():
 @app.route("/success")
 @login_required
 def success():
-    # TODO: Update user plan in real DB after webhook confirmation
-    current_user.plan = "paid"
+    if current_user.id in USERS:
+        USERS[current_user.id]["plan"] = "paid"
+        current_user.plan = "paid"
     flash("🎉 Subscription successful! You now have Pro access (50MB upload limit).")
     return render_template("success.html", plan=current_user.plan)
 
 @app.route("/cancel")
 @login_required
 def cancel():
-    # Reset to free plan (temporary in-memory handling)
     if current_user.id in USERS:
         USERS[current_user.id]["plan"] = "free"
         current_user.plan = "free"
@@ -139,7 +140,7 @@ def cancel():
 @login_required
 def billing_portal():
     try:
-        # Replace with real customer_id from your DB in production
+        # Replace with real customer_id from DB in production
         customer_id = f"cus_{current_user.id}"
         session = stripe.billing_portal.Session.create(
             customer=customer_id,
@@ -151,7 +152,7 @@ def billing_portal():
         return redirect(url_for("index"))
 
 # -----------------------------
-# TERMS & PRIVACY PAGES
+# TERMS & PRIVACY
 # -----------------------------
 @app.route("/terms")
 def terms():
@@ -165,7 +166,6 @@ def privacy():
 # FILE CONVERSION
 # -----------------------------
 @app.route("/convert", methods=["POST"])
-@login_required
 def convert():
     if "file" not in request.files:
         flash("No file selected")
@@ -179,18 +179,22 @@ def convert():
         flash("Unsupported file type")
         return redirect(url_for("index"))
 
-    # Enforce plan limits
+    # Determine plan
+    if current_user.is_authenticated and getattr(current_user, "plan", "free") == "paid":
+        plan = "paid"
+        limit_mb = 50
+    else:
+        plan = "free"
+        limit_mb = 5
+
+    # Enforce size limits
     f.seek(0, os.SEEK_END)
     file_size = f.tell()
     f.seek(0)
     size_mb = file_size / (1024 * 1024)
 
-    if current_user.plan == "free" and size_mb > 5:
-        flash("❌ Free plan limit is 5MB. Upgrade to Pro ($16/month) for files up to 50MB.")
-        return redirect(url_for("index"))
-
-    if current_user.plan == "paid" and size_mb > 50:
-        flash("❌ Pro plan limit is 50MB. Please reduce file size.")
+    if size_mb > limit_mb:
+        flash(f"❌ {plan.capitalize()} plan limit is {limit_mb}MB. Please upgrade or reduce file size.")
         return redirect(url_for("index"))
 
     # Save file temporarily
@@ -200,7 +204,7 @@ def convert():
     f.save(tmp_path)
 
     try:
-        # Process uploaded file into clean text with preserved paragraphs
+        # Process file into continuous text while keeping paragraphs
         text = process_file_to_text(tmp_path, join_strategy="paragraphs")
 
         output_fmt = request.form.get("format", "docx")
@@ -231,7 +235,7 @@ def convert():
             pass
 
 # -----------------------------
-# RUN APP
+# RUN
 # -----------------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
