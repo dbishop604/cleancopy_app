@@ -1,28 +1,30 @@
-# Use a lightweight Python image
+# Use a lightweight Python base
 FROM python:3.11-slim
 
-# Install system dependencies for Tesseract OCR and Poppler
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    tesseract-ocr \
-    libtesseract-dev \
-    poppler-utils \
-    && rm -rf /var/lib/apt/lists/*
+# Prevent Python from writing .pyc files & buffering stdout
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-# Set workdir
+# Set working directory
 WORKDIR /app
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
+# Install system dependencies (OCR + PDF rendering)
+RUN apt-get update && apt-get install -y \
+    poppler-utils \
+    tesseract-ocr \
+    libtesseract-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy app code
+# Install Python dependencies first (caches layers)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy app source
 COPY . .
 
-# Expose Render’s default port
-EXPOSE 10000
+# Expose port for Render
+EXPOSE 5000
 
-# Healthcheck endpoint for Render (matches render.yaml)
-HEALTHCHECK CMD curl --fail http://localhost:10000/healthz || exit 1
-
-# Start with Gunicorn (more stable than Flask dev server)
-CMD ["gunicorn", "app:app", "-b", "0.0.0.0:10000", "-t", "120"]
+# Start the Flask app
+CMD ["python", "app.py"]
