@@ -2,7 +2,7 @@ import os
 import io
 from flask import (
     Flask, render_template, request, redirect,
-    url_for, flash, send_file, jsonify
+    url_for, send_file, jsonify
 )
 from werkzeug.utils import secure_filename
 from processor import process_file_to_text, text_to_docx
@@ -20,6 +20,7 @@ os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
 @app.route("/")
 def index():
+    # Health check + main page
     return render_template("index.html", plan="free")
 
 @app.route("/terms")
@@ -42,32 +43,19 @@ def cancel():
 def coffee():
     return render_template("coffee.html")
 
+# --- File conversion ---
 @app.route("/convert", methods=["POST"])
 def convert():
     try:
-        # Must accept terms
         if "terms" not in request.form:
-            msg = "⚠️ You must agree to the terms of service and privacy policy."
-            if request.accept_mimetypes["application/json"]:
-                return jsonify({"error": msg}), 400
-            flash(msg)
-            return redirect(url_for("index"))
+            return jsonify({"error": "⚠️ You must agree to the terms of service and privacy policy before uploading."}), 400
 
-        # File validation
         if "fileUpload" not in request.files:
-            msg = "⚠️ No file selected."
-            if request.accept_mimetypes["application/json"]:
-                return jsonify({"error": msg}), 400
-            flash(msg)
-            return redirect(url_for("index"))
+            return jsonify({"error": "⚠️ No file uploaded."}), 400
 
         f = request.files["fileUpload"]
         if f.filename == "":
-            msg = "⚠️ No file name provided."
-            if request.accept_mimetypes["application/json"]:
-                return jsonify({"error": msg}), 400
-            flash(msg)
-            return redirect(url_for("index"))
+            return jsonify({"error": "⚠️ No file selected."}), 400
 
         filename = secure_filename(f.filename)
         temp_path = os.path.join("/tmp", filename)
@@ -95,13 +83,7 @@ def convert():
             )
 
     except Exception as e:
-        msg = f"❌ Conversion failed: {e}"
-        # If called by fetch → JSON response
-        if request.accept_mimetypes["application/json"]:
-            return jsonify({"error": msg}), 500
-        # Fallback for normal form POST
-        flash(msg)
-        return redirect(url_for("cancel"))
+        return jsonify({"error": f"❌ Conversion failed: {str(e)}"}), 500
 
 # --- Main entrypoint ---
 if __name__ == "__main__":
