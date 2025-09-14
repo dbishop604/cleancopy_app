@@ -1,21 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Upload Cancelled — SeamlessDocs</title>
+  <meta charset="UTF-8">
+  <title>Upload Cancelled</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; margin: 50px; color: #333; }
-    h1 { color: #b00; }
-    .btn { background: #007BFF; color: #fff; border: none;
-      padding: 10px 20px; border-radius: 6px; text-decoration: none;
+    h1 { font-size: 26px; color: #cc0000; }
+    .btn {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      margin-top: 20px;
+      display: inline-block;
+      text-decoration: none;
     }
-    .btn:hover { background: #0056b3; }
+    .btn:hover { background-color: #0056b3; }
   </style>
 </head>
 <body>
   <h1>Upload Cancelled</h1>
-  <p>Your file upload has been cancelled. Please try again.</p>
-  <a href="{{ url_for('index') }}" class="btn">Return Home</a>
+  <p>Your upload or conversion request was cancelled. Please try again.</p>
+  <a href="/" class="btn">⬅ Back to Home</a>
 </body>
 </html>
