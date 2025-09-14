@@ -4,13 +4,12 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from werkzeug.utils import secure_filename
 from redis import Redis
 from rq import Queue
-
 from worker import process_file_job
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "devkey")
 
-# Shared disk paths (mounted on Render as /data)
+# Shared disk paths (both web + worker use /data mount on Render)
 UPLOAD_FOLDER = "/data/uploads"
 OUTPUT_FOLDER = "/data/outputs"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -19,8 +18,6 @@ os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 # Redis connection
 redis_conn = Redis.from_url(os.environ["REDIS_URL"])
 q = Queue(connection=redis_conn)
-
-# --- Routes ---
 
 @app.route("/")
 def index():
