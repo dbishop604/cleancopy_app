@@ -78,7 +78,7 @@ def convert():
     output_filename = filename.rsplit(".", 1)[0] + f".{fmt}"
     output_path = os.path.join(CONVERTED_FOLDER, output_filename)
 
-    # Queue background job (handled in worker.py)
+    # Queue background job (runs in worker.py)
     job = q.enqueue("worker.process_file_job", upload_path, fmt, output_filename)
 
     return redirect(url_for("success", job_id=job.get_id()))
@@ -87,7 +87,36 @@ def convert():
 def status(job_id):
     if not redis_conn:
         return jsonify({"status": "error", "message": "Redis not available"}), 500
+
     from rq.job import Job
     try:
         job = Job.fetch(job_id, connection=redis_conn)
-    except Excep
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 404
+
+    if job.is_finished:
+        return jsonify({
+            "status": "finished",
+            "download_url": url_for("download_file", filename=job.result["output"].split("/")[-1])
+        })
+    elif job.is_failed:
+        return jsonify({"status": "error", "message": str(job.exc_info)})
+    else:
+        return jsonify({"status": "pending"})
+
+@app.route("/download/<filename>")
+def download_file(filename):
+    path = os.path.join(CONVERTED_FOLDER, filename)
+    if not os.path.exists(path):
+        return "File not found", 404
+    return send_file(path, as_attachment=True)
+
+# --- Health check for Render ---
+@app.route("/healthz")
+def healthz():
+    return "OK", 200
+
+# --- Local run ---
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
