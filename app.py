@@ -45,7 +45,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-# Temporary in-memory user store (replace with database later)
+# Temporary in-memory user store (replace with DB later)
 USERS = {
     "freeuser": {"password": "free123", "plan": "free"},
     "paiduser": {"password": "paid123", "plan": "paid"},
@@ -110,7 +110,7 @@ def upgrade():
             mode="subscription",
             success_url=url_for("success", _external=True),
             cancel_url=url_for("cancel", _external=True),
-            customer_email=f"{current_user.id}@example.com",  # placeholder for now
+            customer_email=f"{current_user.id}@example.com",  # placeholder
         )
         return redirect(checkout_session.url, code=303)
     except Exception as e:
@@ -122,7 +122,7 @@ def upgrade():
 def success():
     # TODO: Update user plan in real DB after webhook confirmation
     current_user.plan = "paid"
-    flash("🎉 Subscription successful! You now have Pro access.")
+    flash("🎉 Subscription successful! You now have Pro access (50MB upload limit).")
     return render_template("success.html", plan=current_user.plan)
 
 @app.route("/cancel")
@@ -186,7 +186,7 @@ def convert():
     size_mb = file_size / (1024 * 1024)
 
     if current_user.plan == "free" and size_mb > 5:
-        flash("❌ Free plan limit is 5MB. Upgrade to Pro ($16/month) for up to 50MB.")
+        flash("❌ Free plan limit is 5MB. Upgrade to Pro ($16/month) for files up to 50MB.")
         return redirect(url_for("index"))
 
     if current_user.plan == "paid" and size_mb > 50:
@@ -200,7 +200,7 @@ def convert():
     f.save(tmp_path)
 
     try:
-        # Process uploaded file
+        # Process uploaded file into clean text with preserved paragraphs
         text = process_file_to_text(tmp_path, join_strategy="paragraphs")
 
         output_fmt = request.form.get("format", "docx")
