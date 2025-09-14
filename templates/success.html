@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Success — SeamlessDocs</title>
+  <title>Success — SeamlessDocs OCR</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -25,21 +25,14 @@
       width: 100%;
       text-align: center;
     }
-    h1 { color: #111; margin-bottom: 1rem; }
-    p { color: #555; line-height: 1.6; margin: 1rem 0; }
-    .progress-container {
-      width: 100%;
-      background: #eee;
-      border-radius: 6px;
-      margin: 1.5rem 0;
-      height: 20px;
-      overflow: hidden;
+    h1 {
+      color: #111;
+      margin-bottom: 1rem;
     }
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: #0077cc;
-      transition: width 0.5s ease;
+    p {
+      color: #555;
+      line-height: 1.6;
+      margin: 1rem 0;
     }
     .btn {
       display: inline-block;
@@ -54,8 +47,28 @@
       cursor: pointer;
       text-decoration: none;
     }
-    .btn:hover { background: #005fa3; }
-    .loading { color: #777; margin-top: 1rem; }
+    .btn:hover {
+      background: #005fa3;
+    }
+    .progress-bar {
+      margin: 1rem 0;
+      width: 100%;
+      background: #eee;
+      border-radius: 6px;
+      overflow: hidden;
+      height: 20px;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #0077cc;
+      transition: width 0.5s ease;
+    }
+    #progress-text {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #333;
+    }
     footer {
       margin-top: 2rem;
       font-size: 10.5px; /* ~8pt */
@@ -72,67 +85,21 @@
 </head>
 <body>
   <div class="container">
-    <h1 id="statusTitle">⏳ Processing Your File...</h1>
-    <p id="statusText">Please wait while we convert your document. This may take a few moments.</p>
+    <h1>⏳ Processing...</h1>
+    <p>Your file is being converted. This page will update automatically.</p>
 
     <!-- Progress bar -->
-    <div class="progress-container">
-      <div id="progressBar" class="progress-bar"></div>
+    <div class="progress-bar">
+      <div id="progress-fill" class="progress-fill"></div>
     </div>
+    <div id="progress-text">Progress: 0%</div>
 
     <!-- Download button (hidden until ready) -->
-    <div id="download" style="display: none;">
-      <h2>✅ Conversion Complete!</h2>
-      <p>Your file is ready to download:</p>
-      <a id="downloadLink" class="btn">⬇ Download Your File</a>
+    <div id="download-link" style="display: none; margin-top: 1rem;">
+      <a id="download-btn" class="btn">⬇ Download Your File</a>
     </div>
 
     <footer>
       © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
       <a href="{{ url_for('terms') }}">Terms of Use</a> |
-      <a href="{{ url_for('privacy') }}">Privacy Policy</a> |
-      <a href="{{ url_for('coffee') }}">Support Us ☕</a>
-    </footer>
-  </div>
-
-  <script>
-    let progress = 0;
-    const progressBar = document.getElementById("progressBar");
-
-    function animateProgress() {
-      if (progress < 95) { // keep below 100 until file is actually done
-        progress += 5;
-        progressBar.style.width = progress + "%";
-        setTimeout(animateProgress, 1000);
-      }
-    }
-
-    async function checkStatus() {
-      try {
-        const response = await fetch("/status/{{ job_id }}");
-        const data = await response.json();
-
-        if (data.status === "finished") {
-          document.getElementById("statusTitle").innerText = "✅ Conversion Complete!";
-          document.getElementById("statusText").innerText = "Your file has been converted successfully.";
-          document.getElementById("download").style.display = "block";
-          document.getElementById("downloadLink").href = data.download_url;
-          progressBar.style.width = "100%"; // fill bar when done
-        } else if (data.status === "pending") {
-          setTimeout(checkStatus, 3000);
-        } else if (data.status === "error") {
-          document.getElementById("statusTitle").innerText = "❌ Conversion Failed";
-          document.getElementById("statusText").innerText = data.message;
-        }
-      } catch (err) {
-        document.getElementById("statusTitle").innerText = "❌ Error checking status";
-        document.getElementById("statusText").innerText = err;
-      }
-    }
-
-    // Start animation + polling
-    animateProgress();
-    checkStatus();
-  </script>
-</body>
-</html>
+      <a href="{{ url_for('privacy') }}">Privacy Polic_
