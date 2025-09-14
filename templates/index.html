@@ -85,4 +85,82 @@
       border-radius: 8px;
       max-width: 600px;
       max-height: 80vh;
-      overflow
+      overflow-y: auto;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover { color: #000; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SeamlessDocs</h1>
+    <p><strong>Free Plan:</strong> Up to 5MB conversions.</p>
+    <p>For files over 5MB up to 50MB, <a href="#" class="btn-primary" style="padding:0.4rem 1rem;">Upgrade to Pro</a></p>
+
+    <h2>Upload Your File</h2>
+    <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
+      <!-- File upload input -->
+      <input type="file" name="fileUpload" id="fileUpload" disabled>
+      <br><br>
+
+      <!-- Terms modal trigger -->
+      <label>
+        <input type="checkbox" id="termsCheck">
+        I have read and agree to the <a href="#" id="openTerms">terms of use and privacy policy</a>.
+      </label>
+      <br><br>
+
+      <!-- Format choice -->
+      <label for="format">Output format:</label>
+      <select name="format" id="format" disabled>
+        <option value="docx">DOCX</option>
+        <option value="txt">TXT</option>
+      </select>
+      <br><br>
+
+      <!-- Upload button -->
+      <button type="submit" id="uploadBtn" disabled>Upload File</button>
+    </form>
+
+    <p class="notice">
+      Download your converted file before 8 hours as your files will automatically be deleted after 8 hours. We do not read, store, or share them.
+    </p>
+
+    <footer>
+      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
+      <p>
+        <a href="{{ url_for('terms') }}">Terms of Use</a> | 
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      </p>
+    </footer>
+  </div>
+
+  <!-- Modal -->
+  <div id="termsModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <h2>Terms of Use & Privacy Policy</h2>
+      <p>
+        [Insert full Terms of Use and Privacy Policy content here. This box scrolls if the text is long.]
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const termsCheck = document.getElementById('termsCheck');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileUpload = document.getElementById('fileUpload');
+    const formatSelect = document.getElementById('format');
+
+    termsCheck.addEventListener('change', function() {
+      const enabled = this.checked;
+      uploadBtn.disabled = !enabled;
+      fileUpload.disabled = !enabled;
+      formatSelect.disabled = !enabled;
+    });
