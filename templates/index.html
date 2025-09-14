@@ -1,5 +1,91 @@
-    /* Loader overlay */
-    #loaderOverlay {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeamlessDocs — Upload</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      margin: 2rem;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 720px;
+      width: 100%;
+      text-align: center;
+    }
+    img.logo {
+      max-width: 140px;
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      margin: 0.25rem 0;
+      font-size: 2rem;
+      color: #111;
+    }
+    .tagline {
+      font-size: 1rem;
+      color: #444;
+      margin: 0.75rem 0 1.5rem 0;
+    }
+    .row {
+      margin: 1rem 0;
+    }
+    input[type="file"], select {
+      padding: 0.5rem;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.7rem 1.4rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background-color: #facc15; /* Yellow */
+      color: #111;
+    }
+    .agree {
+      font-size: 14px;
+      color: #111;
+      margin-top: 1rem;
+      display: block;
+    }
+    .notice {
+      font-size: 14px;
+      color: #555;
+      margin-top: 2rem;
+      line-height: 1.4;
+    }
+    footer {
+      margin-top: 2rem;
+      font-size: 8pt;
+      color: #777;
+      line-height: 1.4;
+    }
+    footer a {
+      color: #0077cc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    footer a:hover { text-decoration: underline; }
+    .overlay {
       display: none;
       position: fixed;
       inset: 0;
@@ -11,34 +97,171 @@
       justify-content: center;
       gap: 1rem;
     }
-    #loaderOverlay .msg {
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #111;
-    }
-    .bar {
+    .progress-container {
       position: relative;
       width: 70%;
       max-width: 400px;
       height: 20px;
-      background: #ccc; /* darker track for contrast */
-      border-radius: 8px;
+      background: #eee;
+      border-radius: 10px;
       overflow: hidden;
-      border: 1px solid #999; /* adds visibility */
     }
-    .bar span {
-      display: block;
+    #progressBar {
+      background: #facc15;
       height: 100%;
       width: 0%;
-      background: #f4c400; /* stronger yellow/gold */
-      transition: width 0.3s ease;
+      transition: width 0.2s ease;
     }
-    .percent-label {
+    #percentLabel {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       font-size: 14px;
       font-weight: bold;
-      color: #000; /* black text for better readability */
+      color: #111;
     }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Logo -->
+    <img src="/static/logo.png" alt="SeamlessDocs Logo" class="logo"/>
+    <h1>SeamlessDocs</h1>
+    <p class="tagline">
+      Upload your <strong>PDF</strong> or image file (<strong>JPG, PNG, TIFF</strong>) and SeamlessDocs will convert it into a clean, editable <strong>DOCX</strong> or <strong>TXT</strong> file.
+    </p>
+
+    <p><strong>Free Plan:</strong> Up to 5MB conversions.</p>
+
+    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
+      <div class="row">
+        <input type="file" name="fileUpload" id="fileUpload" disabled>
+      </div>
+      <div class="row">
+        <label for="format" style="font-size:14px;">Output format:</label>
+        <select name="format" id="format" disabled>
+          <option value="docx">DOCX</option>
+          <option value="txt">TXT</option>
+        </select>
+      </div>
+      <label class="agree">
+        <input type="checkbox" id="termsCheck" name="terms">
+        <span style="font-size:14px;">
+          By continuing, you agree to the <a href="{{ url_for('terms') }}">terms of service</a> and 
+          <a href="{{ url_for('privacy') }}">privacy policy</a>.
+        </span>
+      </label>
+      <div class="row">
+        <button type="submit" id="uploadBtn" class="btn btn-primary" disabled>Upload File</button>
+      </div>
+    </form>
+
+    <p class="notice">
+      Download your converted file within 8 hours — files are automatically deleted after that time. We do not read, store, or share them.
+    </p>
+
+    <footer>
+      © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
+      <a href="{{ url_for('terms') }}">Terms of Use</a> |
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+    </footer>
+  </div>
+
+  <!-- Loader overlay -->
+  <div id="loaderOverlay">
+    <div class="msg" id="loaderMsg">Processing your file… please wait.</div>
+    <div class="progress-container">
+      <div id="progressBar"></div>
+      <div id="percentLabel">0%</div>
+    </div>
+    <a id="downloadLink" class="btn btn-primary" style="display:none;" download>⬇ Download File</a>
+    <div class="error" id="errorMsg" style="display:none;"></div>
+  </div>
+
+  <script>
+    const termsCheck = document.getElementById("termsCheck");
+    const fileUpload = document.getElementById("fileUpload");
+    const formatSelect = document.getElementById("format");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const form = document.getElementById("uploadForm");
+    const overlay = document.getElementById("loaderOverlay");
+    const progressBar = document.getElementById("progressBar");
+    const percentLabel = document.getElementById("percentLabel");
+    const downloadLink = document.getElementById("downloadLink");
+    const errorMsg = document.getElementById("errorMsg");
+
+    let progressInterval;
+
+    termsCheck.addEventListener("change", function() {
+      const enabled = this.checked;
+      fileUpload.disabled = !enabled;
+      formatSelect.disabled = !enabled;
+      uploadBtn.disabled = !enabled;
+    });
+
+    form.addEventListener("submit", async function(event) {
+      event.preventDefault();
+      overlay.style.display = "flex";
+      progressBar.style.width = "0%";
+      percentLabel.textContent = "0%";
+
+      const file = fileUpload.files[0];
+      const format = formatSelect.value;
+      const formData = new FormData();
+      formData.append("fileUpload", file);
+      formData.append("format", format);
+      formData.append("terms", "on");
+
+      let progress = 0;
+      progressInterval = setInterval(() => {
+        if (progress < 95) {
+          progress += Math.floor(Math.random() * 10) + 1;
+          if (progress > 95) progress = 95;
+          progressBar.style.width = progress + "%";
+          percentLabel.textContent = progress + "%";
+        }
+      }, 500);
+
+      try {
+        const response = await fetch("{{ url_for('convert') }}", {
+          method: "POST",
+          body: formData
+        });
+        clearInterval(progressInterval);
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === "done") {
+            progressBar.style.width = "100%";
+            percentLabel.textContent = "100%";
+            loaderMsg.textContent = "✅ Conversion complete!";
+            downloadLink.href = data.download_url;
+            downloadLink.style.display = "inline-block";
+          } else {
+            loaderMsg.textContent = "❌ Conversion failed.";
+            errorMsg.textContent = data.message || "Unknown error.";
+            errorMsg.style.display = "block";
+            progressBar.style.width = "0%";
+            percentLabel.textContent = "0%";
+          }
+        } else {
+          const data = await response.json().catch(() => ({}));
+          loaderMsg.textContent = "❌ Server error.";
+          errorMsg.textContent = data.message || ("Status: " + response.status);
+          errorMsg.style.display = "block";
+          progressBar.style.width = "0%";
+          percentLabel.textContent = "0%";
+        }
+      } catch (err) {
+        clearInterval(progressInterval);
+        loaderMsg.textContent = "❌ Server error.";
+        errorMsg.textContent = err.message;
+        errorMsg.style.display = "block";
+        progressBar.style.width = "0%";
+        percentLabel.textContent = "0%";
+      }
+    });
+  </script>
+</body>
+</html>
