@@ -1,95 +1,76 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeamlessDocs</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-    .container {
-      background: #fff;
-      margin: 2rem;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 700px;
-      width: 100%;
-      text-align: center;
-    }
-    h1 { color: #111; margin-bottom: 0.5rem; }
-    p { color: #555; line-height: 1.6; margin: 1rem 0; }
-    .file-input { margin: 1rem 0; }
-    input[type="file"] {
-      display: block;
-      margin: 0.5rem auto;
-    }
-    .btn {
-      display: inline-block;
-      margin-top: 1rem;
-      padding: 0.7rem 1.4rem;
-      border: none;
-      border-radius: 6px;
-      background: #0077cc;
-      color: #fff;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      text-decoration: none;
-    }
-    .btn:hover { background: #005fa3; }
-    .progress {
-      width: 100%;
-      background: #eee;
-      border-radius: 6px;
-      overflow: hidden;
-      margin: 1rem 0;
-      display: none;
-    }
-    .progress-bar {
-      height: 20px;
-      width: 0%;
-      background: #0077cc;
-      text-align: center;
-      color: #fff;
-      font-size: 12px;
-      line-height: 20px;
-    }
-    footer {
-      margin-top: 2rem;
-      font-size: 10.5px; /* ~8pt */
-      color: #777;
-      line-height: 1.4;
-    }
-    footer a {
-      color: #0077cc;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    footer a:hover { text-decoration: underline; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>SeamlessDocs</h1>
-    <p>Upload your PDF or image files (JPG, PNG, TIFF)<br>
-       and convert them into clean, editable documents (DOCX or TXT).</p>
+import os
+import uuid
+import io
+from flask import (
+    Flask, render_template, request, redirect,
+    url_for, flash, jsonify, send_file
+)
+from werkzeug.utils import secure_filename
+from redis import Redis
+from rq import Queue
+from rq.job import Job
+from worker import process_file_job
 
-    <!-- Upload form -->
-    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
-      <div class="file-input">
-        <label for="fileUpload">Choose a file:</label>
-        <input type="file" name="fileUpload" id="fileUpload" required />
-      </div>
+# --- Flask setup ---
+app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "devkey")
 
-      <label for="outputFormat">Output format:</label>
-      <select name="outputFormat" id="outputFormat">
-        <option value="docx">DOCX</option>
+UPLOAD_FOLDER = "/data/uploads"
+OUTPUT_FOLDER = "/data/outputs"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+
+# --- Redis setup ---
+redis_url = os.environ.get("REDIS_URL")
+redis_conn = Redis.from_url(redis_url) if redis_url else None
+q = Queue("default", connection=redis_conn) if redis_conn else None
+
+# --- Routes ---
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+@app.route("/success/<job_id>")
+def success(job_id):
+    return render_template("success.html", job_id=job_id)
+
+@app.route("/cancel")
+def cancel():
+    return render_template("cancel.html")
+
+@app.route("/coffee")
+def coffee():
+    return render_template("coffee.html")
+
+@app.route("/convert", methods=["POST"])
+def convert():
+    if "terms" not in request.form:
+        flash("⚠️ You must agree to the terms of service and privacy policy before uploading.")
+        return redirect(url_for("index"))
+
+    if "fileUpload" not in request.files:
+        flash("⚠️ No file selected")
+        return redirect(url_for("index"))
+
+    f = request.files["fileUpload"]
+    if f.filename == "":
+        flash("⚠️ No selected file")
+        return redirect(url_for("index"))
+
+    filename = secure_filename(f.filename)
+    job_id = str(uuid.uuid4())
+
+    input_path = os.path.join(UPLOAD_FOLDER, f"{job_id}_{filename}")
+    output_format = request.form.get("outputFormat", "docx")
+    output_ext = "txt" if output_format == "txt" else "docx"
+    output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.{output_ext}")
+
+    f
