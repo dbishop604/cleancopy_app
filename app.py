@@ -1,58 +1,48 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file
-import os, tempfile
-from processor import process_file_to_text, text_to_docx
+from flask import Flask, render_template, request, redirect, url_for, flash
+import smtplib, ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "devkey")
+# ... your existing code ...
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+@app.route("/contact", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        message = request.form.get("message")
 
-@app.route("/convert", methods=["POST"])
-def convert():
-    # Enforce Terms agreement
-    if "terms" not in request.form:
-        flash("You must agree to the Terms of Use and Privacy Policy before uploading.", "error")
-        return redirect(url_for("index"))
+        if not name or not email or not message:
+            flash("⚠️ Please fill out all fields.", "error")
+            return redirect(url_for("contact"))
 
-    # File upload checks
-    if "fileUpload" not in request.files:
-        flash("No file selected.", "error")
-        return redirect(url_for("index"))
+        try:
+            # Email setup
+            sender_email = "noreply@seamlessdocs.com"   # masked sender
+            receiver_email = "admin@bystorytellers.online"
+            subject = f"New Contact Form Submission from {name}"
 
-    f = request.files["fileUpload"]
-    if f.filename == "":
-        flash("No selected file.", "error")
-        return redirect(url_for("index"))
+            msg = MIMEMultipart()
+            msg["From"] = sender_email
+            msg["To"] = receiver_email
+            msg["Subject"] = subject
 
-    try:
-        # Save uploaded file temporarily
-        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(f.filename)[1])
-        f.save(tmp.name)
+            body = f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
+            msg.attach(MIMEText(body, "plain"))
 
-        # Step 1: Run OCR → text
-        text = process_file_to_text(tmp.name)
+            # Use local SMTP (Render supports SendGrid, Postmark, etc.)
+            # Replace with your email provider credentials if needed
+            context = ssl.create_default_context()
+            with smtplib.SMTP("smtp.gmail.com", 587) as server:  # example using Gmail
+                server.starttls(context=context)
+                server.login("your-gmail@gmail.com", "your-app-password")
+                server.sendmail(sender_email, receiver_email, msg.as_string())
 
-        # Step 2: Text → DOCX (BytesIO)
-        buf = text_to_docx(text)
+            flash("✅ Your message has been sent. Thank you!", "success")
+            return redirect(url_for("contact"))
 
-        # Step 3: Clean up temp file
-        os.unlink(tmp.name)
+        except Exception as e:
+            flash(f"❌ Error sending message: {e}", "error")
+            return redirect(url_for("contact"))
 
-        # Step 4: Return DOCX download
-        return send_file(
-            buf,
-            as_attachment=True,
-            download_name=os.path.splitext(f.filename)[0] + ".docx",
-            mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        )
-
-    except Exception as e:
-        print("Conversion error:", e)
-        flash("Something went wrong during conversion. Please try again.", "error")
-        return redirect(url_for("index"))
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    return render_template("contact.html")
