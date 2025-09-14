@@ -1,11 +1,10 @@
 import pytesseract
 from pdf2image import convert_from_path
 from docx import Document
-import os
 
 def process_file_to_text(input_path, join_strategy="smart"):
     """
-    Convert PDF pages to text using OCR (pytesseract + pdf2image).
+    Convert a PDF into text using OCR.
     """
     images = convert_from_path(input_path)
     texts = []
@@ -19,7 +18,7 @@ def process_file_to_text(input_path, join_strategy="smart"):
 
 def text_to_docx(text, output_path):
     """
-    Convert plain text to a DOCX file and save it.
+    Save OCR text into a .docx file.
     """
     doc = Document()
     for line in text.splitlines():
