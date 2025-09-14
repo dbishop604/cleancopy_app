@@ -1,124 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>CleanCopy OCR</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeamlessDocs OCR — Convert PDFs & Images</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      margin: 2rem;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       max-width: 700px;
-      margin: 40px auto;
-      padding: 0 1rem;
+      width: 100%;
+      text-align: center;
     }
     h1 {
-      font-size: 1.8rem;
+      color: #111;
       margin-bottom: 1rem;
     }
-    .upload-box {
-      border: 2px dashed #999;
-      padding: 20px;
-      text-align: center;
-      border-radius: 10px;
-      background: #fafafa;
+    p {
+      color: #555;
+      line-height: 1.6;
+      margin: 1rem 0;
     }
-    .progress {
-      width: 100%;
-      background: #eee;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 20px;
-      height: 20px;
+    form {
+      margin-top: 1.5rem;
     }
-    .progress-bar {
-      width: 0%;
-      height: 100%;
-      background: #4caf50;
-      transition: width 0.4s ease;
+    input[type="file"] {
+      margin: 1rem 0;
     }
-    #status {
-      margin-top: 10px;
+    label {
+      display: block;
+      margin: 1rem 0;
+      color: #333;
+    }
+    select, input[type="checkbox"] {
+      margin: 0.5rem 0;
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.7rem 1.4rem;
+      border: none;
+      border-radius: 6px;
+      background: #0077cc;
+      color: #fff;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: #005fa3;
+    }
+    .message {
+      margin: 1rem 0;
+      color: #d9534f;
+    }
+    footer {
+      margin-top: 2rem;
+      font-size: 10.5px; /* ~8pt */
+      color: #777;
+      line-height: 1.4;
+    }
+    footer p { margin: 0.3rem 0; }
+    footer a {
+      color: #0077cc;
+      text-decoration: none;
       font-weight: bold;
     }
-    button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      background: #4caf50;
-      color: white;
-    }
-    button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
-    #cancelBtn {
-      background: #e74c3c;
-      margin-left: 10px;
-    }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <h1>📄 CleanCopy OCR</h1>
-  <form id="uploadForm" method="POST" enctype="multipart/form-data" action="/upload">
-    <div class="upload-box">
-      <input type="file" name="fileUpload" required>
-    </div>
-    <label>
-      <input type="checkbox" name="terms" required>
-      I agree to the <a href="/terms" target="_blank">terms of service</a> and <a href="/privacy" target="_blank">privacy policy</a>.
-    </label><br><br>
-    <label>Output format:
-      <select name="format">
-        <option value="docx">DOCX</option>
-        <option value="txt">TXT</option>
-      </select>
-    </label><br><br>
-    <button type="submit" id="submitBtn">Upload & Convert</button>
-  </form>
+  <div class="container">
+    <h1>📄 SeamlessDocs OCR</h1>
+    <p>Convert your PDFs and image files (JPG, PNG, TIFF) into clean, editable Word or text documents. Fast, simple, and private — your files are automatically deleted within 8 hours.</p>
 
-  <div id="progress" style="display:none;">
-    <div class="progress">
-      <div id="bar" class="progress-bar"></div>
-    </div>
-    <p id="status">Uploading...</p>
-    <button id="cancelBtn" type="button">✖ Cancel</button>
-  </div>
-
-  <script>
-    const form = document.getElementById("uploadForm");
-    const progressBox = document.getElementById("progress");
-    const bar = document.getElementById("bar");
-    const status = document.getElementById("status");
-    const cancelBtn = document.getElementById("cancelBtn");
-    let currentJobId = null;
-    let pollInterval = null;
-
-    form.addEventListener("submit", async function(e) {
-      e.preventDefault();
-
-      const formData = new FormData(form);
-      progressBox.style.display = "block";
-      status.innerText = "⬆️ Uploading...";
-      bar.style.width = "10%";
-      document.getElementById("submitBtn").disabled = true;
-
-      try {
-        const res = await fetch("/upload", {
-          method: "POST",
-          body: formData
-        });
-        const data = await res.json();
-
-        if (data.error) {
-          status.innerText = "❌ " + data.error;
-          document.getElementById("submitBtn").disabled = false;
-          return;
-        }
-
-        currentJobId = data.job_id;
-        status.innerText = "⏳ Processing...";
-        bar.style.width = "30%";
-
-        pollInterval = setInterval(checkSt
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="message">
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {%
