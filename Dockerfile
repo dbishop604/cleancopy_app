@@ -18,15 +18,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set working directory
 WORKDIR /app
 
-# Copy dependencies first
+# Copy dependencies first for better caching
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy project files
 COPY . /app/
 
-# Expose port for web service
+# Expose port for Render
 ENV PORT=10000
 
-# Default command (overridden by render.yaml)
+# Start command for Render
 CMD ["gunicorn", "-w", "2", "-k", "gthread", "-b", "0.0.0.0:10000", "app:app"]
