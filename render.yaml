@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: cleancopy-ocr-eflg
+    name: seamlessdocs
     env: docker
     plan: starter
     autoDeploy: true
@@ -8,34 +8,26 @@ services:
       - key: PORT
         value: 10000
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: cleancopy-redis
-          property: connectionString
+        sync: false   # will be filled from the Redis instance
     healthCheckPath: /healthz
     disk:
       name: data
-      mountPath: /app/data
+      mountPath: /data
       sizeGB: 1
 
   - type: worker
-    name: cleancopy-worker
+    name: seamlessdocs-worker
     env: docker
     plan: starter
     autoDeploy: true
     envVars:
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: cleancopy-redis
-          property: connectionString
+        sync: false   # will be filled from the Redis instance
     disk:
       name: data
-      mountPath: /app/data
+      mountPath: /data
       sizeGB: 1
-    startCommand: python worker.py
 
-databases:
-  - name: cleancopy-redis
-    plan: free
-    ipAllowList: []
+  - type: redis
+    name: seamlessdocs
+    plan: starter
