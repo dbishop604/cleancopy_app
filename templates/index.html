@@ -24,103 +24,65 @@
       max-width: 800px;
       width: 100%;
     }
-    h1 { text-align: center; margin-bottom: 1rem; color: #111; }
-    h2 { margin-top: 1.5rem; color: #111; }
-    p { font-size: 0.95em; color: #555; line-height: 1.6; }
-    .notice { margin: 0.5rem 0 1rem; font-size: 0.9em; color: #555; }
-    footer { margin-top: 2rem; text-align: center; font-size: 0.8rem; color: #777; }
-    footer p { margin: 0.3rem 0; }
-    a { color: #0077cc; text-decoration: none; font-weight: bold; }
-    a:hover { text-decoration: underline; }
-    .btn-primary {
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #111;
+    }
+    p {
+      font-size: 0.95em;
+      color: #555;
+      line-height: 1.6;
+    }
+    .notice {
+      font-size: 0.9em;
+      margin: 0.5rem 0 1rem;
+      color: #555;
+    }
+    .btn {
       display: inline-block;
-      margin-top: 1rem;
+      margin: 0.3rem 0.3rem 0.3rem 0;
       padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-primary {
       background-color: #0077cc;
       color: white;
-      border-radius: 4px;
-      font-weight: bold;
+    }
+    a {
+      color: #0077cc;
       text-decoration: none;
+      font-weight: bold;
     }
-    .terms-box {
-      border: 1px solid #ccc;
-      padding: 1rem;
-      max-height: 200px;
-      overflow-y: scroll;
-      background: #fdfdfd;
-      margin: 1rem 0;
-      font-size: 0.85em;
-      line-height: 1.4;
+    a:hover { text-decoration: underline; }
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #777;
     }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>SeamlessDocs</h1>
+    footer p { margin: 0.3rem 0; }
 
-    <p><strong>Plan:</strong> Free (up to 5MB conversions)</p>
-    {% if plan == "free" %}
-      <a href="{{ url_for('upgrade') }}" class="btn-primary">
-        For files over 5MB (up to 50MB) — Upgrade to Pro
-      </a>
-    {% endif %}
-
-    <h2>Upload Your File</h2>
-    <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
-      <input type="file" name="fileUpload" id="fileUpload" disabled>
-      <br><br>
-
-      <div class="terms-box">
-        <p><strong>File Handling:</strong> Files you upload are processed automatically and deleted within eight (8) hours.</p>
-        <p><strong>Ownership:</strong> You retain ownership of your content. By uploading, you confirm you have rights to use the files.</p>
-        <p><strong>Creative Independence:</strong> The site owner(s) may independently create or publish material similar to your uploads. Any similarity shall not be considered infringement or plagiarism.</p>
-        <p><strong>Privacy:</strong> We respect your privacy. Files and personal data are never sold, rented, or shared.</p>
-        <p><strong>Liability:</strong> This service is provided “as is” without warranties of any kind.</p>
-      </div>
-
-      <label>
-        <input type="checkbox" id="termsCheck" name="terms">
-        I have read and agree to the terms of use and privacy policy.
-      </label>
-      <br><br>
-
-      <label for="format">Output format:</label>
-      <select name="format" id="format" disabled>
-        <option value="docx">DOCX</option>
-        <option value="txt">TXT</option>
-      </select>
-      <br><br>
-
-      <button type="submit" id="uploadBtn" disabled>Upload File</button>
-    </form>
-
-    <p class="notice">
-      Download your converted file within 8 hours. Files are automatically deleted after that time. We do not read, store, or share them.
-    </p>
-
-    <footer>
-      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
-      <p>
-        <a href="{{ url_for('index') }}">Home</a> |
-        <a href="{{ url_for('contact') }}">Contact</a> |
-        <a href="{{ url_for('terms') }}">Terms of Use</a> |
-        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
-      </p>
-    </footer>
-  </div>
-
-  <script>
-    const termsCheck = document.getElementById('termsCheck');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const fileUpload = document.getElementById('fileUpload');
-    const formatSelect = document.getElementById('format');
-
-    termsCheck.addEventListener('change', function() {
-      const enabled = this.checked;
-      uploadBtn.disabled = !enabled;
-      fileUpload.disabled = !enabled;
-      formatSelect.disabled = !enabled;
-    });
-  </script>
-</body>
-</html>
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background: #fff;
+      margin: 5% auto;
+      padding: 1.5rem;
+      border-radius: 8px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow
