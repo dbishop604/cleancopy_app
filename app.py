@@ -82,4 +82,15 @@ def convert():
                 buf,
                 as_attachment=True,
                 download_name=filename.rsplit(".", 1)[0] + ".docx",
-                mimetype="application/vnd.openxmlformats-offi
+                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+
+    except Exception as e:
+        flash(f"❌ Conversion failed: {e}", "error")
+        return redirect(url_for("cancel"))
+
+
+# --- Main entrypoint ---
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
