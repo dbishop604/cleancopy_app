@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file
-import os
+import os, tempfile
 from processor import process_file_to_text, text_to_docx
 
 app = Flask(__name__)
@@ -11,7 +11,7 @@ def index():
 
 @app.route("/convert", methods=["POST"])
 def convert():
-    # Check Terms agreement
+    # Enforce Terms agreement
     if "terms" not in request.form:
         flash("You must agree to the Terms of Use and Privacy Policy before uploading.", "error")
         return redirect(url_for("index"))
@@ -27,14 +27,26 @@ def convert():
         return redirect(url_for("index"))
 
     try:
+        # Save uploaded file to a temporary path
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(f.filename)[1])
+        f.save(tmp.name)
+
         # Step 1: Run OCR → plain text
-        text = process_file_to_text(f)
+        text = process_file_to_text(tmp.name)
 
-        # Step 2: Convert text → DOCX file
-        output_path = text_to_docx(text)
+        # Step 2: Convert text → DOCX file (returns BytesIO)
+        buf = text_to_docx(text)
 
-        # Step 3: Send back file as download
-        return send_file(output_path, as_attachment=True)
+        # Step 3: Clean up temp file
+        os.unlink(tmp.name)
+
+        # Step 4: Send DOCX to user
+        return send_file(
+            buf,
+            as_attachment=True,
+            download_name=os.path.splitext(f.filename)[0] + ".docx",
+            mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
 
     except Exception as e:
         print("Conversion error:", e)
