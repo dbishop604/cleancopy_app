@@ -41,9 +41,19 @@ def privacy():
     return render_template("privacy.html")
 
 
+@app.route("/success/<job_id>")
+def success(job_id):
+    return render_template("success.html", job_id=job_id)
+
+
+@app.route("/cancel")
+def cancel():
+    return render_template("cancel.html")
+
+
 @app.route("/coffee")
 def coffee():
-    return render_template("support.html")
+    return render_template("coffee.html")
 
 
 @app.route("/convert", methods=["POST"])
@@ -61,4 +71,28 @@ def convert():
         flash("⚠️ No selected file")
         return redirect(url_for("index"))
 
-    filename = secure_filename(f.filen_
+    filename = secure_filename(f.filename)
+    job_id = str(uuid.uuid4())
+
+    input_path = os.path.join(UPLOAD_FOLDER, f"{job_id}_{filename}")
+    output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.docx")
+
+    f.save(input_path)
+
+    if not redis_conn:
+        return jsonify({"status": "error", "message": "Redis is not connected"}), 500
+
+    job = q.enqueue(process_file_job, input_path, output_path, job_id)
+    return redirect(url_for("success", job_id=job.get_id()))
+
+
+@app.route("/status/<job_id>")
+def status(job_id):
+    if not redis_conn:
+        return jsonify({"status": "error", "message": "Redis is not connected"})
+    try:
+        job = Job.fetch(job_id, connection=redis_conn)
+        if job.is_finished:
+            return jsonify({"status": "done", "output": job.result.get("output")})
+        elif job.is_failed:
+            return jsonify({"status": "error", "message": str(job.exc_info)})
