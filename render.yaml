@@ -8,13 +8,13 @@ services:
       - key: PORT
         value: 10000
       - key: REDIS_URL
-        sync: false
+        value: "redis://default:AVYAAAIncDE3ZGY5MTE5NDhhYzI0NTRhYmNlYjkzNDc3MDkxM2I5ZXAxMjIwMTY@secure-wahoo-22016.upstash.io:6379"
     healthCheckPath: /healthz
     disk:
       name: data
       mountPath: /data
       sizeGB: 1
-    buildCommand: ""  # Leave blank – uses Dockerfile
+    buildCommand: ""
 
   - type: worker
     name: seamlessdocs-worker
@@ -23,10 +23,10 @@ services:
     autoDeploy: true
     envVars:
       - key: REDIS_URL
-        sync: false
+        value: "redis://default:AVYAAAIncDE3ZGY5MTE5NDhhYzI0NTRhYmNlYjkzNDc3MDkxM2I5ZXAxMjIwMTY@secure-wahoo-22016.upstash.io:6379"
     disk:
       name: data
       mountPath: /data
       sizeGB: 1
-    buildCommand: ""  # Leave blank – uses Dockerfile
-    # ❌ REMOVE startCommand for Docker
+    buildCommand: ""
+    startCommand: "python worker.py"
