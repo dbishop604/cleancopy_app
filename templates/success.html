@@ -12,12 +12,11 @@
       padding: 0;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: center;
       min-height: 100vh;
     }
     .container {
       background: #fff;
-      margin: 2rem;
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -25,56 +24,32 @@
       width: 100%;
       text-align: center;
     }
-    h1 {
-      color: #111;
-      margin-bottom: 1rem;
-    }
-    p {
-      color: #555;
-      line-height: 1.6;
-      margin: 1rem 0;
-    }
+    h1 { color: #111; }
+    p { color: #555; line-height: 1.6; }
     .btn {
       display: inline-block;
-      margin: 0.5rem;
+      margin: 0.3rem;
       padding: 0.6rem 1.2rem;
       border-radius: 4px;
-      font-weight: bold;
       text-decoration: none;
+      font-weight: bold;
       cursor: pointer;
     }
-    .btn-primary {
-      background-color: #0077cc;
-      color: white;
-    }
-    .btn-coffee {
-      background-color: #ff813f;
-      color: white;
-    }
+    .btn-primary { background: #0077cc; color: white; }
     footer {
       margin-top: 2rem;
-      text-align: center;
       font-size: 0.8rem;
       color: #777;
     }
-    footer p { margin: 0.3rem 0; }
-    a { color: #0077cc; text-decoration: none; font-weight: bold; }
-    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>✅ Conversion Successful!</h1>
-    <p>Your file has been converted and is ready for download.</p>
-    <a href="/" class="btn btn-primary">⬅ Back to Home</a>
-    <a href="https://www.buymeacoffee.com/seamlessdocs" target="_blank" class="btn btn-coffee">☕ Buy SeamlessDocs a coffee</a>
-
+    <h1>✅ Success!</h1>
+    <p>Your file has been converted successfully. It should download automatically. If not, please try again.</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary">Convert Another File</a>
     <footer>
-      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
-      <p>
-        <a href="{{ url_for('terms') }}">Terms of Use</a> | 
-        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
-      </p>
+      <p>© SeamlessDocs. All rights reserved.</p>
     </footer>
   </div>
 </body>
