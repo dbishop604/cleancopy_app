@@ -17,6 +17,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
 # --- Routes ---
+
 @app.route("/")
 def index():
     return render_template("index.html", plan="free")
@@ -44,14 +45,14 @@ def coffee():
 @app.route("/convert", methods=["POST"])
 def convert():
     if "terms" not in request.form:
-        return jsonify({"message": "You must agree to the terms of service and privacy policy."}), 400
+        return jsonify({"status": "error", "message": "You must agree to the terms of service and privacy policy."}), 400
 
     if "fileUpload" not in request.files:
-        return jsonify({"message": "No file selected."}), 400
+        return jsonify({"status": "error", "message": "No file uploaded."}), 400
 
     f = request.files["fileUpload"]
     if f.filename == "":
-        return jsonify({"message": "No file selected."}), 400
+        return jsonify({"status": "error", "message": "No file selected."}), 400
 
     filename = secure_filename(f.filename)
     temp_path = os.path.join("/tmp", filename)
@@ -61,27 +62,33 @@ def convert():
         text = process_file_to_text(temp_path, join_strategy="smart")
 
         fmt = request.form.get("format", "docx")
+        base_name = os.path.splitext(filename)[0]
+
         if fmt == "txt":
-            buf = io.BytesIO(text.encode("utf-8"))
-            buf.seek(0)
-            return send_file(
-                buf,
-                as_attachment=True,
-                download_name=filename.rsplit(".", 1)[0] + ".txt",
-                mimetype="text/plain"
-            )
+            output_path = os.path.join(CONVERTED_FOLDER, base_name + ".txt")
+            with open(output_path, "w", encoding="utf-8") as txt_file:
+                txt_file.write(text)
+            download_url = url_for("download_file", filename=base_name + ".txt")
         else:
             buf = text_to_docx(text)
-            buf.seek(0)
-            return send_file(
-                buf,
-                as_attachment=True,
-                download_name=filename.rsplit(".", 1)[0] + ".docx",
-                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
+            output_path = os.path.join(CONVERTED_FOLDER, base_name + ".docx")
+            with open(output_path, "wb") as out_file:
+                out_file.write(buf.getvalue())
+            download_url = url_for("download_file", filename=base_name + ".docx")
+
+        return jsonify({"status": "success", "download_url": download_url})
 
     except Exception as e:
-        return jsonify({"message": f"Conversion failed: {str(e)}"}), 500
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@app.route("/download/<filename>")
+def download_file(filename):
+    path = os.path.join(CONVERTED_FOLDER, filename)
+    if not os.path.exists(path):
+        return "File not found or expired.", 404
+    return send_file(path, as_attachment=True)
+
 
 # --- Main entrypoint ---
 if __name__ == "__main__":
