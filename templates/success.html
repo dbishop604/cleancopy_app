@@ -17,10 +17,10 @@
     }
     .container {
       background: #fff;
-      margin: 2rem;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin: 3rem;
+      padding: 2.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       max-width: 700px;
       width: 100%;
       text-align: center;
@@ -28,41 +28,38 @@
     h1 {
       margin-bottom: 1rem;
       color: #111;
+      font-size: 2rem;
     }
     p {
-      color: #555;
+      color: #444;
       line-height: 1.6;
       margin: 1rem 0;
       font-size: 1rem;
+      text-align: center;
     }
     .btn {
       display: inline-block;
-      margin: 0.3rem;
-      padding: 0.8rem 1.6rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      text-decoration: none;
-    }
-    .btn-primary {
+      margin: 1rem 0;
+      padding: 0.7rem 1.4rem;
       background-color: #0077cc;
       color: white;
-    }
-    .btn-coffee {
-      background-color: #FFD200; /* Bright yellow */
-      color: #111;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: bold;
       font-size: 1rem;
-      margin-top: 1rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: background 0.3s;
     }
-    .btn-coffee:hover {
-      background-color: #f5c400;
+    .btn:hover {
+      background-color: #005fa3;
     }
     footer {
       margin-top: 2rem;
-      font-size: 0.8rem;
+      text-align: center;
+      font-size: 0.75rem; /* ~8pt */
       color: #777;
+      line-height: 1.4;
     }
     footer a {
       color: #0077cc;
@@ -74,20 +71,22 @@
 </head>
 <body>
   <div class="container">
+    <!-- Logo -->
+    <img src="/static/logo.png" alt="SeamlessDocs Logo" style="max-width:150px; margin-bottom:1.5rem; display:block; margin-left:auto; margin-right:auto;"/>
+
+    <!-- Heading -->
     <h1>🎉 Conversion Successful!</h1>
-    <p>Your file has been converted and is ready for download.</p>
 
-    <a href="{{ url_for('index') }}" class="btn btn-primary">Convert Another File</a>
-    <a href="{{ url_for('coffee') }}" class="btn btn-coffee">☕ Buy Us a Coffee</a>
+    <!-- Message -->
+    <p>Your file has been converted successfully.  
+    Click below to download your document.</p>
 
+    <!-- Button -->
+    <a href="/" class="btn">⬅ Back to Home</a>
+
+    <!-- Footer -->
     <footer>
-      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
-      <p>
-        <a href="{{ url_for('index') }}">Home</a> | 
-        <a href="{{ url_for('terms') }}">Terms of Use</a> | 
-        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
-      </p>
-    </footer>
-  </div>
-</body>
-</html>
+      <p><em>By continuing, you agree to the 
+        <a href="{{ url_for('terms') }}">terms of service</a> and 
+        <a href="{{ url_for('privacy') }}">privacy policy</a>.
+      </em></p>
