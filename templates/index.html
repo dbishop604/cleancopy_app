@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeamlessDocs</title>
+  <title>SeamlessDocs — Upload</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -27,10 +27,6 @@
     h1 {
       text-align: center;
       margin-bottom: 1rem;
-      color: #111;
-    }
-    h2 {
-      margin-top: 1.5rem;
       color: #111;
     }
     p {
@@ -70,6 +66,16 @@
     }
     footer p { margin: 0.3rem 0; }
 
+    /* Flash messages */
+    .flash {
+      padding: 0.8rem 1rem;
+      margin-bottom: 1rem;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .flash.success { background: #e6ffed; color: #0a662e; border: 1px solid #0a662e; }
+    .flash.error { background: #ffe6e6; color: #a60000; border: 1px solid #a60000; }
+
     /* Modal styles */
     .modal {
       display: none;
@@ -80,23 +86,20 @@
       width: 100%;
       height: 100%;
       overflow: auto;
-      background-color: rgba(0,0,0,0.6);
+      background-color: rgba(0,0,0,0.5);
     }
     .modal-content {
       background: #fff;
       margin: 5% auto;
       padding: 1.5rem;
       border-radius: 8px;
-      max-width: 700px;
+      max-width: 600px;
       max-height: 80vh;
       overflow-y: auto;
-      position: relative;
     }
     .close {
       color: #aaa;
-      position: absolute;
-      right: 1rem;
-      top: 1rem;
+      float: right;
       font-size: 24px;
       font-weight: bold;
       cursor: pointer;
@@ -107,55 +110,6 @@
 <body>
   <div class="container">
     <h1>SeamlessDocs</h1>
-    <p><strong>Free Plan:</strong> Up to 5MB conversions.</p>
-    <p>For files over 5MB up to 50MB, 
-      <a href="#" class="btn btn-primary" id="upgradeBtn">Upgrade to Pro</a>
-    </p>
 
-    <h2>Upload Your File</h2>
-    <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
-      <!-- File upload input -->
-      <input type="file" name="fileUpload" id="fileUpload" required>
-      <br><br>
-
-      <!-- Terms checkbox with modal -->
-      <label>
-        <input type="checkbox" name="terms" id="termsCheck" required>
-        I have read and agree to the 
-        <a href="#" id="openTerms">terms of use and privacy policy</a>.
-      </label>
-      <br><br>
-
-      <!-- Format choice -->
-      <label for="format">Output format:</label>
-      <select name="format" id="format">
-        <option value="docx">DOCX</option>
-        <option value="txt">TXT</option>
-      </select>
-      <br><br>
-
-      <!-- Upload button -->
-      <button type="submit" class="btn btn-primary">Upload File</button>
-    </form>
-
-    <p class="notice">
-      Download your converted file before 8 hours as your files will automatically be deleted after 8 hours. We do not read, store, or share them.
-    </p>
-
-    <footer>
-      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
-      <p>
-        <a href="#" id="footerTerms">Terms of Use</a> | 
-        <a href="#" id="footerPrivacy">Privacy Policy</a>
-      </p>
-    </footer>
-  </div>
-
-  <!-- Modal -->
-  <div id="termsModal" class="modal">
-    <div class="modal-content">
-      <span class="close" id="closeModal">&times;</span>
-      <h2>Terms of Use & Privacy Policy</h2>
-      <p>
-        By uploading content, you acknowledge and agree that the site owner(s) may independently develop, publish, or distribute material 
-        that is similar to or overlaps with your uploaded content in subject matter, theme, or expre
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_mes
