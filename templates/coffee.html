@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Buy Us a Coffee — SeamlessDocs</title>
+  <title>Support Us — SeamlessDocs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -17,94 +17,69 @@
     }
     .container {
       background: #fff;
-      margin: 3rem;
-      padding: 2.5rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin: 2rem;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       max-width: 700px;
       width: 100%;
       text-align: center;
     }
     h1 {
-      margin-bottom: 1rem;
       color: #111;
-      font-size: 2rem;
+      margin-bottom: 1rem;
     }
     p {
-      color: #444;
+      color: #555;
       line-height: 1.6;
       margin: 1rem 0;
-      font-size: 1rem;
-      text-align: center;
     }
-    img.logo {
-      max-width: 150px;
-      display: block;
-      margin: 0 auto 1.5rem auto;
-    }
-    .btn-coffee {
+    .donate-btn {
       display: inline-block;
+      margin-top: 1rem;
       padding: 0.8rem 1.6rem;
-      background-color: #FFD200; /* bright yellow */
-      color: #111;
       border: none;
-      border-radius: 6px;
-      text-decoration: none;
+      border-radius: 8px;
+      background: #f1c40f;
+      color: #000;
       font-weight: bold;
       font-size: 1rem;
-      margin-top: 1rem;
-      transition: background 0.3s;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
-    .btn-coffee:hover {
-      background-color: #e6c200;
+    .donate-btn:hover {
+      background: #f39c12;
+      color: #fff;
     }
     footer {
       margin-top: 2rem;
-      text-align: center;
-      font-size: 0.75rem; /* ~8pt */
+      font-size: 10.5px;
       color: #777;
       line-height: 1.4;
     }
     footer a {
       color: #0077cc;
-      font-weight: bold;
       text-decoration: none;
+      font-weight: bold;
     }
     footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Logo -->
-    <img src="/static/logo.png" alt="SeamlessDocs Logo" class="logo"/>
-
-    <!-- Heading -->
-    <h1>Support SeamlessDocs</h1>
-
-    <!-- Description -->
-    <p style="font-size:14px;">
-      SeamlessDocs turns your <strong>PDF</strong> or image files 
-      (<strong>JPG, PNG, TIFF</strong>) into clean, editable documents — 
-      no messy paragraph boxes, no separate windows.
-    </p>
+    <h1>☕ Support CleanCopy OCR</h1>
     <p>
-      If this tool makes your work easier, consider buying us a coffee ☕.  
-      Your support helps us keep improving SeamlessDocs for everyone.
+      This service is free to use, but it takes time and resources to maintain.  
+      If you’d like to support development and keep CleanCopy OCR running, you can buy us a coffee.  
+      Your support helps us improve features and keep the service accessible.
     </p>
+    <a class="donate-btn" href="https://www.buymeacoffee.com/yourusername" target="_blank">☕ Buy Us a Coffee</a>
 
-    <!-- Buy me a coffee button -->
-    <a href="https://www.buymeacoffee.com/YOURNAME" target="_blank" class="btn-coffee">
-      ☕ Buy Us a Coffee
-    </a>
-
-    <!-- Footer -->
     <footer>
-      <p><em>By continuing, you agree to the 
-        <a href="{{ url_for('terms') }}">terms of service</a> and 
-        <a href="{{ url_for('privacy') }}">privacy policy</a>.
-      </em></p>
-      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
+      © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
+      <a href="{{ url_for('terms') }}">Terms of Use</a> |
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
     </footer>
   </div>
 </body>
