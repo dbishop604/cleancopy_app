@@ -30,7 +30,7 @@
       color: #111;
     }
     p {
-      font-size: 1rem;
+      font-size: 14px;
       color: #555;
       line-height: 1.6;
       margin: 0.75rem 0;
@@ -39,8 +39,6 @@
       display: inline-block;
       margin: 0.3rem;
       padding: 0.6rem 1.2rem;
-      background-color: #0077cc;
-      color: white;
       border: none;
       border-radius: 4px;
       text-decoration: none;
@@ -48,11 +46,7 @@
       font-weight: bold;
     }
     .btn-primary {
-      background-color: #0077cc;
-      color: white;
-    }
-    .btn-coffee {
-      background-color: #FFD200; /* Yellow */
+      background-color: #FFD200; /* Yellow button */
       color: #111;
     }
     footer {
@@ -62,7 +56,11 @@
       color: #555;
       line-height: 1.4;
     }
-    footer a { color: #0077cc; font-weight: bold; text-decoration: none; }
+    footer a {
+      color: #0077cc;
+      font-weight: bold;
+      text-decoration: none;
+    }
     footer a:hover { text-decoration: underline; }
     /* Overlay */
     #overlay {
@@ -91,18 +89,6 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-    label {
-      font-size: 14px;
-    }
-    #format {
-      font-size: 14px;
-      padding: 0.4rem;
-    }
-    .notice {
-      font-size: 14px;
-      margin: 1rem 0;
-      color: #555;
-    }
   </style>
 </head>
 <body>
@@ -119,7 +105,8 @@
         <input type="checkbox" id="termsCheck">
         <span style="font-size:14px;">By continuing, you agree to the 
         <a href="{{ url_for('terms') }}">terms of service</a> and 
-        <a href="{{ url_for('privacy') }}">privacy policy</a>.</span>
+        <a href="{{ url_for('privacy') }}">privacy policy</a>.
+        </span>
       </label>
       <br><br>
 
@@ -135,12 +122,19 @@
       <button type="submit" id="uploadBtn" class="btn btn-primary" disabled>Upload File</button>
     </form>
 
+    <p class="notice">
+      Download your converted file before 8 hours as your files will automatically be deleted after 8 hours. We do not read, store, or share them.
+    </p>
+
     <footer>
       <p>By continuing, you agree to the 
         <a href="{{ url_for('terms') }}">terms of service</a> and 
         <a href="{{ url_for('privacy') }}">privacy policy</a>.
       </p>
       <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
+      <p>
+        <a href="{{ url_for('index') }}">Home</a>
+      </p>
     </footer>
   </div>
 
