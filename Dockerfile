@@ -1,29 +1,22 @@
 FROM python:3.11-slim
 
-# Install system dependencies for Tesseract and PDF handling
+# Install system dependencies for OCR and PDFs
 RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-eng \
     poppler-utils \
     libtesseract-dev \
     libleptonica-dev \
-    libsm6 \
-    libxext6 \
-    libxrender1 \
-    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Install Python dependencies
+# Install Python requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code
+# Copy the rest of the app
 COPY . .
 
-# Expose Render's default port
-EXPOSE 10000
-
-# Run with Gunicorn in production
-CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:10000", "app:app", "--timeout", "120"]
+# Run with Gunicorn, binding to the PORT Render provides
+CMD ["sh", "-c", "gunicorn --workers=2 --threads=4 --timeout 120 -b 0.0.0.0:$PORT app:app"]
