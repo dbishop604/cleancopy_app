@@ -51,9 +51,14 @@
       border-radius: 4px;
       cursor: pointer;
       font-weight: bold;
+      text-decoration: none;
     }
     .btn-primary {
       background-color: #0077cc;
+      color: white;
+    }
+    .btn-coffee {
+      background-color: #ff813f;
       color: white;
     }
     a {
@@ -76,7 +81,7 @@
     <h1>SeamlessDocs</h1>
     <p><strong>Free Plan:</strong> Up to 5MB conversions.</p>
     <p>For files over 5MB up to 50MB, 
-      <a href="{{ url_for('upgrade') }}" class="btn-primary" style="padding:0.4rem 1rem;">Upgrade to Pro</a>
+      <a href="{{ url_for('upgrade') }}" class="btn btn-primary" style="padding:0.4rem 1rem;">Upgrade to Pro</a>
     </p>
 
     <h2>Upload Your File</h2>
@@ -93,4 +98,4 @@
         <input type="checkbox" id="termsCheck">
         I have read and agree to the 
         <a href="{{ url_for('terms') }}" target="_blank">terms of use</a> and 
-        <a
+        <a href="{{ url_for('privacy') }}" target="_blank">privacy poli
