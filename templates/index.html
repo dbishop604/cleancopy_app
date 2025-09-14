@@ -1,25 +1,144 @@
-<h2>Upload Your File</h2>
-<p>Upload your <strong>PDF</strong> or image file (<strong>JPG, PNG, TIFF</strong>) and SeamlessDocs will convert it into a clean, editable <strong>DOCX</strong> or <strong>TXT</strong> file.</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeamlessDocs — Upload</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      margin: 2rem;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 800px;
+      width: 100%;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #111;
+    }
+    h2 {
+      margin-top: 1.5rem;
+      color: #111;
+    }
+    p {
+      font-size: 0.95em;
+      color: #555;
+      line-height: 1.6;
+    }
+    .notice {
+      font-size: 0.9em;
+      margin: 0.5rem 0 1rem;
+      color: #555;
+    }
+    .btn {
+      display: inline-block;
+      margin: 0.3rem;
+      padding: 0.6rem 1.2rem;
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-primary {
+      background-color: #0077cc;
+      color: white;
+    }
+    .btn-coffee {
+      background-color: #ff813f;
+      color: white;
+    }
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #555;
+      line-height: 1.6;
+    }
+    footer p { margin: 0.3rem 0; }
+    a {
+      color: #0077cc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>SeamlessDocs</h1>
 
-<form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
-  <input type="file" name="fileUpload" id="fileUpload" disabled>
-  <br><br>
+    <h2>Upload Your File</h2>
+    <p>Upload your <strong>PDF</strong> or image file (<strong>JPG, PNG, TIFF</strong>) and SeamlessDocs will convert it into a clean, editable <strong>DOCX</strong> or <strong>TXT</strong> file.</p>
 
-  <!-- Terms modal trigger -->
-  <label>
-    <input type="checkbox" id="termsCheck">
-    I have read and agree to the <a href="#" id="openTerms">terms of service and privacy policy</a>.
-  </label>
-  <br><br>
+    <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
+      <input type="file" name="fileUpload" id="fileUpload" disabled>
+      <br><br>
 
-  <!-- Format choice -->
-  <label for="format">Output format:</label>
-  <select name="format" id="format" disabled>
-    <option value="docx">DOCX</option>
-    <option value="txt">TXT</option>
-  </select>
-  <br><br>
+      <!-- Terms modal trigger -->
+      <label>
+        <input type="checkbox" id="termsCheck">
+        I have read and agree to the 
+        <a href="{{ url_for('terms') }}">terms of service</a> and 
+        <a href="{{ url_for('privacy') }}">privacy policy</a>.
+      </label>
+      <br><br>
 
-  <!-- Upload button -->
-  <button type="submit" id="uploadBtn" disabled>Upload File</button>
-</form>
+      <!-- Format choice -->
+      <label for="format">Output format:</label>
+      <select name="format" id="format" disabled>
+        <option value="docx">DOCX</option>
+        <option value="txt">TXT</option>
+      </select>
+      <br><br>
+
+      <!-- Upload button -->
+      <button type="submit" id="uploadBtn" class="btn btn-primary" disabled>Upload File</button>
+    </form>
+
+    <p class="notice">
+      Download your converted file within 8 hours — all uploaded PDFs and images are automatically deleted from our servers after that time. We do not read, store, or share your content.
+    </p>
+
+    <footer>
+      <p><em>By continuing, you agree to the 
+        <a href="{{ url_for('terms') }}">terms of service</a> and 
+        <a href="{{ url_for('privacy') }}">privacy policy</a>.
+      </em></p>
+      <p>© SeamlessDocs. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script>
+    const termsCheck = document.getElementById('termsCheck');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileUpload = document.getElementById('fileUpload');
+
+    termsCheck.addEventListener('change', function() {
+      const enabled = this.checked;
+      fileUpload.disabled = !enabled;
+      uploadBtn.disabled = !enabled;
+    });
+
+    document.getElementById('openTerms').addEventListener('click', function(event) {
+      event.preventDefault();
+      window.location.href = "{{ url_for('terms') }}";
+    });
+  </script>
+</body>
+</html>
