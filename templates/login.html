@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — CleanCopy OCR</title>
+  <title>Login — SeamlessDocs Online</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,11 +12,12 @@
       padding: 0;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       min-height: 100vh;
     }
     .container {
       background: #fff;
+      margin: 2rem;
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -26,86 +27,60 @@
     h1 {
       text-align: center;
       margin-bottom: 1rem;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+      color: #111;
     }
     label {
-      font-weight: bold;
+      display: block;
+      margin-top: 1rem;
+      color: #555;
     }
     input {
+      width: 100%;
       padding: 0.5rem;
-      border: 1px solid #ddd;
-      border-radius: 6px;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
     button {
+      margin-top: 1rem;
+      width: 100%;
+      padding: 0.7rem;
       background: #007bff;
       color: #fff;
       border: none;
-      padding: 0.75rem;
-      font-size: 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    .flash {
-      background: #ffe5e5;
-      color: #900;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
       border-radius: 4px;
-      text-align: center;
+      cursor: pointer;
     }
+    button:hover { background: #0056b3; }
     footer {
       margin-top: 2rem;
       text-align: center;
-      font-size: 0.8rem;
-      color: #555;
+      font-size: 0.8em;
+      color: #777;
     }
-    footer a {
-      color: #007bff;
-      text-decoration: none;
-    }
-    footer a:hover {
-      text-decoration: underline;
-    }
+    footer p { margin: 0.3rem 0; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Login to CleanCopy</h1>
+    <h1>Login to SeamlessDocs Online</h1>
 
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <div class="flash">
-        {% for m in messages %}
-          <div>{{ m }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-    {% endwith %}
-
-    <form method="POST">
+    <form method="post">
       <label for="username">Username:</label>
-      <input type="text" id="username" name="username" required>
+      <input type="text" name="username" required>
 
       <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required>
+      <input type="password" name="password" required>
 
       <button type="submit">Login</button>
     </form>
 
     <footer>
-      <small>
-        © Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute. |
-        <a href="terms.html" target="_blank">Terms</a> |
-        <a href="privacy.html" target="_blank">Privacy</a>
-      </small>
+      <p>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</p>
+      <p>
+        <a href="{{ url_for('terms') }}">Terms of Use</a><br>
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      </p>
     </footer>
   </div>
 </body>
