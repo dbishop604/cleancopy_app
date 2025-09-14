@@ -29,7 +29,10 @@
       margin-bottom: 1rem;
       color: #111;
     }
-    h2 { color: #111; }
+    h2 {
+      margin-top: 1.5rem;
+      color: #111;
+    }
     p {
       font-size: 0.95em;
       color: #555;
@@ -40,13 +43,22 @@
       margin: 0.5rem 0 1rem;
       color: #555;
     }
+    .btn {
+      display: inline-block;
+      margin: 0.3rem;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
     .btn-primary {
       background-color: #0077cc;
       color: white;
-      padding: 0.4rem 1rem;
-      border-radius: 4px;
-      text-decoration: none;
-      font-weight: bold;
+    }
+    .btn-coffee {
+      background-color: #ff813f;
+      color: white;
     }
     a {
       color: #0077cc;
@@ -61,7 +73,8 @@
       color: #777;
     }
     footer p { margin: 0.3rem 0; }
-    /* Modal */
+
+    /* Modal styles */
     .modal {
       display: none;
       position: fixed;
@@ -78,7 +91,7 @@
       margin: 5% auto;
       padding: 1.5rem;
       border-radius: 8px;
-      max-width: 700px;
+      max-width: 600px;
       max-height: 80vh;
       overflow-y: auto;
     }
@@ -96,24 +109,32 @@
   <div class="container">
     <h1>SeamlessDocs</h1>
     <p><strong>Free Plan:</strong> Up to 5MB conversions.</p>
-    <p>For files over 5MB up to 50MB, <a href="{{ url_for('upgrade') }}" class="btn-primary">Upgrade to Pro</a></p>
+    <p>For files over 5MB up to 50MB, <a href="{{ url_for('success') }}" class="btn-primary" style="padding:0.4rem 1rem;">Upgrade to Pro</a></p>
 
     <h2>Upload Your File</h2>
-    <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
+    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
+      <!-- File upload input -->
       <input type="file" name="fileUpload" id="fileUpload" disabled>
       <br><br>
+
+      <!-- Terms modal trigger -->
       <label>
         <input type="checkbox" id="termsCheck">
-        I have read and agree to the <a href="#" id="openTerms">terms of service and privacy policy</a>.
+        By continuing, you agree to the <a href="#" id="openTerms">terms of service and privacy policy</a>.
       </label>
       <br><br>
+
+      <!-- Format choice -->
       <label for="format">Output format:</label>
       <select name="format" id="format" disabled>
         <option value="docx">DOCX</option>
         <option value="txt">TXT</option>
       </select>
       <br><br>
+
+      <!-- Upload button -->
       <button type="submit" id="uploadBtn" disabled>Upload File</button>
+      <a href="https://www.buymeacoffee.com/seamlessdocs" target="_blank" class="btn btn-coffee">☕ Buy us a coffee</a>
     </form>
 
     <p class="notice">
@@ -123,9 +144,8 @@
     <footer>
       <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
       <p>
-        By continuing, you agree to the 
-        <a href="{{ url_for('terms') }}">terms of service</a> and 
-        <a href="{{ url_for('privacy') }}">privacy policy</a>.
+        <a href="{{ url_for('terms') }}">Terms of Service</a> | 
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
       </p>
     </footer>
   </div>
@@ -134,20 +154,27 @@
   <div id="termsModal" class="modal">
     <div class="modal-content">
       <span class="close" id="closeModal">&times;</span>
-      <h2>Terms of Use</h2>
+      <h2>Terms of Service & Privacy Policy</h2>
       <p>
-        By uploading content, you acknowledge and agree that SeamlessDocs may independently develop, publish, or distribute material that is similar to or overlaps with your uploaded content in subject matter, theme, or expression. Any such similarity shall not give rise to any claim of infringement, plagiarism, misappropriation, or other liability. You expressly waive all such claims against SeamlessDocs and release them from any responsibility in connection with independently created works.
+        Welcome to SeamlessDocs. By using our service, you agree to the following terms:
       </p>
-      <p>
-        You must ensure that you own the rights to the content you upload or have the necessary permissions. SeamlessDocs will not be liable for any copyright or intellectual property violations arising from your uploads. Files are automatically deleted after 8 hours.
-      </p>
+      <h3>1. Use of Service</h3>
+      <p>You may use SeamlessDocs to upload and convert documents. You agree not to misuse the service or upload unlawful content.</p>
 
-      <h2>Privacy Policy</h2>
-      <p><strong>Information We Collect:</strong> Only the minimum required to provide this service, such as your login credentials and uploaded files.</p>
-      <p><strong>File Privacy:</strong> Files are processed automatically. We do not read or access your content. Files are deleted within 8 hours.</p>
-      <p><strong>Use of Information:</strong> Your email and account data are used solely for authentication and subscription management. We do not sell or share your personal data.</p>
-      <p><strong>Data Security:</strong> Industry-standard measures are used, but no online system is 100% secure.</p>
-      <p><strong>Policy Updates:</strong> This Privacy Policy may change, and continued use constitutes acceptance.</p>
+      <h3>2. Privacy</h3>
+      <p>We respect your privacy. Files you upload are processed automatically and deleted from our servers within eight (8) hours. We do not read, store, or share your files.</p>
+
+      <h3>3. Data Use</h3>
+      <p>Your account information (such as email address) is only used for authentication and subscription management. We never sell or rent your data to third parties.</p>
+
+      <h3>4. Security</h3>
+      <p>We use industry-standard security measures to protect your data. However, no online service can guarantee 100% security.</p>
+
+      <h3>5. Disclaimer</h3>
+      <p>SeamlessDocs is provided “as is” without warranties of any kind. We are not responsible for any data loss, errors, or damages arising from the use of this service.</p>
+
+      <h3>6. Policy Updates</h3>
+      <p>We may update these terms and policies from time to time. Continued use of the service constitutes acceptance of the updated terms.</p>
     </div>
   </div>
 
@@ -156,10 +183,8 @@
     const uploadBtn = document.getElementById('uploadBtn');
     const fileUpload = document.getElementById('fileUpload');
     const formatSelect = document.getElementById('format');
-    const modal = document.getElementById('termsModal');
-    const openTerms = document.getElementById('openTerms');
-    const closeModal = document.getElementById('closeModal');
 
+    // Enable upload only if terms are accepted
     termsCheck.addEventListener('change', function() {
       const enabled = this.checked;
       uploadBtn.disabled = !enabled;
@@ -167,18 +192,23 @@
       formatSelect.disabled = !enabled;
     });
 
-    openTerms.addEventListener('click', function(event) {
-      event.preventDefault();
-      modal.style.display = 'block';
-    });
+    // Modal logic
+    const modal = document.getElementById("termsModal");
+    const openModal = document.getElementById("openTerms");
+    const closeModal = document.getElementById("closeModal");
 
-    closeModal.addEventListener('click', function() {
-      modal.style.display = 'none';
-    });
+    openModal.onclick = function(e) {
+      e.preventDefault();
+      modal.style.display = "block";
+    }
+
+    closeModal.onclick = function() {
+      modal.style.display = "none";
+    }
 
     window.onclick = function(event) {
-      if (event.target === modal) {
-        modal.style.display = 'none';
+      if (event.target == modal) {
+        modal.style.display = "none";
       }
     }
   </script>
