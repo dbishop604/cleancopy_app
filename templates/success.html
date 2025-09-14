@@ -56,6 +56,7 @@
       color: #777;
       line-height: 1.4;
     }
+    footer p { margin: 0.3rem 0; }
     footer a {
       color: #0077cc;
       text-decoration: none;
@@ -76,10 +77,12 @@
     {% endif %}
 
     <footer>
-      © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
-      <a href="{{ url_for('terms') }}">Terms of Use</a> |
-      <a href="{{ url_for('privacy') }}">Privacy Policy</a> |
-      <a href="{{ url_for('coffee') }}">Support Us ☕</a>
+      <p>
+        © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
+        <a href="{{ url_for('terms') }}">Terms of Use</a> |
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a> |
+        <a href="{{ url_for('coffee') }}">Support Us ☕</a>
+      </p>
     </footer>
   </div>
 </body>
