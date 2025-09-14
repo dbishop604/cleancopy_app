@@ -21,13 +21,6 @@ import io
 import stripe
 
 from processor import process_file_to_text, text_to_docx
-@app.route("/terms")
-def terms():
-    return render_template("terms.html")
-
-@app.route("/privacy")
-def privacy():
-    return render_template("privacy.html")
 
 # -----------------------------
 # CONFIG
@@ -143,21 +136,6 @@ def cancel():
     flash("⚠️ Subscription canceled. You have been moved back to the Free plan (5MB upload limit).")
     return render_template("cancel.html", plan=current_user.plan)
 
-@app.route("/billing-portal")
-@login_required
-def billing_portal():
-    try:
-        # Replace with real customer_id from DB in production
-        customer_id = f"cus_{current_user.id}"
-        session = stripe.billing_portal.Session.create(
-            customer=customer_id,
-            return_url=url_for("index", _external=True),
-        )
-        return redirect(session.url)
-    except Exception as e:
-        flash(f"Error opening billing portal: {e}")
-        return redirect(url_for("index"))
-
 # -----------------------------
 # TERMS & PRIVACY
 # -----------------------------
@@ -174,11 +152,11 @@ def privacy():
 # -----------------------------
 @app.route("/convert", methods=["POST"])
 def convert():
-    if "file" not in request.files:
+    if "fileUpload" not in request.files:
         flash("No file selected")
         return redirect(url_for("index"))
 
-    f = request.files["file"]
+    f = request.files["fileUpload"]
     if f.filename == "":
         flash("No selected file")
         return redirect(url_for("index"))
@@ -247,4 +225,3 @@ def convert():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
-
