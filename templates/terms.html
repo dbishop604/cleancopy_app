@@ -3,40 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terms of Use & Privacy Policy</title>
+  <title>Terms of Use & Privacy Policy — CleanCopy OCR</title>
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      margin: 2rem;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       max-width: 800px;
-      margin: 40px auto;
-      padding: 0 1rem;
-      line-height: 1.6;
-      color: #333;
+      width: 100%;
     }
     h1, h2 {
       color: #111;
     }
+    p {
+      color: #555;
+      line-height: 1.6;
+    }
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #777;
+    }
+    footer a {
+      color: #555;
+      text-decoration: none;
+      margin: 0 0.5rem;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-  <h1>Terms of Use & Privacy Policy</h1>
-  <p><strong>Last Updated:</strong> [Insert Date]</p>
+  <div class="container">
+    <h1>Terms of Use & Privacy Policy</h1>
+    <p><strong>Last Updated:</strong> [Insert Date]</p>
 
-  <h2>1. File Handling</h2>
-  <p>Files you upload are processed automatically. We do not read, review, or access your files, and they are automatically deleted from our system within eight (8) hours of upload.</p>
+    <h2>1. File Handling</h2>
+    <p>
+      Files you upload are processed automatically. We do not read, review, or access your files. 
+      All uploads are stored temporarily and automatically deleted within eight (8) hours.
+    </p>
 
-  <h2>2. Ownership & Copyright</h2>
-  <p>You retain full ownership of all materials you upload. By uploading, you confirm that you own or have the legal right to use the files, and you agree not to upload materials that infringe upon the intellectual property rights of others.</p>
+    <h2>2. Ownership & Copyright</h2>
+    <p>
+      You retain full ownership of all materials you upload. By uploading, you confirm that you own 
+      or have the legal right to use the files, and you agree not to upload materials that infringe 
+      upon the intellectual property rights of others.
+    </p>
 
-  <h2>3. Indemnification & Release</h2>
-  <p>By uploading content, you agree to indemnify and hold harmless the site owner(s) from any claims, disputes, or legal actions arising from the content you upload. You also acknowledge and agree that the site owner(s) may independently create, develop, publish, or distribute material that is similar to or overlaps with your uploaded content in subject matter, theme, or expression. Any such similarity shall not be construed as infringement, plagiarism, or misappropriation. You waive any claims against the site owner(s) related to such independent creations.</p>
+    <h2>3. Indemnification & Release</h2>
+    <p>
+      By uploading content, you agree to indemnify and hold harmless the site owner(s) from any 
+      claims, disputes, or legal actions related to the content you upload. You also acknowledge and 
+      agree that the site owner(s) may independently create, develop, publish, or distribute material 
+      that is similar in theme, subject matter, or expression to your uploaded content. Any such 
+      similarity does not constitute infringement, plagiarism, or misappropriation, and you waive 
+      any claims against the site owner(s) in such cases.
+    </p>
 
-  <h2>4. Privacy</h2>
-  <p>We do not sell, rent, or share your personal information. We do not collect your files for marketing, resale, or distribution. Uploaded files are automatically deleted within eight (8) hours. Email addresses or account details are used solely for authentication and subscription management and are never sold to third parties.</p>
+    <h2>4. Privacy</h2>
+    <p>
+      We do not sell, rent, or share your personal information. We do not collect or retain your 
+      uploaded files for marketing, resale, or distribution. Files are processed automatically and 
+      deleted after eight (8) hours. Email addresses and account details are used solely for 
+      authentication and subscription management.
+    </p>
 
-  <h2>5. Limitation of Liability</h2>
-  <p>This service is provided “as-is” without warranties of any kind. The site owner(s) shall not be liable for any damages, losses, or claims resulting from the use or inability to use this service.</p>
+    <h2>5. Limitation of Liability</h2>
+    <p>
+      This service is provided “as-is” without warranties of any kind. The site owner(s) shall not be 
+      liable for any damages, losses, or claims resulting from the use or inability to use this 
+      service.
+    </p>
 
-  <p><a href="{{ url_for('index') }}">⬅ Back to Upload Page</a></p>
+    <footer>
+      <p>
+        <a href="{{ url_for('index') }}">⬅ Back to Upload Page</a> | 
+        <a href="{{ url_for('terms') }}">Terms of Use</a> | 
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      </p>
+      <small>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</small>
+    </footer>
+  </div>
 </body>
 </html>
+
