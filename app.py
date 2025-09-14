@@ -1,11 +1,16 @@
 import os
 import io
+import logging
 from flask import (
     Flask, render_template, request, redirect,
-    url_for, flash, send_file, jsonify
+    url_for, flash, send_file
 )
 from werkzeug.utils import secure_filename
 from processor import process_file_to_text, text_to_docx
+
+# --- Logging setup ---
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # --- Flask setup ---
 app = Flask(__name__)
@@ -16,14 +21,11 @@ CONVERTED_FOLDER = "converted"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
-# --- Health check route ---
-@app.route("/healthz")
-def healthz():
-    return jsonify(status="ok"), 200
-
 # --- Core Routes ---
+
 @app.route("/")
 def index():
+    logger.info("Index page loaded")
     return render_template("index.html", plan="free")
 
 @app.route("/terms")
@@ -42,54 +44,33 @@ def success():
 def cancel():
     return render_template("cancel.html")
 
-# --- File conversion ---
 @app.route("/convert", methods=["POST"])
 def convert():
+    logger.info("Received file conversion request")
+
     if "terms" not in request.form:
         flash("⚠️ You must agree to the terms of use and privacy policy before uploading.")
+        logger.warning("Terms not accepted")
         return redirect(url_for("index"))
 
     if "fileUpload" not in request.files:
         flash("⚠️ No file selected")
+        logger.warning("No file uploaded")
         return redirect(url_for("index"))
 
     f = request.files["fileUpload"]
     if f.filename == "":
         flash("⚠️ No selected file")
+        logger.warning("Empty filename")
         return redirect(url_for("index"))
 
     filename = secure_filename(f.filename)
     temp_path = os.path.join("/tmp", filename)
     f.save(temp_path)
+    logger.info(f"File saved temporarily at {temp_path}")
 
     try:
-        # Run OCR/text extraction
         text = process_file_to_text(temp_path, join_strategy="smart")
+        logger.info("Text extraction successful")
 
         fmt = request.form.get("format", "docx")
-        if fmt == "txt":
-            flash("✅ File converted successfully! Your TXT is ready.")
-            return send_file(
-                io.BytesIO(text.encode("utf-8")),
-                as_attachment=True,
-                download_name=filename.rsplit(".", 1)[0] + ".txt",
-                mimetype="text/plain"
-            )
-        else:
-            buf = text_to_docx(text)
-            flash("✅ File converted successfully! Your DOCX is ready.")
-            return send_file(
-                buf,
-                as_attachment=True,
-                download_name=filename.rsplit(".", 1)[0] + ".docx",
-                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
-
-    except Exception as e:
-        flash(f"❌ Conversion failed: {e}")
-        return redirect(url_for("cancel"))
-
-# --- Main entrypoint ---
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
