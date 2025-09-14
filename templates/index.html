@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeamlessDocs — Upload</title>
+  <title>SeamlessDocs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -11,75 +11,51 @@
       margin: 0;
       padding: 0;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
       min-height: 100vh;
-      justify-content: space-between;
     }
     .container {
       background: #fff;
-      max-width: 700px;
-      margin: 3rem auto;
+      margin: 2rem;
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 600px;
+      width: 100%;
       text-align: center;
     }
     h1 {
-      font-size: 28px;
-      margin-bottom: 1rem;
       color: #111;
+      margin-bottom: 1rem;
     }
     p {
-      font-size: 16px;
-      color: #444;
-      margin-bottom: 1rem;
-      line-height: 1.5;
-    }
-    form {
-      margin-top: 1.5rem;
+      color: #555;
+      line-height: 1.6;
     }
     input[type="file"] {
       margin: 1rem 0;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
     }
-    .btn {
-      background-color: #007BFF;
-      color: white;
+    button {
+      background: #0077cc;
+      color: #fff;
       border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
+      padding: 0.7rem 1.4rem;
       border-radius: 6px;
-      display: inline-block;
-      text-decoration: none;
-      margin-top: 10px;
-    }
-    .btn:hover {
-      background-color: #0056b3;
-    }
-    .terms {
-      margin-top: 1.2rem;
-      font-size: 0.9rem;
-      color: #555;
-    }
-    .terms a {
-      color: #007BFF;
-      text-decoration: none;
       font-weight: bold;
+      cursor: pointer;
+      margin-top: 1rem;
     }
-    .terms a:hover {
-      text-decoration: underline;
+    button:hover {
+      background: #005fa3;
     }
     footer {
       margin-top: 2rem;
-      text-align: center;
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       color: #777;
     }
     footer a {
-      color: #007BFF;
+      color: #0077cc;
       text-decoration: none;
       font-weight: bold;
     }
@@ -91,42 +67,34 @@
 <body>
   <div class="container">
     <h1>SeamlessDocs</h1>
-    <p>
-      Upload your PDF or image files (JPG, PNG, TIFF)<br/>
-      and convert them into clean, editable documents (DOCX or TXT).
-    </p>
+    <p>Upload your PDF or image files (JPG, PNG, TIFF)<br/>and convert them into clean, editable documents (DOCX or TXT).</p>
 
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="flash">
-          {% for msg in messages %}
-            <p style="color: red;">{{ msg }}</p>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
+    <form action="/convert" method="post" enctype="multipart/form-data">
+      <label for="fileUpload">Choose a file:</label><br/>
+      <input type="file" id="fileUpload" name="fileUpload" required><br/>
 
-    <form action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
-      <input type="file" name="fileUpload" required/>
-      <div class="terms">
-        <label>
-          <input type="checkbox" name="terms" required>
-          I agree to the <a href="{{ url_for('terms') }}">Terms of Use</a> and
-          <a href="{{ url_for('privacy') }}">Privacy Policy</a>.
-        </label>
-      </div>
-      <button type="submit" class="btn">Upload & Convert</button>
+      <label for="format">Output format:</label><br/>
+      <select id="format" name="format">
+        <option value="docx">DOCX</option>
+        <option value="txt">TXT</option>
+      </select><br/><br/>
+
+      <label>
+        <input type="checkbox" name="terms" value="agree" required>
+        I agree to the terms of service and privacy policy.
+      </label><br/><br/>
+
+      <button type="submit">⬆ Upload & Convert</button>
     </form>
-  </div>
 
-  <footer>
-    <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
-    <p>
-      <a href="{{ url_for('index') }}">Home</a> |
-      <a href="{{ url_for('terms') }}">Terms of Use</a> |
-      <a href="{{ url_for('privacy') }}">Privacy Policy</a> |
-      <a href="{{ url_for('coffee') }}">Support Us</a>
-    </p>
-  </footer>
+    <footer>
+      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
+      <p>
+        <a href="{{ url_for('terms') }}">Terms of Use</a> |
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a> |
+        <a href="{{ url_for('coffee') }}">Support Us ☕</a>
+      </p>
+    </footer>
+  </div>
 </body>
 </html>
