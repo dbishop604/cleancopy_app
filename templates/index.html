@@ -18,30 +18,93 @@
     .container {
       background: #fff;
       margin: 2rem;
-      padding: 2rem;
+      padding: 2rem 2rem 3rem 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       max-width: 720px;
       width: 100%;
+    }
+    img.logo {
+      max-width: 140px;
+      margin-bottom: 1rem;
+    }
+    h1 {
+      margin: 0.25rem 0;
+      font-size: 2rem;
+      color: #111;
+    }
+    .tagline {
+      font-size: 1rem;
+      color: #444;
+      margin: 0.75rem 0 1.5rem;
       text-align: center;
     }
-    img.logo { max-width: 140px; margin-bottom: 1rem; }
-    h1 { font-size: 2rem; margin: 0.25rem 0; }
-    .tagline { font-size: 1rem; margin: 0.75rem 0 1.5rem; color: #444; }
-    .plan { font-size: 0.95rem; margin-bottom: 1.5rem; color: #555; }
-    .btn {
-      padding: 0.7rem 1.4rem;
-      border: none; border-radius: 6px;
-      background: #0077cc; color: #fff;
-      font-weight: bold; cursor: pointer;
+    .plan {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 1.5rem;
+      text-align: center;
     }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .agree { font-size: 14px; margin-top: 1rem; display: block; }
-    .notice { font-size: 0.9rem; margin-top: 1.5rem; color: #555; }
-    footer { margin-top: 2rem; font-size: 10.5px; color: #777; }
-    footer a { color: #0077cc; font-weight: bold; text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
-
+    .row {
+      margin: 1rem 0;
+    }
+    input[type="file"], select {
+      padding: 0.5rem;
+      font-size: 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.7rem 1.4rem;
+      border: none;
+      border-radius: 6px;
+      background: #FFD200; /* Yellow button */
+      color: #111;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .agree {
+      display: block;
+      margin: 1rem 0;
+      font-size: 14px;
+      color: #111;
+    }
+    .agree a {
+      color: #0077cc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .agree a:hover {
+      text-decoration: underline;
+    }
+    .notice {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 1.5rem;
+      text-align: center;
+      line-height: 1.4;
+    }
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 8pt; /* Smaller footer text */
+      color: #777;
+      line-height: 1.4;
+    }
+    footer a {
+      color: #0077cc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
     /* Loader overlay */
     #loaderOverlay {
       display: none;
@@ -49,30 +112,51 @@
       inset: 0;
       background: rgba(255,255,255,0.95);
       z-index: 1000;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       gap: 1rem;
     }
+    #loaderOverlay .msg {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #0077cc;
+    }
     .bar {
-      width: 70%; max-width: 400px; height: 20px;
-      background: #eee; border-radius: 999px;
-      overflow: hidden; position: relative;
+      position: relative;
+      width: 70%;
+      max-width: 400px;
+      height: 20px;
+      background: #eee;
+      border-radius: 6px;
+      overflow: hidden;
     }
     .bar span {
-      display: block; height: 100%; width: 0;
-      background: #0077cc; transition: width 0.3s ease;
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: #FFD200;
+      transition: width 0.3s ease;
     }
     .percent-label {
-      position: absolute; top: 50%; left: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 12px; font-weight: bold; color: #fff;
+      font-size: 14px;
+      font-weight: bold;
+      color: #111;
     }
-    .error { color: red; font-weight: bold; margin-top: 1rem; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
   <div class="container">
+    <!-- Logo -->
     <img src="/static/logo.png" alt="SeamlessDocs Logo" class="logo"/>
+
+    <!-- Heading -->
     <h1>SeamlessDocs</h1>
     <p class="tagline">
       Upload your <strong>PDF</strong> or image file (<strong>JPG, PNG, TIFF</strong>) 
@@ -80,25 +164,39 @@
     </p>
     <p class="plan"><strong>Free Plan:</strong> Up to 5MB conversions.</p>
 
-    <form id="uploadForm" enctype="multipart/form-data">
-      <input type="file" name="fileUpload" id="fileUpload" disabled><br><br>
-      <label for="format" style="font-size:14px;">Output format:</label>
-      <select name="format" id="format" disabled>
-        <option value="docx">DOCX</option>
-        <option value="txt">TXT</option>
-      </select><br><br>
+    <!-- Upload form -->
+    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
+      <div class="row">
+        <input type="file" name="fileUpload" id="fileUpload" disabled>
+      </div>
+      <div class="row">
+        <label for="format" style="font-size:14px;">Output format:</label>
+        <select name="format" id="format" disabled>
+          <option value="docx">DOCX</option>
+          <option value="txt">TXT</option>
+        </select>
+      </div>
       <label class="agree">
         <input type="checkbox" id="termsCheck" name="terms">
         By continuing, you agree to the
         <a href="{{ url_for('terms') }}">terms of service</a> and
         <a href="{{ url_for('privacy') }}">privacy policy</a>.
-      </label><br>
-      <button type="submit" id="uploadBtn" class="btn" disabled>Upload File</button>
+      </label>
+      <div class="row">
+        <button type="submit" id="uploadBtn" class="btn" disabled>Upload File</button>
+      </div>
     </form>
 
-    <p class="notice">Download your converted file within 8 hours — files are deleted after that time.</p>
-    <footer>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
-      <a href="{{ url_for('terms') }}">Terms of Use</a> |
+    <!-- Status -->
+    <p class="notice">
+      Download your converted file within 8 hours — files are automatically deleted after that time. 
+      We do not read, store, or share them.
+    </p>
+
+    <!-- Footer -->
+    <footer>
+      © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
+      <a href="{{ url_for('terms') }}">Terms of Service</a> |
       <a href="{{ url_for('privacy') }}">Privacy Policy</a>
     </footer>
   </div>
@@ -106,9 +204,12 @@
   <!-- Loader overlay -->
   <div id="loaderOverlay">
     <div class="msg" id="loaderMsg">Processing your file… please wait.</div>
-    <div class="bar"><span id="progressBar"></span><div class="percent-label" id="percentLabel">0%</div></div>
-    <a id="downloadLink" class="btn" style="display:none;" download>⬇ Download File</a>
-    <div class="error" id="errorMsg" style="display:none;"></div>
+    <div class="bar">
+      <span id="progressBar"></span>
+      <div class="percent-label" id="percentLabel">0%</div>
+    </div>
+    <a id="downloadLink" class="btn hidden" download>⬇ Download File</a>
+    <div class="error hidden" id="errorMsg"></div>
   </div>
 
   <script>
@@ -120,67 +221,75 @@
     const overlay = document.getElementById("loaderOverlay");
     const progressBar = document.getElementById("progressBar");
     const percentLabel = document.getElementById("percentLabel");
-    const loaderMsg = document.getElementById("loaderMsg");
     const downloadLink = document.getElementById("downloadLink");
     const errorMsg = document.getElementById("errorMsg");
 
-    termsCheck.addEventListener("change", () => {
-      const enabled = termsCheck.checked;
+    termsCheck.addEventListener("change", function() {
+      const enabled = this.checked;
       fileUpload.disabled = !enabled;
       formatSelect.disabled = !enabled;
       uploadBtn.disabled = !enabled;
     });
 
-    form.addEventListener("submit", async (e) => {
+    form.addEventListener("submit", async function(e) {
       e.preventDefault();
+
       overlay.style.display = "flex";
       progressBar.style.width = "0%";
       percentLabel.textContent = "0%";
       loaderMsg.textContent = "Processing your file… please wait.";
-      downloadLink.style.display = "none";
-      errorMsg.style.display = "none";
+      downloadLink.classList.add("hidden");
+      errorMsg.classList.add("hidden");
 
       const formData = new FormData(form);
+      const xhr = new XMLHttpRequest();
+
+      xhr.open("POST", "{{ url_for('convert') }}", true);
+      xhr.responseType = "blob";
+
+      xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = percent + "%";
+          percentLabel.textContent = percent + "%";
+        }
+      };
+
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          loaderMsg.textContent = "✅ Conversion complete!";
+          progressBar.style.width = "100%";
+          percentLabel.textContent = "100%";
+          const blob = xhr.response;
+          const url = window.URL.createObjectURL(blob);
+          downloadLink.href = url;
+          downloadLink.download = fileUpload.files[0].name.replace(/\.[^.]+$/, "") + "." + formatSelect.value;
+          downloadLink.classList.remove("hidden");
+        } else {
+          loaderMsg.textContent = "❌ Conversion failed.";
+          errorMsg.textContent = "Server error: " + xhr.status + " — " + xhr.statusText;
+          errorMsg.classList.remove("hidden");
+        }
+      };
+
+      xhr.onerror = function() {
+        clearInterval(fakeProgress);
+        loaderMsg.textContent = "❌ Network error. Please try again.";
+        errorMsg.classList.remove("hidden");
+      };
+
+      xhr.send(formData);
+
+      // Simulated progress bar
       let progress = 0;
       const fakeProgress = setInterval(() => {
         if (progress < 95) {
-          progress += Math.floor(Math.random() * 5) + 2;
+          progress += Math.floor(Math.random() * 8) + 2;
           if (progress > 95) progress = 95;
           progressBar.style.width = progress + "%";
           percentLabel.textContent = progress + "%";
         }
-      }, 600);
-
-      try {
-        const response = await fetch("{{ url_for('convert') }}", {
-          method: "POST", body: formData
-        });
-        clearInterval(fakeProgress);
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.success) {
-            progressBar.style.width = "100%";
-            percentLabel.textContent = "100%";
-            loaderMsg.textContent = "✅ Conversion complete!";
-            downloadLink.href = data.download_url;
-            downloadLink.style.display = "inline-block";
-          } else {
-            loaderMsg.textContent = "❌ Conversion failed.";
-            errorMsg.textContent = data.message;
-            errorMsg.style.display = "block";
-          }
-        } else {
-          loaderMsg.textContent = "❌ Conversion failed.";
-          errorMsg.textContent = "Server error.";
-          errorMsg.style.display = "block";
-        }
-      } catch (err) {
-        clearInterval(fakeProgress);
-        loaderMsg.textContent = "❌ Server error.";
-        errorMsg.textContent = err.message;
-        errorMsg.style.display = "block";
-      }
+      }, 400);
     });
   </script>
 </body>
