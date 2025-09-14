@@ -14,7 +14,7 @@ services:
       name: data
       mountPath: /data
       sizeGB: 1
-    buildCommand: ""
+    buildCommand: ""  # Leave blank – uses Dockerfile
 
   - type: worker
     name: seamlessdocs-worker
@@ -28,5 +28,5 @@ services:
       name: data
       mountPath: /data
       sizeGB: 1
-    buildCommand: ""
-    startCommand: "python worker.py"
+    buildCommand: ""  # Leave blank – uses Dockerfile
+    # ❌ REMOVE startCommand for Docker
