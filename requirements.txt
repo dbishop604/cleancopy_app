@@ -1,5 +1,7 @@
-PyPDF2
-pdf2image
-pytesseract
-Pillow
+flask
+gunicorn
 python-docx
+pytesseract
+pdf2image
+Pillow
+PyPDF2
