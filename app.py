@@ -106,4 +106,18 @@ def status(task_id):
 
 @app.route("/download/<task_id>")
 def download(task_id):
-    outp
+    output_path = os.path.join(OUTPUT_FOLDER, f"{task_id}.docx")
+    if os.path.exists(output_path):
+        return send_file(output_path, as_attachment=True)
+    else:
+        return "File not found", 404
+
+
+@app.route("/healthz")
+def healthz():
+    return "OK", 200
+
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
