@@ -1,3 +1,47 @@
+import os
+import io
+from flask import (
+    Flask, render_template, request, redirect,
+    url_for, flash, send_file
+)
+from werkzeug.utils import secure_filename
+from processor import process_file_to_text, text_to_docx
+
+# --- Flask setup ---
+app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "devkey")
+
+UPLOAD_FOLDER = "uploads"
+CONVERTED_FOLDER = "converted"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(CONVERTED_FOLDER, exist_ok=True)
+
+# --- Routes ---
+
+@app.route("/")
+def index():
+    return render_template("index.html", plan="free")
+
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+@app.route("/success")
+def success():
+    return render_template("success.html")
+
+@app.route("/cancel")
+def cancel():
+    return render_template("cancel.html")
+
+@app.route("/coffee")
+def coffee():
+    return render_template("coffee.html")
+
 @app.route("/convert", methods=["POST"])
 def convert():
     if "terms" not in request.form:
@@ -15,7 +59,6 @@ def convert():
 
     filename = secure_filename(f.filename)
     base_name = filename.rsplit(".", 1)[0]
-
     temp_path = os.path.join(UPLOAD_FOLDER, filename)
     f.save(temp_path)
 
@@ -35,9 +78,21 @@ def convert():
             with open(out_path, "wb") as out:
                 out.write(buf.getbuffer())
 
-        # redirect to success page with filename
         return redirect(url_for("success", file=out_name))
 
     except Exception as e:
         flash(f"❌ Conversion failed: {e}")
         return redirect(url_for("cancel"))
+
+@app.route("/download/<filename>")
+def download(filename):
+    path = os.path.join(CONVERTED_FOLDER, filename)
+    if not os.path.exists(path):
+        flash("⚠️ File not found or expired.")
+        return redirect(url_for("index"))
+    return send_file(path, as_attachment=True)
+
+# --- Main entrypoint ---
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
