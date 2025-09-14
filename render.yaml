@@ -8,7 +8,7 @@ services:
       - key: PORT
         value: 10000
       - key: REDIS_URL
-        sync: false   # Filled with your Key Value (Redis) instance
+        sync: false
     healthCheckPath: /healthz
     disk:
       name: data
