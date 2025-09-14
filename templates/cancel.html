@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Subscription Canceled — CleanCopy OCR</title>
+  <title>Subscription Canceled — SeamlessDocs Online</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,65 +12,47 @@
       padding: 0;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       min-height: 100vh;
     }
     .container {
       background: #fff;
+      margin: 2rem;
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 500px;
+      max-width: 600px;
       width: 100%;
-      text-align: center;
     }
     h1 {
+      text-align: center;
+      color: #111;
       margin-bottom: 1rem;
-      color: #900;
     }
-    p {
-      color: #555;
-      margin-bottom: 1.5rem;
-    }
-    a.button {
-      display: inline-block;
-      background: #007bff;
-      color: #fff;
-      padding: 0.75rem 1.25rem;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    a.button:hover {
-      background: #0056b3;
-    }
+    p { color: #555; line-height: 1.6; text-align: center; }
     footer {
       margin-top: 2rem;
+      text-align: center;
       font-size: 0.8rem;
-      color: #555;
+      color: #777;
     }
-    footer a {
-      color: #007bff;
-      text-decoration: none;
-    }
-    footer a:hover {
-      text-decoration: underline;
-    }
+    footer p { margin: 0.3rem 0; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>❌ Subscription Canceled</h1>
-    <p>Your upgrade was canceled. You are still on the <strong>Free Plan</strong>, which allows uploads up to 5MB.  
-    To convert larger files (up to 50MB), you can upgrade anytime.</p>
-    <a href="{{ url_for('index') }}" class="button">Back to Upload</a>
+    <h1>Subscription Canceled</h1>
+    <p>Your Pro upgrade was canceled. You are now on the <strong>Free Plan</strong> with a 5MB file upload limit.</p>
+    <p>You can upgrade anytime to unlock uploads up to 50MB.</p>
+
+    <p><a href="{{ url_for('index') }}">⬅ Back to Upload Page</a></p>
 
     <footer>
-      <small>
-        © Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute. |
-        <a href="terms.html" target="_blank">Terms</a> |
-        <a href="privacy.html" target="_blank">Privacy</a>
-      </small>
+      <p>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</p>
+      <p>
+        <a href="{{ url_for('terms') }}">Terms of Use</a><br>
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      </p>
     </footer>
   </div>
 </body>
