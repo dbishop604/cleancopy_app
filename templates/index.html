@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Home — By.Storytellers</title>
+  <title>CleanCopy OCR — Upload</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <style>
     body {
@@ -14,12 +14,13 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      color: #555;
     }
     main {
       flex: 1;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       padding: 2rem;
     }
     .container {
@@ -29,15 +30,48 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       max-width: 800px;
       width: 100%;
-      text-align: center;
     }
-    h2 {
+    h1 {
+      text-align: center;
       margin-bottom: 1rem;
       color: #111;
     }
+    h2 {
+      margin-top: 1.5rem;
+      color: #111;
+    }
+    .plan-box {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #f0f0f0;
+      border-radius: 6px;
+    }
     p {
+      font-size: 0.95em;
       color: #555;
       line-height: 1.6;
+    }
+    .notice {
+      margin-top: 1rem;
+      font-size: 0.9em;
+      color: #555;
+    }
+    .btn {
+      display: inline-block;
+      margin: 0.3rem 0.3rem 0.3rem 0;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-primary {
+      background-color: #0077cc;
+      color: white;
+    }
+    .btn-secondary {
+      background-color: #eee;
+      color: #333;
     }
   </style>
 </head>
@@ -46,21 +80,21 @@
 
   <main>
     <div class="container">
-      <h2>Welcome to By.Storytellers</h2>
-      <p>
-        So much is changing in our world — jobs are shifting, tech is expanding, industries are evolving,
-        and AI is accelerating everything. Behind all that are real people with real stories.
-      </p>
-      <p>
-        By.Storytellers is about shining a light on creators, thinkers, and everyday heroes. We share the
-        pivots, passions, and purpose behind their work — and build a community that lifts each other up.
-      </p>
-      <p>
-        Explore the site, listen to inspiring voices, and be part of the story.
-      </p>
-    </div>
-  </main>
+      <h1>CleanCopy OCR</h1>
 
-  {% include 'footer.html' %}
-</body>
-</html>
+      {% if user and plan == "paid" %}
+        <div class="plan-box">
+          <strong>Logged in as:</strong> {{ user.id }} <br>
+          <strong>Plan:</strong> Pro (50MB uploads) <br>
+          <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+          <a href="{{ url_for('billing_portal') }}" class="btn btn-primary">Manage Billing</a>
+        </div>
+      {% else %}
+        <div class="plan-box">
+          <strong>Plan:</strong> Free (5MB uploads) <br>
+          <a href="{{ url_for('login') }}" class="btn btn-primary">Upgrade to Pro</a>
+        </div>
+      {% endif %}
+
+      <h2>Upload Your File</h2>
+      <form id="uploadForm" action="{{ url_for('convert')_
