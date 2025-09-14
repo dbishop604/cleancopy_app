@@ -1,54 +1,41 @@
 import os
 import pytesseract
-from PIL import Image
 from pdf2image import convert_from_path
 from docx import Document
+from PIL import Image
 
-def process_file_to_text(filepath, join_strategy="smart"):
+UPLOAD_FOLDER = "/data/uploads"
+OUTPUT_FOLDER = "/data/outputs"
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+
+
+def process_file(input_path: str, output_path: str):
     """
-    Convert a PDF or image file to extracted text using Tesseract OCR.
-    Supports: PDF, JPG, PNG, TIFF.
+    Convert an uploaded PDF or image into a clean DOCX with OCR.
     """
-    text = ""
+    text_chunks = []
 
-    ext = os.path.splitext(filepath)[1].lower()
-
-    if ext == ".pdf":
-        # Convert each page to image and OCR
-        pages = convert_from_path(filepath)
-        chunks = []
+    # Handle PDF
+    if input_path.lower().endswith(".pdf"):
+        pages = convert_from_path(input_path)
         for i, page in enumerate(pages):
-            temp_img = f"/tmp/page_{i}.png"
-            page.save(temp_img, "PNG")
-            page_text = pytesseract.image_to_string(Image.open(temp_img))
-            chunks.append(page_text.strip())
-            os.remove(temp_img)
+            text = pytesseract.image_to_string(page)
+            text_chunks.append(text)
 
-        if join_strategy == "smart":
-            text = "\n\n".join(chunks)
-        else:
-            text = "\n".join(chunks)
-
-    elif ext in [".jpg", ".jpeg", ".png", ".tif", ".tiff"]:
-        img = Image.open(filepath)
-        text = pytesseract.image_to_string(img)
-
+    # Handle image files (JPG, PNG, TIFF)
     else:
-        raise ValueError("Unsupported file type. Please upload PDF, JPG, PNG, or TIFF.")
+        img = Image.open(input_path)
+        text = pytesseract.image_to_string(img)
+        text_chunks.append(text)
 
-    return text.strip()
-
-
-def text_to_docx(text, output_path=None):
-    """
-    Convert extracted text into a DOCX file.
-    Returns a BytesIO if output_path is None, otherwise writes to disk.
-    """
+    # Write to DOCX
     doc = Document()
-    for line in text.splitlines():
-        doc.add_paragraph(line)
+    for chunk in text_chunks:
+        doc.add_paragraph(chunk.strip())
+        doc.add_paragraph("")  # blank line between pages
 
-    if output_path:
-        doc.save(output_path)
-        return output_path
-    else
+    doc.save(output_path)
+
+    return output_path
