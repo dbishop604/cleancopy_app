@@ -1,7 +1,8 @@
 flask
-gunicorn
 redis
 rq
+gunicorn
 pytesseract
 pdf2image
 python-docx
+Pillow
