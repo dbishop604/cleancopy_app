@@ -8,10 +8,7 @@ services:
       - key: PORT
         value: 10000
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: seamlessdocs
-          property: connectionString
+        value: redis://red-d337uoqdbo4c73avqvng:6379
     healthCheckPath: /healthz
     disk:
       name: data
@@ -26,10 +23,7 @@ services:
     autoDeploy: true
     envVars:
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: seamlessdocs
-          property: connectionString
+        value: redis://red-d337uoqdbo4c73avqvng:6379
     disk:
       name: data
       mountPath: /data
