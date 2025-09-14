@@ -3,57 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Terms of Use & Privacy Policy — SeamlessDocs Online</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-    .container {
-      background: #fff;
-      margin: 2rem;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 800px;
-      width: 100%;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 1rem;
-      color: #111;
-    }
-    h2 {
-      margin-top: 1.5rem;
-      color: #111;
-    }
-    p {
-      color: #555;
-      line-height: 1.6;
-    }
-    footer {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 0.8rem;
-      color: #777;
-    }
-    footer p { margin: 0.3rem 0; }
-  </style>
+  <title>Terms of Use — SeamlessDocs</title>
 </head>
 <body>
-  <div class="container">
-    <h1>Terms of Use & Privacy Policy</h1>
+  {% include 'header.html' %}
+  <main style="padding:2rem;max-width:800px;margin:auto;">
+    <h1>Terms of Use</h1>
     <p><strong>Last Updated:</strong> [Insert Date]</p>
 
     <h2>1. File Handling</h2>
     <p>
-      Files you upload are processed automatically by our system. We do not read, review, or access your files.
+      Files you upload are processed automatically by SeamlessDocs. We do not read, review, or access your files.
       All uploaded files are stored temporarily and are automatically deleted from our servers within eight (8) hours.
     </p>
 
@@ -65,11 +25,11 @@
 
     <h2>3. Indemnification & Creative Independence</h2>
     <p>
-      By uploading content, you agree to indemnify and hold harmless the site owner(s) from any claims, disputes, or legal actions
-      arising from the content you upload. You also acknowledge and agree that the site owner(s) may independently create, publish,
+      By uploading content, you agree to indemnify and hold harmless SeamlessDocs from any claims, disputes, or legal actions
+      arising from the content you upload. You also acknowledge and agree that SeamlessDocs may independently create, publish,
       or distribute material that is similar to or overlaps with your uploaded content in subject matter, theme, or expression.
       Any such similarity shall not be construed as infringement, plagiarism, or misappropriation. You expressly waive any claims
-      against the site owner(s) related to such independent creations.
+      against SeamlessDocs related to such independent creations.
     </p>
 
     <h2>4. Privacy</h2>
@@ -81,12 +41,10 @@
 
     <h2>5. Limitation of Liability</h2>
     <p>
-      This service is provided “as-is” without warranties of any kind. The site owner(s) shall not be liable for any damages,
+      This service is provided “as-is” without warranties of any kind. SeamlessDocs shall not be liable for any damages,
       losses, or claims resulting from the use or inability to use this service.
     </p>
-
-    <footer>
-      <p>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</p>
-      <p>
-        <a href="{{ url_for('terms') }}">Terms of Use</a><br>
-        <a href="{{ url_for('p_
+  </main>
+  {% include 'footer.html' %}
+</body>
+</html>
