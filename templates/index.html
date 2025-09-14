@@ -41,12 +41,13 @@
     }
     .btn {
       display: inline-block;
-      margin: 0.3rem 0.3rem 0.3rem 0;
+      margin: 0.3rem 0.6rem 0.3rem 0;
       padding: 0.6rem 1.2rem;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       font-weight: bold;
+      text-decoration: none;
     }
     .btn-primary {
       background-color: #0077cc;
@@ -101,7 +102,10 @@
   <div class="container">
     <h1>SeamlessDocs</h1>
     <p><strong>Free Plan:</strong> Up to 5MB conversions.</p>
-    <p>For files over 5MB up to 50MB, <a href="#" class="btn-primary" style="padding:0.4rem 1rem;">Upgrade to Pro</a></p>
+    <p style="margin-bottom: 1.5rem;">
+      For files over 5MB up to 50MB, 
+      <a href="#" class="btn btn-primary">Upgrade to Pro</a>
+    </p>
 
     <h2>Upload Your File</h2>
     <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
@@ -111,7 +115,7 @@
 
       <!-- Terms modal trigger -->
       <label>
-        <input type="checkbox" id="termsCheck">
+        <input type="checkbox" id="termsCheck" disabled>
         I have read and agree to the <a href="#" id="openTerms">terms of use and privacy policy</a>.
       </label>
       <br><br>
@@ -125,7 +129,7 @@
       <br><br>
 
       <!-- Upload button -->
-      <button type="submit" id="uploadBtn" disabled>Upload File</button>
+      <button type="submit" id="uploadBtn" class="btn btn-primary" disabled>Upload File</button>
     </form>
 
     <p class="notice">
@@ -133,8 +137,7 @@
     </p>
 
     <footer>
-      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
-      <p>
+      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
         <a href="{{ url_for('terms') }}">Terms of Use</a> | 
         <a href="{{ url_for('privacy') }}">Privacy Policy</a>
       </p>
@@ -147,20 +150,16 @@
       <span class="close" id="closeModal">&times;</span>
       <h2>Terms of Use & Privacy Policy</h2>
       <p>
-        [Insert full Terms of Use and Privacy Policy content here. This box scrolls if the text is long.]
-      </p>
-    </div>
-  </div>
+        Welcome to SeamlessDocs. By using this service, you agree to the following terms and privacy policy.<br><br>
+        Files you upload are processed automatically and deleted within 8 hours. We do not read, review, or share your content.<br><br>
+        You agree not to upload illegal, harmful, or copyrighted materials without permission.<br><br>
+        <em>--- sample filler text to enable scrolling ---</em><br><br>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed ut orci vel libero viverra condimentum. 
+        Curabitur id lectus nec libero faucibus vulputate. Pellentesque habitant morbi tristique senectus 
+        et netus et malesuada fames ac turpis egestas. Integer fermentum turpis et finibus porttitor. 
+        Suspendisse potenti. Sed vel sem ut nulla volutpat congue. Donec maximus, nunc at vehicula feugiat, 
+        justo eros elementum odio, non sagittis libero lorem ut nulla. Fusce sit amet leo vitae tortor fermentum 
+        ullamcorper nec id neque. Donec vitae urna at sapien convallis aliquam non vitae sem. Mauris consequat 
+        bibendum ligu
 
-  <script>
-    const termsCheck = document.getElementById('termsCheck');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const fileUpload = document.getElementById('fileUpload');
-    const formatSelect = document.getElementById('format');
-
-    termsCheck.addEventListener('change', function() {
-      const enabled = this.checked;
-      uploadBtn.disabled = !enabled;
-      fileUpload.disabled = !enabled;
-      formatSelect.disabled = !enabled;
-    });
+        
