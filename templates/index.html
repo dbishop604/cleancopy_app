@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login — CleanCopy OCR</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CleanCopy OCR — Upload</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,101 +12,137 @@
       padding: 0;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       min-height: 100vh;
+      color: #555; /* 60% black text */
     }
     .container {
       background: #fff;
+      margin: 2rem;
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 400px;
+      max-width: 600px;
       width: 100%;
     }
     h1 {
       text-align: center;
       margin-bottom: 1rem;
+      color: #111;
     }
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+    h2 {
+      margin-top: 1.5rem;
+      color: #111;
     }
-    label {
+    .plan-box {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #f0f0f0;
+      border-radius: 6px;
+    }
+    .notice {
+      font-size: 0.9em;
+      color: #555;
+      margin: 0.5rem 0 1rem;
+    }
+    .btn {
+      display: inline-block;
+      margin: 0.3rem 0.3rem 0.3rem 0;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
       font-weight: bold;
     }
-    input {
-      padding: 0.5rem;
-      border: 1px solid #ddd;
-      border-radius: 6px;
+    .btn-primary {
+      background-color: #0077cc;
+      color: white;
     }
-    button {
-      background: #007bff;
-      color: #fff;
-      border: none;
-      padding: 0.75rem;
-      font-size: 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    .flash {
-      background: #ffe5e5;
-      color: #900;
-      padding: 0.5rem;
-      margin-bottom: 1rem;
-      border-radius: 4px;
-      text-align: center;
+    .btn-secondary {
+      background-color: #eee;
+      color: #333;
     }
     footer {
       margin-top: 2rem;
       text-align: center;
       font-size: 0.8rem;
-      color: #555;
+      color: #777;
     }
-    footer a {
-      color: #007bff;
-      text-decoration: none;
-    }
-    footer a:hover {
-      text-decoration: underline;
-    }
+    a { color: #0077cc; text-decoration: none; }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Login to CleanCopy</h1>
+    <h1>CleanCopy OCR</h1>
 
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-      <div class="flash">
-        {% for m in messages %}
-          <div>{{ m }}</div>
-        {% endfor %}
+    {% if user and plan == "paid" %}
+      <div class="plan-box">
+        <strong>Logged in as:</strong> {{ user.id }} <br>
+        <strong>Plan:</strong> Pro (50MB uploads) <br>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+        <a href="{{ url_for('billing_portal') }}" class="btn btn-primary">Manage Billing</a>
+      </div>
+    {% else %}
+      <div class="plan-box">
+        <strong>Plan:</strong> Free (5MB uploads)  
+        <br>
+        <a href="{{ url_for('login') }}" class="btn btn-primary">Upgrade to Pro</a>
       </div>
     {% endif %}
-    {% endwith %}
 
-    <form method="POST">
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" required>
+    <h2>Upload Your File</h2>
 
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required>
+    <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
+      <!-- File upload input -->
+      <input type="file" name="file" id="fileUpload" disabled>
+      <br><br>
 
-      <button type="submit">Login</button>
+      <!-- Reassurance line -->
+      <p class="notice">
+        Your files are automatically deleted after 8 hours. We do not read, store, or share them.
+      </p>
+
+      <!-- Terms checkbox -->
+      <label>
+        <input type="checkbox" id="termsCheck">
+        I have read and agree to the <a href="{{ url_for('terms') }}" target="_blank">Terms of Use</a> and 
+        <a href="{{ url_for('privacy') }}" target="_blank">Privacy Policy</a>.
+      </label>
+      <br><br>
+
+      <!-- Format choice -->
+      <label for="format">Output format:</label>
+      <select name="format" id="format" disabled>
+        <option value="docx">DOCX</option>
+        <option value="txt">TXT</option>
+      </select>
+      <br><br>
+
+      <!-- Upload button -->
+      <button type="submit" id="uploadBtn" disabled>Upload File</button>
     </form>
 
     <footer>
-      <small>
-        © Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute. |
-        <a href="terms.html" target="_blank">Terms of Use</a> |
-        <a href="privacy.html" target="_blank">Privacy Policy</a>
-      </small>
+      <p>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute. |
+         <a href="{{ url_for('terms') }}">Terms of Use</a> | 
+         <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      </p>
     </footer>
   </div>
+
+  <script>
+    const termsCheck = document.getElementById('termsCheck');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileUpload = document.getElementById('fileUpload');
+    const formatSelect = document.getElementById('format');
+
+    termsCheck.addEventListener('change', function() {
+      const enabled = this.checked;
+      uploadBtn.disabled = !enabled;
+      fileUpload.disabled = !enabled;
+      formatSelect.disabled = !enabled;
+    });
+  </script>
 </body>
 </html>
