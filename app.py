@@ -13,8 +13,11 @@ from processor import process_file_to_text, text_to_docx
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "devkey")
 
-UPLOAD_FOLDER = "uploads"
-CONVERTED_FOLDER = "converted"
+# Use shared disk mounted at /app/data
+BASE_FOLDER = "/app/data"
+UPLOAD_FOLDER = os.path.join(BASE_FOLDER, "uploads")
+CONVERTED_FOLDER = os.path.join(BASE_FOLDER, "converted")
+
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
@@ -68,31 +71,40 @@ def convert():
         return redirect(url_for("index"))
 
     filename = secure_filename(f.filename)
-    temp_path = os.path.join("/tmp", filename)
-    f.save(temp_path)
+    upload_path = os.path.join(UPLOAD_FOLDER, filename)
+    f.save(upload_path)
 
     try:
-        text = process_file_to_text(temp_path, join_strategy="smart")
+        # Extract text
+        text = process_file_to_text(upload_path, join_strategy="smart")
 
+        # Generate output file
         fmt = request.form.get("format", "docx")
         if fmt == "txt":
-            return send_file(
-                io.BytesIO(text.encode("utf-8")),
-                as_attachment=True,
-                download_name=filename.rsplit(".", 1)[0] + ".txt",
-                mimetype="text/plain"
-            )
+            output_filename = filename.rsplit(".", 1)[0] + ".txt"
+            output_path = os.path.join(CONVERTED_FOLDER, output_filename)
+            with open(output_path, "w", encoding="utf-8") as out_f:
+                out_f.write(text)
         else:
+            output_filename = filename.rsplit(".", 1)[0] + ".docx"
+            output_path = os.path.join(CONVERTED_FOLDER, output_filename)
             buf = text_to_docx(text)
-            return send_file(
-                buf,
-                as_attachment=True,
-                download_name=filename.rsplit(".", 1)[0] + ".docx",
-                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
+            with open(output_path, "wb") as out_f:
+                out_f.write(buf.getvalue())
+
+        # Build download link
+        download_url = url_for("download_file", filename=output_filename)
+        return render_template("success.html", download_url=download_url)
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route("/download/<filename>")
+def download_file(filename):
+    path = os.path.join(CONVERTED_FOLDER, filename)
+    if not os.path.exists(path):
+        return "File not found", 404
+    return send_file(path, as_attachment=True)
 
 # --- Health check for Render ---
 @app.route("/healthz")
