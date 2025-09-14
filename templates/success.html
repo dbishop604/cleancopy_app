@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Subscription Success — SeamlessDocs Online</title>
+  <title>Subscription Successful — SeamlessDocs Online</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -23,21 +23,17 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       max-width: 600px;
       width: 100%;
-      text-align: center;
     }
     h1 {
+      text-align: center;
       color: #111;
       margin-bottom: 1rem;
     }
-    p {
-      color: #555;
-      font-size: 1em;
-      line-height: 1.6;
-    }
+    p { color: #555; line-height: 1.6; text-align: center; }
     footer {
       margin-top: 2rem;
       text-align: center;
-      font-size: 0.8em;
+      font-size: 0.8rem;
       color: #777;
     }
     footer p { margin: 0.3rem 0; }
@@ -45,15 +41,17 @@
 </head>
 <body>
   <div class="container">
-    <h1>🎉 Subscription Successful!</h1>
-    <p>You are now on the <strong>{{ plan|capitalize }}</strong> plan. You can upload files up to 50MB.</p>
-    <p><a href="{{ url_for('index') }}">Go back to Upload Page</a></p>
+    <h1>Subscription Successful 🎉</h1>
+    <p>Thank you for upgrading to the <strong>Pro Plan</strong>!  
+    You can now upload files up to 50MB.</p>
+
+    <p><a href="{{ url_for('index') }}">⬅ Back to Upload Page</a></p>
 
     <footer>
       <p>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</p>
       <p>
-        <a href="{{ url_for('terms') }}" target="_blank">Terms of Use</a><br>
-        <a href="{{ url_for('privacy') }}" target="_blank">Privacy Policy</a>
+        <a href="{{ url_for('terms') }}">Terms of Use</a><br>
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
       </p>
     </footer>
   </div>
