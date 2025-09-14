@@ -44,9 +44,7 @@
       color: #555;
       margin-bottom: 1.5rem;
     }
-    .row {
-      margin: 1rem 0;
-    }
+    .row { margin: 1rem 0; }
     input[type="file"], select {
       padding: 0.5rem;
       font-size: 14px;
@@ -79,7 +77,6 @@
       text-decoration: none;
       font-weight: bold;
     }
-    .agree a:hover { text-decoration: underline; }
     .notice {
       font-size: 0.9rem;
       color: #555;
@@ -88,7 +85,7 @@
     }
     footer {
       margin-top: 2rem;
-      font-size: 10.5px; /* ~8pt */
+      font-size: 10.5px;
       color: #777;
       line-height: 1.4;
     }
@@ -111,6 +108,7 @@
       align-items: center;
       justify-content: center;
       gap: 1.5rem;
+      text-align: center;
     }
     #loaderOverlay .msg {
       font-size: 1.2rem;
@@ -138,6 +136,7 @@
       50% { transform: translateX(50%); }
       100% { transform: translateX(120%); }
     }
+    .error { color: red; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -149,7 +148,7 @@
     </p>
     <p class="plan"><strong>Free Plan:</strong> Up to 5MB conversions.</p>
 
-    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
+    <form id="uploadForm">
       <div class="row">
         <input type="file" name="fileUpload" id="fileUpload" disabled>
       </div>
@@ -186,6 +185,7 @@
   <div id="loaderOverlay">
     <div class="msg">Processing your file… please wait.</div>
     <div class="progress"><div class="progress-bar"></div></div>
+    <div id="errorMsg" class="error"></div>
   </div>
 
   <script>
@@ -195,6 +195,8 @@
     const uploadBtn = document.getElementById("uploadBtn");
     const form = document.getElementById("uploadForm");
     const overlay = document.getElementById("loaderOverlay");
+    const msg = document.querySelector("#loaderOverlay .msg");
+    const errorMsg = document.getElementById("errorMsg");
 
     termsCheck.addEventListener("change", function() {
       const enabled = this.checked;
@@ -203,9 +205,13 @@
       uploadBtn.disabled = !enabled;
     });
 
-    form.addEventListener("submit", function() {
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+
+      if (!fileUpload.files.length) {
+        alert("Please select a file.");
+        return;
+      }
+
       overlay.style.display = "flex";
-    });
-  </script>
-</body>
-</html>
+      msg.tex
