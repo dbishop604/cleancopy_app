@@ -24,10 +24,25 @@
       max-width: 800px;
       width: 100%;
     }
-    h1 { text-align: center; margin-bottom: 1rem; color: #111; }
-    h2 { margin-top: 1.5rem; color: #111; }
-    p { color: #555; line-height: 1.6; }
-    footer { margin-top: 2rem; text-align: center; font-size: 0.8rem; color: #777; }
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #111;
+    }
+    h2 {
+      margin-top: 1.5rem;
+      color: #111;
+    }
+    p {
+      color: #555;
+      line-height: 1.6;
+    }
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #777;
+    }
     footer p { margin: 0.3rem 0; }
     a { color: #0077cc; text-decoration: none; font-weight: bold; }
     a:hover { text-decoration: underline; }
@@ -50,6 +65,35 @@
       to use the files, and you agree not to upload materials that infringe upon the intellectual property rights of others.
     </p>
 
-    <h2>3. Indemnification & Creative Independence</h2>
+    <h2>3. Creative Independence</h2>
     <p>
-      By uploading content, you agree to indemnify and hold harmless the site owner
+      By uploading content, you acknowledge and agree that SeamlessDocs may independently develop, publish,
+      or distribute material that is similar to or overlaps with your uploaded content in subject matter, theme, or expression.
+      Any such similarity shall not be construed as infringement, plagiarism, or misappropriation. You expressly waive any claims
+      against SeamlessDocs related to such independent creations.
+    </p>
+
+    <h2>4. Privacy</h2>
+    <p>
+      We respect your privacy. We do not sell, rent, or share your personal information. We do not collect or use your files for
+      marketing, resale, or distribution. Your email address and account details are used solely for authentication and subscription
+      management.
+    </p>
+
+    <h2>5. Limitation of Liability</h2>
+    <p>
+      This service is provided “as-is” without warranties of any kind. SeamlessDocs shall not be liable for any damages,
+      losses, or claims resulting from the use or inability to use this service.
+    </p>
+
+    <footer>
+      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
+      <p>
+        <a href="{{ url_for('index') }}">Home</a> |
+        <a href="{{ url_for('terms') }}">Terms of Use</a> |
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
