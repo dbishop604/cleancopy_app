@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeamlessDocs — Upload</title>
+  <title>SeamlessDocs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -21,22 +21,23 @@
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 800px;
+      max-width: 700px;
       width: 100%;
+      text-align: center;
     }
     h1 {
-      text-align: center;
       margin-bottom: 1rem;
       color: #111;
     }
     p {
-      font-size: 0.95em;
       color: #555;
       line-height: 1.6;
+      margin: 1rem 0;
+      font-size: 1rem;
     }
     .btn {
       display: inline-block;
-      margin: 0.3rem;
+      margin: 0.3rem 0.3rem 0.3rem 0;
       padding: 0.6rem 1.2rem;
       background-color: #0077cc;
       color: white;
@@ -47,7 +48,11 @@
       font-weight: bold;
     }
     .btn-primary {
-      background-color: #FFD200; /* Yellow button */
+      background-color: #0077cc;
+      color: white;
+    }
+    .btn-coffee {
+      background-color: #ffcc00; /* yellow button */
       color: #111;
     }
     footer {
@@ -58,11 +63,13 @@
       line-height: 1.6;
     }
     footer p { margin: 0.3rem 0; }
-    footer a {
+    a {
       color: #0077cc;
-      font-weight: bold;
       text-decoration: none;
+      font-weight: bold;
     }
+    a:hover { text-decoration: underline; }
+    footer a { color: #0077cc; font-weight: bold; text-decoration: none; }
     footer a:hover { text-decoration: underline; }
   </style>
 </head>
@@ -70,16 +77,12 @@
   <div class="container">
     <h1>SeamlessDocs</h1>
     <p><strong>Free Plan:</strong> Up to 5MB conversions.</p>
-    <p>For files over 5MB up to 50MB, 
-      <a href="{{ url_for('upgrade') }}" class="btn btn-primary">Upgrade to Pro</a>
-    </p>
 
     <h2>Upload Your File</h2>
     <p>Upload your <strong>PDF</strong> or image file (<strong>JPG, PNG, TIFF</strong>) and SeamlessDocs will convert it into a clean, editable <strong>DOCX</strong> or <strong>TXT</strong> file.</p>
 
     <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
-      <!-- File upload input -->
-      <input type="file" name="fileUpload" id="fileUpload" accept=".pdf,.jpg,.jpeg,.png,.tif,.tiff" disabled>
+      <input type="file" name="fileUpload" id="fileUpload" disabled>
       <br><br>
 
       <!-- Terms agreement -->
@@ -91,20 +94,28 @@
       </label>
       <br><br>
 
-      <!-- Upload button (only DOCX for now) -->
+      <!-- Format choice -->
+      <label for="format">Output format:</label>
+      <select name="format" id="format" disabled>
+        <option value="docx">DOCX</option>
+        <option value="txt">TXT</option>
+      </select>
+      <br><br>
+
+      <!-- Upload button -->
       <button type="submit" id="uploadBtn" class="btn btn-primary" disabled>Upload File</button>
     </form>
 
     <p class="notice">
-      Download your converted file within 8 hours — all uploaded PDFs and images are automatically deleted from our servers after that time. We do not read, store, or share your content.
+      Download your converted file before 8 hours as your files will automatically be deleted after 8 hours. We do not read, store, or share them.
     </p>
 
     <footer>
+      <p><em>By continuing, you agree to the 
+        <a href="{{ url_for('terms') }}">terms of service</a> and 
+        <a href="{{ url_for('privacy') }}">privacy policy</a>.
+      </em></p>
       <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
-      <p>
-        <a href="{{ url_for('terms') }}">Terms of Service</a> | 
-        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
-      </p>
     </footer>
   </div>
 
@@ -112,11 +123,13 @@
     const termsCheck = document.getElementById('termsCheck');
     const uploadBtn = document.getElementById('uploadBtn');
     const fileUpload = document.getElementById('fileUpload');
+    const formatSelect = document.getElementById('format');
 
     termsCheck.addEventListener('change', function() {
       const enabled = this.checked;
       fileUpload.disabled = !enabled;
       uploadBtn.disabled = !enabled;
+      formatSelect.disabled = !enabled;
     });
   </script>
 </body>
