@@ -21,25 +21,26 @@
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 800px;
+      max-width: 700px;
       width: 100%;
       text-align: center;
     }
     h1 {
-      color: #111;
       margin-bottom: 1rem;
+      color: #111;
     }
     p {
       color: #555;
       line-height: 1.6;
       margin: 1rem 0;
+      font-size: 1rem;
     }
     .btn {
       display: inline-block;
       margin: 0.3rem;
-      padding: 0.6rem 1.2rem;
+      padding: 0.8rem 1.6rem;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
       text-decoration: none;
@@ -49,43 +50,43 @@
       color: white;
     }
     .btn-coffee {
-      background-color: #ff813f;
-      color: white;
+      background-color: #FFD200; /* Bright yellow */
+      color: #111;
+      font-size: 1rem;
+      margin-top: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .btn-coffee:hover {
+      background-color: #f5c400;
     }
     footer {
       margin-top: 2rem;
-      text-align: center;
-      font-size: 0.85rem;
-      color: #555;
-      line-height: 1.6;
+      font-size: 0.8rem;
+      color: #777;
     }
-    footer p { margin: 0.3rem 0; }
-    a {
+    footer a {
       color: #0077cc;
-      text-decoration: none;
       font-weight: bold;
+      text-decoration: none;
     }
-    a:hover { text-decoration: underline; }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>✅ File Converted Successfully!</h1>
+    <h1>🎉 Conversion Successful!</h1>
     <p>Your file has been converted and is ready for download.</p>
 
-    <a href="{{ url_for('download_file', filename=output_filename) }}" class="btn btn-primary">Download File</a>
-    <a href="{{ url_for('index') }}" class="btn btn-coffee">Convert Another</a>
-
-    <p class="notice">
-      Download your converted file within 8 hours — all uploaded PDFs and images are automatically deleted from our servers after that time. We do not read, store, or share them.
-    </p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary">Convert Another File</a>
+    <a href="{{ url_for('coffee') }}" class="btn btn-coffee">☕ Buy Us a Coffee</a>
 
     <footer>
-      <p><em>By continuing, you agree to the 
-        <a href="{{ url_for('terms') }}">terms of service</a> and 
-        <a href="{{ url_for('privacy') }}">privacy policy</a>.
-      </em></p>
-      <p>© SeamlessDocs. All rights reserved.</p>
+      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
+      <p>
+        <a href="{{ url_for('index') }}">Home</a> | 
+        <a href="{{ url_for('terms') }}">Terms of Use</a> | 
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      </p>
     </footer>
   </div>
 </body>
