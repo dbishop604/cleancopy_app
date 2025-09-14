@@ -21,6 +21,13 @@ import io
 import stripe
 
 from processor import process_file_to_text, text_to_docx
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
 
 # -----------------------------
 # CONFIG
@@ -240,3 +247,4 @@ def convert():
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
+
