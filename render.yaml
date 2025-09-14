@@ -4,6 +4,10 @@ services:
     env: docker
     plan: starter
     autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 10000
+    healthCheckPath: /healthz
     disk:
       name: data
       mountPath: /app/uploads
