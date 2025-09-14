@@ -5,95 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Processing — SeamlessDocs</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .box {
-      text-align: center;
-    }
+    body { font-family: Arial, sans-serif; text-align: center; margin: 50px; color: #333; }
+    h1 { font-size: 26px; }
     .spinner {
-      border: 6px solid #eee;
-      border-top: 6px solid #0077cc;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
-      margin: 1rem auto;
+      border: 6px solid #eee; border-top: 6px solid #007BFF;
+      border-radius: 50%; width: 60px; height: 60px;
+      animation: spin 1s linear infinite; margin: 1rem auto;
     }
-    @keyframes spin {
-      0% { transform: rotate(0deg);}
-      100% { transform: rotate(360deg);}
-    }
-    .message {
-      font-size: 1rem;
-      color: #333;
-    }
+    @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
     .btn {
-      display: inline-block;
-      margin-top: 1.5rem;
-      padding: 0.7rem 1.4rem;
-      background: #FFD200;
-      color: #111;
-      border-radius: 6px;
-      font-weight: bold;
-      text-decoration: none;
+      background: #007BFF; color: white; border: none;
+      padding: 10px 20px; font-size: 16px;
+      cursor: pointer; border-radius: 6px;
+      margin-top: 20px; text-decoration: none; display: inline-block;
     }
-    footer {
-      margin-top: 2rem;
-      font-size: 0.8rem;
-      color: #777;
-      text-align: center;
-    }
-    footer a {
-      color: #0077cc;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    footer a:hover { text-decoration: underline; }
+    .btn:hover { background: #0056b3; }
   </style>
 </head>
 <body>
-  <div class="box">
-    <div class="spinner"></div>
-    <p class="message">Processing your file... please wait.</p>
-    <div id="download"></div>
-  </div>
-
-  <footer>
-    <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
-    <p>
-      <a href="{{ url_for('index') }}">Home</a> |
-      <a href="{{ url_for('terms') }}">Terms of Use</a> |
-      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
-    </p>
-  </footer>
+  <h1>Your file is being processed...</h1>
+  <div class="spinner"></div>
+  <p id="status">Job ID: {{ job_id }}</p>
+  <div id="download"></div>
 
   <script>
     async function checkStatus() {
       try {
-        const res = await fetch("/status/{{job_id}}");
+        const res = await fetch("/status/{{ job_id }}");
         if (!res.ok) return;
         const data = await res.json();
         if (data.status === "done") {
           document.querySelector(".spinner").style.display = "none";
-          document.querySelector(".message").textContent = "✅ Conversion complete! Your file is ready.";
+          document.getElementById("status").textContent = "✅ Conversion complete!";
           document.getElementById("download").innerHTML =
-            `<a href="/download/{{job_id}}" class="btn">Download File</a>`;
+            `<a href="/download/{{ job_id }}" class="btn">Download File</a>`;
         } else if (data.status === "error") {
           document.querySelector(".spinner").style.display = "none";
-          document.querySelector(".message").textContent = "❌ " + data.message;
+          document.getElementById("status").textContent = "❌ " + data.message;
         } else {
           setTimeout(checkStatus, 2000);
         }
       } catch (e) {
-        console.error(e);
         setTimeout(checkStatus, 3000);
       }
     }
