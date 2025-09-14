@@ -1,37 +1,30 @@
-import os
-import io
-import uuid
-from flask import (
-    Flask, render_template, request, redirect,
-    url_for, flash, jsonify, send_file
-)
+from flask import Flask, render_template, request, redirect, url_for, send_file
 from werkzeug.utils import secure_filename
+import os
 import redis
-from rq import Queue
-from rq.job import Job
-from processor import process_file_job
+from worker import convert_file_task
+import uuid
 
-# --- Flask setup ---
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "devkey")
+app.config["UPLOAD_FOLDER"] = "uploads"
+app.config["OUTPUT_FOLDER"] = "output"
 
-UPLOAD_FOLDER = "/data/uploads"
-OUTPUT_FOLDER = "/data/outputs"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+os.makedirs(app.config["OUTPUT_FOLDER"], exist_ok=True)
 
-# --- Redis setup (with TLS for Upstash) ---
-redis_url = os.environ.get("REDIS_URL")
-redis_conn = None
-q = None
+# Initialize Redis (safely)
+redis_url = os.getenv("REDIS_URL")
+r = None
+
 if redis_url:
     try:
-        redis_conn = redis.from_url(redis_url, ssl=True, decode_responses=False)
-        q = Queue("default", connection=redis_conn)
+        r = redis.from_url(redis_url)
+        r.ping()
+        print("Redis connection successful")
     except Exception as e:
-        print(f"Redis connection failed: {e}")
+        print("Redis connection failed")
+        r = None
 
-# --- Routes ---
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -44,79 +37,27 @@ def terms():
 def privacy():
     return render_template("privacy.html")
 
-@app.route("/success/<job_id>")
-def success(job_id):
-    return render_template("success.html", job_id=job_id)
+@app.route("/success")
+def success():
+    return render_template("success.html")
 
 @app.route("/cancel")
 def cancel():
     return render_template("cancel.html")
 
-@app.route("/coffee")
-def coffee():
-    return render_template("coffee.html")
+@app.route("/upload", methods=["POST"])
+def upload_file():
+    if "file" not in request.files:
+        return "No file part", 400
 
-@app.route("/convert", methods=["POST"])
-def convert():
-    if "terms" not in request.form:
-        flash("⚠️ You must agree to the terms of service and privacy policy before uploading.")
-        return redirect(url_for("index"))
+    file = request.files["file"]
 
-    if "fileUpload" not in request.files:
-        flash("⚠️ No file selected")
-        return redirect(url_for("index"))
+    if file.filename == "":
+        return "No selected file", 400
 
-    f = request.files["fileUpload"]
-    if f.filename == "":
-        flash("⚠️ No selected file")
-        return redirect(url_for("index"))
+    filename = secure_filename(file.filename)
+    input_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    file.save(input_path)
 
-    filename = secure_filename(f.filename)
-    job_id = str(uuid.uuid4())
-
-    input_path = os.path.join(UPLOAD_FOLDER, f"{job_id}_{filename}")
-    output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.docx")
-
-    f.save(input_path)
-
-    if not redis_conn or not q:
-        return jsonify({"status": "error", "message": "Redis is not connected"}), 500
-
-    # enqueue the background job
-    job = q.enqueue(process_file_job, input_path, output_path, job_id)
-
-    return redirect(url_for("success", job_id=job.id))
-
-@app.route("/status/<job_id>")
-def job_status(job_id):
-    if not redis_conn:
-        return jsonify({"status": "error", "message": "Redis not connected"}), 500
-
-    try:
-        job = Job.fetch(job_id, connection=redis_conn)
-    except Exception:
-        return jsonify({"status": "error", "message": "Job not found"}), 404
-
-    if job.is_finished:
-        return jsonify({"status": "done", "result": job.result})
-    elif job.is_failed:
-        return jsonify({"status": "error", "message": str(job.exc_info)})
-    else:
-        return jsonify({"status": "processing"})
-
-@app.route("/download/<job_id>")
-def download(job_id):
-    file_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.docx")
-    if not os.path.exists(file_path):
-        return "File not ready", 404
-    return send_file(file_path, as_attachment=True)
-
-@app.route("/healthz")
-def healthz():
-    try:
-        if redis_conn:
-            redis_conn.ping()
-            return "OK", 200
-        return "Redis not connected", 500
-    except redis.exceptions.ConnectionError:
-        return "Redis not connected", 500
+    task_id = str(uuid.uuid4())
+    convert_file_t
