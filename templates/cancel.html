@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cancelled — By.Storytellers</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <title>Cancelled — SeamlessDocs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,45 +11,41 @@
       margin: 0;
       padding: 0;
       display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    main {
-      flex: 1;
-      display: flex;
       justify-content: center;
-      align-items: center;
-      padding: 2rem;
+      align-items: flex-start;
+      min-height: 100vh;
     }
     .container {
       background: #fff;
+      margin: 2rem;
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       max-width: 600px;
+      width: 100%;
       text-align: center;
     }
-    h1 {
-      color: #cc0000;
-      margin-bottom: 1rem;
-    }
-    p {
-      color: #555;
-      line-height: 1.6;
-    }
+    h1 { color: #cc0000; margin-bottom: 1rem; }
+    p { color: #555; line-height: 1.6; }
+    footer { margin-top: 2rem; font-size: 0.8rem; color: #777; }
+    a { color: #0077cc; text-decoration: none; font-weight: bold; }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  {% include 'header.html' %}
+  <div class="container">
+    <h1>⚠️ Cancelled</h1>
+    <p>Your subscription or action has been cancelled. You may return to the homepage or try again later.</p>
 
-  <main>
-    <div class="container">
-      <h1>⚠️ Cancelled</h1>
-      <p>Your request was cancelled or could not be completed.</p>
-      <p><a href="{{ url_for('index') }}">Return to Home</a></p>
-    </div>
-  </main>
-
-  {% include 'footer.html' %}
+    <footer>
+      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
+      <p>
+        <a href="{{ url_for('index') }}">Home</a> |
+        <a href="{{ url_for('contact') }}">Contact</a> |
+        <a href="{{ url_for('terms') }}">Terms of Use</a> |
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      </p>
+    </footer>
+  </div>
 </body>
 </html>
