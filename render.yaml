@@ -4,9 +4,6 @@ services:
     env: docker
     plan: starter
     autoDeploy: true
-    envVars:
-      - key: PORT
-        value: 10000
     disk:
       name: data
       mountPath: /app/uploads
