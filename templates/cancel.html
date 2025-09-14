@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cancelled — SeamlessDocs</title>
+  <title>Conversion Failed — SeamlessDocs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -25,23 +25,45 @@
       width: 100%;
       text-align: center;
     }
-    h1 { color: #cc0000; margin-bottom: 1rem; }
-    p { color: #555; line-height: 1.6; }
-    footer { margin-top: 2rem; font-size: 0.8rem; color: #777; }
+    h1 {
+      color: #cc0000;
+      margin-bottom: 1rem;
+    }
+    p {
+      color: #555;
+      line-height: 1.6;
+    }
+    a.btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.6rem 1.2rem;
+      background-color: #0077cc;
+      color: white;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #777;
+    }
+    footer p { margin: 0.3rem 0; }
     a { color: #0077cc; text-decoration: none; font-weight: bold; }
     a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>⚠️ Cancelled</h1>
-    <p>Your subscription or action has been cancelled. You may return to the homepage or try again later.</p>
+    <h1>❌ Conversion Failed</h1>
+    <p>We were unable to convert your file. Please try again.</p>
+    <a href="{{ url_for('index') }}" class="btn">Try Again</a>
 
     <footer>
       <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
       <p>
         <a href="{{ url_for('index') }}">Home</a> |
-        <a href="{{ url_for('contact') }}">Contact</a> |
         <a href="{{ url_for('terms') }}">Terms of Use</a> |
         <a href="{{ url_for('privacy') }}">Privacy Policy</a>
       </p>
