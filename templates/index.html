@@ -45,7 +45,7 @@
     }
     .btn {
       display: inline-block;
-      margin: 0.3rem;
+      margin: 0.3rem 0.3rem 0.3rem 0;
       padding: 0.6rem 1.2rem;
       border: none;
       border-radius: 4px;
@@ -73,144 +73,53 @@
       color: #777;
     }
     footer p { margin: 0.3rem 0; }
-
-    /* Modal styles */
-    .modal {
+    /* Progress bar */
+    #progressBar {
       display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.5);
+      width: 0;
+      height: 6px;
+      background-color: #c59de8;
+      margin-top: 1rem;
+      border-radius: 3px;
+      transition: width 0.3s;
     }
-    .modal-content {
-      background: #fff;
-      margin: 5% auto;
-      padding: 1.5rem;
-      border-radius: 8px;
-      max-width: 600px;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 24px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .close:hover { color: #000; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>SeamlessDocs</h1>
     <p><strong>Free Plan:</strong> Up to 5MB conversions.</p>
-    <p>For files over 5MB up to 50MB, <a href="{{ url_for('success') }}" class="btn-primary" style="padding:0.4rem 1rem;">Upgrade to Pro</a></p>
+    <p>For files over 5MB up to 50MB, 
+      <a href="/upgrade" class="btn btn-primary" style="padding:0.4rem 1rem;">Upgrade to Pro</a>
+    </p>
 
     <h2>Upload Your File</h2>
-    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
+    <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
       <!-- File upload input -->
-      <input type="file" name="fileUpload" id="fileUpload" disabled>
+      <input type="file" name="fileUpload" id="fileUpload" required>
       <br><br>
 
-      <!-- Terms modal trigger -->
+      <!-- Terms checkbox -->
       <label>
-        <input type="checkbox" id="termsCheck">
-        By continuing, you agree to the <a href="#" id="openTerms">terms of service and privacy policy</a>.
+        <input type="checkbox" name="terms" id="termsCheck" required>
+        By continuing, you agree to the 
+        <a href="{{ url_for('terms') }}" target="_blank">terms of service</a> and 
+        <a href="{{ url_for('privacy') }}" target="_blank">privacy policy</a>.
       </label>
       <br><br>
 
       <!-- Format choice -->
       <label for="format">Output format:</label>
-      <select name="format" id="format" disabled>
+      <select name="format" id="format">
         <option value="docx">DOCX</option>
         <option value="txt">TXT</option>
       </select>
       <br><br>
 
-      <!-- Upload button -->
-      <button type="submit" id="uploadBtn" disabled>Upload File</button>
+      <!-- Upload + Donate buttons -->
+      <button type="submit" id="uploadBtn" class="btn btn-primary">Upload File</button>
       <a href="https://www.buymeacoffee.com/seamlessdocs" target="_blank" class="btn btn-coffee">☕ Buy us a coffee</a>
     </form>
 
-    <p class="notice">
-      Download your converted file before 8 hours as your files will automatically be deleted after 8 hours. We do not read, store, or share them.
-    </p>
-
-    <footer>
-      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
-      <p>
-        <a href="{{ url_for('terms') }}">Terms of Service</a> | 
-        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
-      </p>
-    </footer>
-  </div>
-
-  <!-- Modal -->
-  <div id="termsModal" class="modal">
-    <div class="modal-content">
-      <span class="close" id="closeModal">&times;</span>
-      <h2>Terms of Service & Privacy Policy</h2>
-      <p>
-        Welcome to SeamlessDocs. By using our service, you agree to the following terms:
-      </p>
-      <h3>1. Use of Service</h3>
-      <p>You may use SeamlessDocs to upload and convert documents. You agree not to misuse the service or upload unlawful content.</p>
-
-      <h3>2. Privacy</h3>
-      <p>We respect your privacy. Files you upload are processed automatically and deleted from our servers within eight (8) hours. We do not read, store, or share your files.</p>
-
-      <h3>3. Data Use</h3>
-      <p>Your account information (such as email address) is only used for authentication and subscription management. We never sell or rent your data to third parties.</p>
-
-      <h3>4. Security</h3>
-      <p>We use industry-standard security measures to protect your data. However, no online service can guarantee 100% security.</p>
-
-      <h3>5. Disclaimer</h3>
-      <p>SeamlessDocs is provided “as is” without warranties of any kind. We are not responsible for any data loss, errors, or damages arising from the use of this service.</p>
-
-      <h3>6. Policy Updates</h3>
-      <p>We may update these terms and policies from time to time. Continued use of the service constitutes acceptance of the updated terms.</p>
-    </div>
-  </div>
-
-  <script>
-    const termsCheck = document.getElementById('termsCheck');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const fileUpload = document.getElementById('fileUpload');
-    const formatSelect = document.getElementById('format');
-
-    // Enable upload only if terms are accepted
-    termsCheck.addEventListener('change', function() {
-      const enabled = this.checked;
-      uploadBtn.disabled = !enabled;
-      fileUpload.disabled = !enabled;
-      formatSelect.disabled = !enabled;
-    });
-
-    // Modal logic
-    const modal = document.getElementById("termsModal");
-    const openModal = document.getElementById("openTerms");
-    const closeModal = document.getElementById("closeModal");
-
-    openModal.onclick = function(e) {
-      e.preventDefault();
-      modal.style.display = "block";
-    }
-
-    closeModal.onclick = function() {
-      modal.style.display = "none";
-    }
-
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
-    }
-  </script>
-</body>
-</html>
+    <!-- Progress bar -->
+    <div id="progressBar">
