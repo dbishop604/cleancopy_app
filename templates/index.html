@@ -44,7 +44,9 @@
       color: #555;
       margin-bottom: 1.5rem;
     }
-    .row { margin: 1rem 0; }
+    .row {
+      margin: 1rem 0;
+    }
     input[type="file"], select {
       padding: 0.5rem;
       font-size: 14px;
@@ -77,6 +79,7 @@
       text-decoration: none;
       font-weight: bold;
     }
+    .agree a:hover { text-decoration: underline; }
     .notice {
       font-size: 0.9rem;
       color: #555;
@@ -85,7 +88,7 @@
     }
     footer {
       margin-top: 2rem;
-      font-size: 10.5px;
+      font-size: 10.5px; /* ~8pt */
       color: #777;
       line-height: 1.4;
     }
@@ -95,7 +98,6 @@
       font-weight: bold;
     }
     footer a:hover { text-decoration: underline; }
-
     /* Loader overlay */
     #loaderOverlay {
       display: none;
@@ -107,36 +109,41 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 1.5rem;
-      text-align: center;
+      gap: 1rem;
     }
     #loaderOverlay .msg {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: bold;
       color: #0077cc;
     }
-    .progress {
+    .bar {
       width: 70%;
       max-width: 400px;
-      height: 14px;
-      background: #e0e0e0;
+      height: 12px;
+      background: #eee;
       border-radius: 999px;
       overflow: hidden;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+      margin-top: 0.5rem;
     }
-    .progress-bar {
-      width: 40%;
+    .bar span {
+      display: block;
       height: 100%;
-      background: linear-gradient(90deg, #0077cc, #3399ff);
-      border-radius: 999px;
-      animation: loading 1.6s infinite ease-in-out;
+      width: 0%;
+      background: #0077cc;
+      transition: width 0.3s ease;
     }
-    @keyframes loading {
-      0% { transform: translateX(-100%); }
-      50% { transform: translateX(50%); }
-      100% { transform: translateX(120%); }
+    #downloadBtn {
+      display: none;
+      padding: 0.7rem 1.4rem;
+      border: none;
+      border-radius: 6px;
+      background: #28a745;
+      color: #fff;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
     }
-    .error { color: red; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -148,7 +155,7 @@
     </p>
     <p class="plan"><strong>Free Plan:</strong> Up to 5MB conversions.</p>
 
-    <form id="uploadForm">
+    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
       <div class="row">
         <input type="file" name="fileUpload" id="fileUpload" disabled>
       </div>
@@ -183,9 +190,9 @@
 
   <!-- Loader overlay -->
   <div id="loaderOverlay">
-    <div class="msg">Processing your file… please wait.</div>
-    <div class="progress"><div class="progress-bar"></div></div>
-    <div id="errorMsg" class="error"></div>
+    <div class="msg" id="loaderMsg">Processing your file… please wait.</div>
+    <div class="bar"><span id="progressBar"></span></div>
+    <button id="downloadBtn">⬇ Download File</button>
   </div>
 
   <script>
@@ -195,8 +202,9 @@
     const uploadBtn = document.getElementById("uploadBtn");
     const form = document.getElementById("uploadForm");
     const overlay = document.getElementById("loaderOverlay");
-    const msg = document.querySelector("#loaderOverlay .msg");
-    const errorMsg = document.getElementById("errorMsg");
+    const loaderMsg = document.getElementById("loaderMsg");
+    const progressBar = document.getElementById("progressBar");
+    const downloadBtn = document.getElementById("downloadBtn");
 
     termsCheck.addEventListener("change", function() {
       const enabled = this.checked;
@@ -205,13 +213,60 @@
       uploadBtn.disabled = !enabled;
     });
 
-    form.addEventListener("submit", async function(e) {
-      e.preventDefault();
-
-      if (!fileUpload.files.length) {
-        alert("Please select a file.");
-        return;
-      }
-
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
       overlay.style.display = "flex";
-      msg.tex
+      loaderMsg.textContent = "Processing your file… please wait.";
+      progressBar.style.width = "0%";
+      downloadBtn.style.display = "none";
+
+      const formData = new FormData(form);
+      fetch("{{ url_for('convert') }}", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Server error: " + response.statusText);
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = formData.get("fileUpload").name.split(".")[0] + "." + formData.get("format");
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        loaderMsg.textContent = "✅ Conversion complete!";
+        progressBar.style.width = "100%";
+        downloadBtn.style.display = "inline-block";
+        downloadBtn.onclick = () => {
+          const a2 = document.createElement("a");
+          a2.href = url;
+          a2.download = a.download;
+          document.body.appendChild(a2);
+          a2.click();
+          a2.remove();
+        };
+      })
+      .catch(err => {
+        loaderMsg.textContent = "❌ Error: " + err.message;
+        progressBar.style.background = "#cc0000";
+        progressBar.style.width = "100%";
+      });
+    });
+
+    // Fake progress animation until server responds
+    let progress = 0;
+    setInterval(() => {
+      if (overlay.style.display === "flex" && progress < 90) {
+        progress += 5;
+        progressBar.style.width = progress + "%";
+      }
+    }, 500);
+  </script>
+</body>
+</html>
