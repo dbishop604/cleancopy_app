@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Terms of Use & Privacy Policy — SeamlessDocs Online</title>
   <style>
     body {
@@ -24,8 +24,19 @@
       max-width: 800px;
       width: 100%;
     }
-    h1, h2 { color: #111; }
-    p { color: #555; line-height: 1.6; }
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #111;
+    }
+    h2 {
+      margin-top: 1.5rem;
+      color: #111;
+    }
+    p {
+      color: #555;
+      line-height: 1.6;
+    }
     footer {
       margin-top: 2rem;
       text-align: center;
@@ -41,27 +52,41 @@
     <p><strong>Last Updated:</strong> [Insert Date]</p>
 
     <h2>1. File Handling</h2>
-    <p>Files you upload are processed automatically. We do not read, review, or access your files. Uploaded files are stored temporarily and are automatically deleted from our servers within eight (8) hours of upload.</p>
+    <p>
+      Files you upload are processed automatically by our system. We do not read, review, or access your files.
+      All uploaded files are stored temporarily and are automatically deleted from our servers within eight (8) hours.
+    </p>
 
     <h2>2. Ownership & Copyright</h2>
-    <p>You retain full ownership of all materials you upload. By uploading, you confirm that you own or have the legal right to use the files, and you agree not to upload materials that infringe upon the intellectual property rights of others.</p>
+    <p>
+      You retain full ownership of all materials you upload. By uploading, you confirm that you own or have the legal right
+      to use the files, and you agree not to upload materials that infringe upon the intellectual property rights of others.
+    </p>
 
-    <h2>3. Indemnification & Release</h2>
-    <p>By uploading content, you agree to indemnify and hold harmless the site owner(s) from any claims, disputes, or legal actions related to your uploaded materials. You also acknowledge and agree that the site owner(s) may independently create, develop, publish, or distribute material that may be similar to or overlap with your uploaded content in subject matter, theme, or expression. Any such similarity shall not be construed as infringement, plagiarism, or misappropriation. You expressly waive any claims against the site owner(s) related to such independent creations.</p>
+    <h2>3. Indemnification & Creative Independence</h2>
+    <p>
+      By uploading content, you agree to indemnify and hold harmless the site owner(s) from any claims, disputes, or legal actions
+      arising from the content you upload. You also acknowledge and agree that the site owner(s) may independently create, publish,
+      or distribute material that is similar to or overlaps with your uploaded content in subject matter, theme, or expression.
+      Any such similarity shall not be construed as infringement, plagiarism, or misappropriation. You expressly waive any claims
+      against the site owner(s) related to such independent creations.
+    </p>
 
     <h2>4. Privacy</h2>
-    <p>We do not sell, rent, or share your personal information. We do not collect your files for marketing, resale, or distribution. Uploaded files are automatically deleted within eight (8) hours. Email addresses or account details are used solely for authentication and subscription management and are never sold to third parties.</p>
+    <p>
+      We respect your privacy. We do not sell, rent, or share your personal information. We do not collect or use your files for
+      marketing, resale, or distribution. Your email address and account details are used solely for authentication and subscription
+      management.
+    </p>
 
     <h2>5. Limitation of Liability</h2>
-    <p>This service is provided “as-is” without warranties of any kind. The site owner(s) shall not be liable for any damages, losses, or claims resulting from the use or inability to use this service.</p>
+    <p>
+      This service is provided “as-is” without warranties of any kind. The site owner(s) shall not be liable for any damages,
+      losses, or claims resulting from the use or inability to use this service.
+    </p>
 
     <footer>
       <p>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</p>
       <p>
         <a href="{{ url_for('terms') }}">Terms of Use</a><br>
-        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
-      </p>
-    </footer>
-  </div>
-</body>
-</html>
+        <a href="{{ url_for('p_
