@@ -1,6 +1,5 @@
 import os
 import io
-import traceback
 from flask import (
     Flask, render_template, request, redirect,
     url_for, flash, send_file
@@ -13,8 +12,9 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "devkey")
 
 UPLOAD_FOLDER = "uploads"
+CONVERTED_FOLDER = "converted"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
+os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
 # --- Routes ---
 
@@ -42,33 +42,31 @@ def cancel():
 def coffee():
     return render_template("coffee.html")
 
-
-# --- Conversion Route ---
 @app.route("/convert", methods=["POST"])
 def convert():
+    if "terms" not in request.form:
+        flash("⚠️ You must agree to the terms of service and privacy policy before uploading.")
+        return redirect(url_for("index"))
+
+    if "fileUpload" not in request.files:
+        flash("⚠️ No file selected")
+        return redirect(url_for("index"))
+
+    f = request.files["fileUpload"]
+    if f.filename == "":
+        flash("⚠️ No selected file")
+        return redirect(url_for("index"))
+
+    filename = secure_filename(f.filename)
+    temp_path = os.path.join("/tmp", filename)
+    f.save(temp_path)
+
     try:
-        if "terms" not in request.form:
-            flash("⚠️ You must agree to the terms of service and privacy policy before uploading.")
-            return redirect(url_for("index"))
-
-        if "fileUpload" not in request.files:
-            flash("⚠️ No file selected")
-            return redirect(url_for("index"))
-
-        f = request.files["fileUpload"]
-        if f.filename == "":
-            flash("⚠️ No selected file")
-            return redirect(url_for("index"))
-
-        filename = secure_filename(f.filename)
-        temp_path = os.path.join("/tmp", filename)
-        f.save(temp_path)
-
-        # Process the file
         text = process_file_to_text(temp_path, join_strategy="smart")
 
         fmt = request.form.get("format", "docx")
         if fmt == "txt":
+            flash("✅ File converted successfully! Your TXT is ready.")
             return send_file(
                 io.BytesIO(text.encode("utf-8")),
                 as_attachment=True,
@@ -77,6 +75,7 @@ def convert():
             )
         else:
             buf = text_to_docx(text)
+            flash("✅ File converted successfully! Your DOCX is ready.")
             return send_file(
                 buf,
                 as_attachment=True,
@@ -85,12 +84,5 @@ def convert():
             )
 
     except Exception as e:
-        traceback.print_exc()
         flash(f"❌ Conversion failed: {e}")
         return redirect(url_for("cancel"))
-
-
-# --- Main entrypoint ---
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
