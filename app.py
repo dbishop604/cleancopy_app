@@ -110,7 +110,7 @@ def upgrade():
             mode="subscription",
             success_url=url_for("success", _external=True),
             cancel_url=url_for("cancel", _external=True),
-            customer_email=f"{current_user.id}@example.com",  # placeholder
+            customer_email=f"{current_user.id}@example.com",  # placeholder for now
         )
         return redirect(checkout_session.url, code=303)
     except Exception as e:
@@ -128,9 +128,11 @@ def success():
 @app.route("/cancel")
 @login_required
 def cancel():
-    # Reset plan back to free
-    current_user.plan = "free"
-    flash("⚠️ Your subscription has been canceled. You are now on the Free plan (5MB file limit).")
+    # Reset to free plan (temporary in-memory handling)
+    if current_user.id in USERS:
+        USERS[current_user.id]["plan"] = "free"
+        current_user.plan = "free"
+    flash("⚠️ Subscription canceled. You have been moved back to the Free plan (5MB upload limit).")
     return render_template("cancel.html", plan=current_user.plan)
 
 @app.route("/billing-portal")
@@ -171,7 +173,7 @@ def convert():
 
     f = request.files["file"]
     if f.filename == "":
-        flash("No file selected")
+        flash("No selected file")
         return redirect(url_for("index"))
     if not allowed_file(f.filename):
         flash("Unsupported file type")
@@ -198,7 +200,8 @@ def convert():
     f.save(tmp_path)
 
     try:
-        text = process_file_to_text(tmp_path, join_strategy=request.form.get("join_strategy", "smart"))
+        # Process uploaded file
+        text = process_file_to_text(tmp_path, join_strategy="paragraphs")
 
         output_fmt = request.form.get("format", "docx")
         if output_fmt == "txt":
