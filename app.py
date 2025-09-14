@@ -2,7 +2,7 @@ import os
 import io
 from flask import (
     Flask, render_template, request, redirect,
-    url_for, flash, send_file
+    url_for, flash, send_file, jsonify
 )
 from werkzeug.utils import secure_filename
 from processor import process_file_to_text, text_to_docx
@@ -16,47 +16,46 @@ CONVERTED_FOLDER = "converted"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
+# --- Health check route ---
+@app.route("/healthz")
+def healthz():
+    return jsonify(status="ok"), 200
 
 # --- Core Routes ---
-
 @app.route("/")
 def index():
     return render_template("index.html", plan="free")
-
 
 @app.route("/terms")
 def terms():
     return render_template("terms.html")
 
-
 @app.route("/privacy")
 def privacy():
     return render_template("privacy.html")
-
 
 @app.route("/success")
 def success():
     return render_template("success.html")
 
-
 @app.route("/cancel")
 def cancel():
     return render_template("cancel.html")
 
-
+# --- File conversion ---
 @app.route("/convert", methods=["POST"])
 def convert():
     if "terms" not in request.form:
-        flash("⚠️ You must agree to the terms of use and privacy policy before uploading.", "error")
+        flash("⚠️ You must agree to the terms of use and privacy policy before uploading.")
         return redirect(url_for("index"))
 
     if "fileUpload" not in request.files:
-        flash("⚠️ No file selected", "error")
+        flash("⚠️ No file selected")
         return redirect(url_for("index"))
 
     f = request.files["fileUpload"]
     if f.filename == "":
-        flash("⚠️ No selected file", "error")
+        flash("⚠️ No selected file")
         return redirect(url_for("index"))
 
     filename = secure_filename(f.filename)
@@ -64,11 +63,12 @@ def convert():
     f.save(temp_path)
 
     try:
+        # Run OCR/text extraction
         text = process_file_to_text(temp_path, join_strategy="smart")
 
         fmt = request.form.get("format", "docx")
         if fmt == "txt":
-            flash("✅ File converted successfully! Your TXT is ready.", "success")
+            flash("✅ File converted successfully! Your TXT is ready.")
             return send_file(
                 io.BytesIO(text.encode("utf-8")),
                 as_attachment=True,
@@ -77,7 +77,7 @@ def convert():
             )
         else:
             buf = text_to_docx(text)
-            flash("✅ File converted successfully! Your DOCX is ready.", "success")
+            flash("✅ File converted successfully! Your DOCX is ready.")
             return send_file(
                 buf,
                 as_attachment=True,
@@ -86,9 +86,8 @@ def convert():
             )
 
     except Exception as e:
-        flash(f"❌ Conversion failed: {e}", "error")
+        flash(f"❌ Conversion failed: {e}")
         return redirect(url_for("cancel"))
-
 
 # --- Main entrypoint ---
 if __name__ == "__main__":
