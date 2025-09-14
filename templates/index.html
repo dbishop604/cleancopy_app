@@ -29,85 +29,102 @@
       margin-bottom: 1rem;
       color: #111;
     }
-    .flash {
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border-radius: 5px;
-      position: relative;
+    p {
+      font-size: 0.95em;
+      color: #555;
+      line-height: 1.6;
     }
-    .flash.success {
-      background-color: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
+    .notice {
+      font-size: 0.9em;
+      margin: 0.5rem 0 1rem;
+      color: #555;
     }
-    .flash.error {
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-    .flash .close {
-      position: absolute;
-      right: 10px;
-      top: 8px;
+    .btn {
+      display: inline-block;
+      margin: 0.3rem 0.3rem 0.3rem 0;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 4px;
       cursor: pointer;
       font-weight: bold;
-      color: #555;
     }
     .btn-primary {
       background-color: #0077cc;
       color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 0.6rem 1.2rem;
-      font-weight: bold;
-      cursor: pointer;
     }
+    a {
+      color: #0077cc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    a:hover { text-decoration: underline; }
     footer {
       margin-top: 2rem;
       text-align: center;
       font-size: 0.8rem;
       color: #777;
     }
-    footer a {
-      color: #0077cc;
-      font-weight: bold;
-      text-decoration: none;
+    footer p { margin: 0.3rem 0; }
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
     }
-    footer a:hover { text-decoration: underline; }
+    .modal-content {
+      background: #fff;
+      margin: 5% auto;
+      padding: 1.5rem;
+      border-radius: 8px;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover { color: #000; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>SeamlessDocs</h1>
-
-    <!-- Flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash {{ category }}">
-            {{ message }}
-            <span class="close" onclick="this.parentElement.style.display='none';">&times;</span>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
     <p><strong>Free Plan:</strong> Up to 5MB conversions.</p>
-    <p>For files over 5MB up to 50MB, <a href="#" class="btn-primary">Upgrade to Pro</a></p>
+    <p>For files over 5MB up to 50MB, <a href="{{ url_for('upgrade') }}" class="btn-primary" style="padding:0.4rem 1rem;">Upgrade to Pro</a></p>
 
     <h2>Upload Your File</h2>
     <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
-      <input type="file" name="fileUpload" required><br><br>
+      <!-- File upload input -->
+      <input type="file" name="fileUpload" id="fileUpload" disabled>
+      <br><br>
+
+      <!-- Terms modal trigger -->
       <label>
-        <input type="checkbox" name="terms" required>
-        I have read and agree to the <a href="{{ url_for('terms') }}">terms of use</a> and <a href="{{ url_for('privacy') }}">privacy policy</a>.
-      </label><br><br>
+        <input type="checkbox" id="termsCheck">
+        I have read and agree to the <a href="#" id="openTerms">terms of use and privacy policy</a>.
+      </label>
+      <br><br>
+
+      <!-- Format choice -->
       <label for="format">Output format:</label>
-      <select name="format" id="format">
+      <select name="format" id="format" disabled>
         <option value="docx">DOCX</option>
         <option value="txt">TXT</option>
-      </select><br><br>
-      <button type="submit" class="btn-primary">Upload File</button>
+      </select>
+      <br><br>
+
+      <!-- Upload button -->
+      <button type="submit" id="uploadBtn" disabled>Upload File</button>
     </form>
 
     <p class="notice">
@@ -117,10 +134,56 @@
     <footer>
       <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
       <p>
-        <a href="{{ url_for('terms') }}">Terms of Use</a> | 
-        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+        By continuing, you agree to the 
+        <a href="{{ url_for('terms') }}">terms of service</a> and 
+        <a href="{{ url_for('privacy') }}">privacy policy</a>.
       </p>
     </footer>
   </div>
+
+  <!-- Modal -->
+  <div id="termsModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <h2>Terms of Use & Privacy Policy</h2>
+      <p>
+        [Insert full Terms of Use and Privacy Policy content here. This box scrolls if the text is long.]
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const termsCheck = document.getElementById('termsCheck');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileUpload = document.getElementById('fileUpload');
+    const formatSelect = document.getElementById('format');
+
+    termsCheck.addEventListener('change', function() {
+      const enabled = this.checked;
+      uploadBtn.disabled = !enabled;
+      fileUpload.disabled = !enabled;
+      formatSelect.disabled = !enabled;
+    });
+
+    // Modal logic
+    const modal = document.getElementById('termsModal');
+    const openTerms = document.getElementById('openTerms');
+    const closeModal = document.getElementById('closeModal');
+
+    openTerms.addEventListener('click', function(event) {
+      event.preventDefault();
+      modal.style.display = 'block';
+    });
+
+    closeModal.addEventListener('click', function() {
+      modal.style.display = 'none';
+    });
+
+    window.onclick = function(event) {
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    }
+  </script>
 </body>
 </html>
