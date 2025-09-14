@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeamlessDocs — Convert PDFs & Images to DOCX</title>
+  <title>SeamlessDocs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -21,25 +21,32 @@
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 600px;
+      max-width: 700px;
       width: 100%;
       text-align: center;
     }
-    h1 { color: #111; margin-bottom: 1rem; }
-    p { color: #555; line-height: 1.6; margin: 1rem 0; }
-    form { margin-top: 1.5rem; }
-    label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
-    input[type="file"], select {
-      margin: 0.5rem 0 1rem 0;
-      padding: 0.5rem;
-      width: 100%;
+    h1 {
+      color: #111;
+      margin-bottom: 1rem;
     }
-    .checkbox {
+    p {
+      color: #555;
+      line-height: 1.6;
       margin: 1rem 0;
-      text-align: left;
+    }
+    form {
+      margin-top: 1.5rem;
+    }
+    input[type="file"] {
+      display: block;
+      margin: 1rem auto;
+    }
+    label, select, input[type="checkbox"] {
+      margin: 0.5rem 0;
     }
     .btn {
       display: inline-block;
+      margin-top: 1rem;
       padding: 0.7rem 1.4rem;
       border: none;
       border-radius: 6px;
@@ -50,10 +57,8 @@
       cursor: pointer;
       text-decoration: none;
     }
-    .btn:hover { background: #005fa3; }
-    .flash {
-      color: red;
-      margin: 1rem 0;
+    .btn:hover {
+      background: #005fa3;
     }
     footer {
       margin-top: 2rem;
@@ -61,45 +66,46 @@
       color: #777;
       line-height: 1.4;
     }
-    footer p { margin: 0.3rem 0; }
     footer a {
       color: #0077cc;
       text-decoration: none;
       font-weight: bold;
     }
     footer a:hover { text-decoration: underline; }
+    a { color: #0077cc; font-weight: bold; text-decoration: none; }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📄 SeamlessDocs OCR</h1>
-    <p>Upload your PDF or image files (JPG, PNG, TIFF) and convert them into clean, editable documents (DOCX or TXT).</p>
+    <h1>SeamlessDocs</h1>
+    <p>Upload your PDF or image files (JPG, PNG, TIFF).<br/>
+       Convert them into clean, editable documents (DOCX or TXT).</p>
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}
-        <div class="flash">
-          {% for msg in messages %}
-            <p>{{ msg }}</p>
+        <ul style="color:red; list-style:none; padding:0;">
+          {% for message in messages %}
+            <li>{{ message }}</li>
           {% endfor %}
-        </div>
+        </ul>
       {% endif %}
     {% endwith %}
 
-    <form action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
+    <form method="POST" action="{{ url_for('convert') }}" enctype="multipart/form-data">
       <label for="fileUpload">Choose a file:</label>
-      <input type="file" name="fileUpload" id="fileUpload" accept=".pdf,.jpg,.jpeg,.png,.tiff" required />
+      <input type="file" name="fileUpload" id="fileUpload" required>
 
-      <label for="format">Output format:</label>
-      <select name="format" id="format">
+      <p>Output format:</p>
+      <select name="format">
         <option value="docx">DOCX</option>
         <option value="txt">TXT</option>
       </select>
 
-      <div class="checkbox">
+      <div style="margin-top: 1rem;">
         <label>
           <input type="checkbox" name="terms" required>
-          I agree to the <a href="{{ url_for('terms') }}">terms of service</a> and 
-          <a href="{{ url_for('privacy') }}">privacy policy</a>.
+          I agree to the <a href="{{ url_for('terms') }}">terms of service</a> and <a href="{{ url_for('privacy') }}">privacy policy</a>.
         </label>
       </div>
 
@@ -107,13 +113,5 @@
     </form>
 
     <footer>
-      <p>
-        © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
-        <a href="{{ url_for('terms') }}">Terms of Use</a> |
-        <a href="{{ url_for('privacy') }}">Privacy Policy</a> |
-        <a href="{{ url_for('coffee') }}">Support Us ☕</a>
-      </p>
-    </footer>
-  </div>
-</body>
-</html>
+      © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. | 
+      <a href="{{ url_for('te_
