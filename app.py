@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 from redis import Redis
 from rq import Queue
 from rq.job import Job
-from worker import process_file_job
+from processor import process_file_to_text, text_to_docx
 
 # --- Flask setup ---
 app = Flask(__name__)
@@ -75,24 +75,11 @@ def convert():
     job_id = str(uuid.uuid4())
 
     input_path = os.path.join(UPLOAD_FOLDER, f"{job_id}_{filename}")
-    output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.docx")
+    output_format = request.form.get("format", "docx").lower()
+    output_ext = "docx" if output_format == "docx" else "txt"
+    output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.{output_ext}")
 
     f.save(input_path)
 
     if not redis_conn:
-        return jsonify({"status": "error", "message": "Redis is not connected"}), 500
-
-    job = q.enqueue(process_file_job, input_path, output_path, job_id)
-    return redirect(url_for("success", job_id=job.get_id()))
-
-
-@app.route("/status/<job_id>")
-def status(job_id):
-    if not redis_conn:
-        return jsonify({"status": "error", "message": "Redis is not connected"})
-    try:
-        job = Job.fetch(job_id, connection=redis_conn)
-        if job.is_finished:
-            return jsonify({"status": "done", "output": job.result.get("output")})
-        elif job.is_failed:
-            return jsonify({"status": "error", "message": str(job.exc_info)})
+        return jsonify({"status": "error", "message": "Redis is not conn
