@@ -33,6 +33,7 @@ services:
       name: data
       mountPath: /data
       sizeGB: 5
+    startCommand: "rq worker -u $REDIS_URL default"
 
 databases:
   - name: cleancopy-redis
