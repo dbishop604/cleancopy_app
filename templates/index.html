@@ -190,7 +190,7 @@
 
   <!-- Loader overlay -->
   <div id="loaderOverlay">
-    <div class="msg">Processing your file… please wait.</div>
+    <div class="msg" id="loaderMsg">Processing your file… please wait.</div>
     <div id="percent">0%</div>
     <div class="bar"><span id="progressBar"></span></div>
   </div>
@@ -202,6 +202,7 @@
     const uploadBtn = document.getElementById("uploadBtn");
     const form = document.getElementById("uploadForm");
     const overlay = document.getElementById("loaderOverlay");
+    const loaderMsg = document.getElementById("loaderMsg");
     const progressBar = document.getElementById("progressBar");
     const percentText = document.getElementById("percent");
     const errorMsg = document.getElementById("errorMsg");
@@ -227,6 +228,7 @@
       overlay.style.display = "flex";
       progressBar.style.width = "0%";
       percentText.textContent = "0%";
+      loaderMsg.textContent = "Processing your file… please wait.";
 
       const data = new FormData();
       data.append("fileUpload", file);
@@ -265,7 +267,13 @@
           a.remove();
           window.URL.revokeObjectURL(url);
 
-          overlay.style.display = "none";
+          // Show success message briefly
+          loaderMsg.textContent = "✅ Conversion Complete!";
+          progressBar.style.width = "100%";
+          percentText.textContent = "100%";
+          setTimeout(() => {
+            overlay.style.display = "none";
+          }, 2000);
         } else {
           overlay.style.display = "none";
           errorMsg.textContent = "❌ Error: " + xhr.status + " - " + xhr.statusText;
@@ -275,12 +283,4 @@
 
       xhr.onerror = function() {
         overlay.style.display = "none";
-        errorMsg.textContent = "❌ Network error or server unreachable.";
-        errorMsg.style.display = "block";
-      };
-
-      xhr.send(data);
-    });
-  </script>
-</body>
-</html>
+        error
