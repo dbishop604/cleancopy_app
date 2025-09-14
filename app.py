@@ -7,6 +7,7 @@ from flask import (
 from werkzeug.utils import secure_filename
 from processor import process_file_to_text, text_to_docx
 
+# --- Flask setup ---
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "devkey")
 
@@ -35,13 +36,11 @@ def privacy():
 
 @app.route("/success")
 def success():
-    # Success page now shows any flash messages
     return render_template("success.html")
 
 
 @app.route("/cancel")
 def cancel():
-    # Cancel page now shows any flash messages
     return render_template("cancel.html")
 
 
@@ -76,4 +75,16 @@ def convert():
                 download_name=filename.rsplit(".", 1)[0] + ".txt",
                 mimetype="text/plain"
             )
-        e
+        else:
+            buf = text_to_docx(text)
+            flash("✅ File converted successfully! Your DOCX is ready.")
+            return send_file(
+                buf,
+                as_attachment=True,
+                download_name=filename.rsplit(".", 1)[0] + ".docx",
+                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+
+    except Exception as e:
+        flash(f"❌ Conversion failed: {e}")
+        return redirect(url
