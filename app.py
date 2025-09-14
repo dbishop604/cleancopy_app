@@ -12,14 +12,13 @@ from processor import process_file_to_text, text_to_docx
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "devkey")
 
-# Configure logging (so we see errors in Render logs)
+# Configure logging for Render logs
 logging.basicConfig(level=logging.INFO)
 
 UPLOAD_FOLDER = "uploads"
 CONVERTED_FOLDER = "converted"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
-
 
 # --- Core Routes ---
 
@@ -54,7 +53,7 @@ def cancel():
 def convert():
     try:
         if "terms" not in request.form:
-            flash("⚠️ You must agree to the terms of use and privacy policy before uploading.")
+            flash("⚠️ You must agree to the terms of service and privacy policy before uploading.")
             return redirect(url_for("index"))
 
         if "fileUpload" not in request.files:
@@ -77,3 +76,32 @@ def convert():
 
         fmt = request.form.get("format", "docx")
         if fmt == "txt":
+            app.logger.info("Converting to TXT")
+            flash("✅ File converted successfully! Your TXT is ready.")
+            return send_file(
+                io.BytesIO(text.encode("utf-8")),
+                as_attachment=True,
+                download_name=filename.rsplit(".", 1)[0] + ".txt",
+                mimetype="text/plain"
+            )
+        else:
+            app.logger.info("Converting to DOCX")
+            buf = text_to_docx(text)
+            flash("✅ File converted successfully! Your DOCX is ready.")
+            return send_file(
+                buf,
+                as_attachment=True,
+                download_name=filename.rsplit(".", 1)[0] + ".docx",
+                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+
+    except Exception as e:
+        app.logger.error(f"Conversion failed: {e}", exc_info=True)
+        flash(f"❌ Conversion failed: {e}")
+        return redirect(url_for("cancel"))
+
+
+# --- Main entrypoint ---
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))  # Render requires binding to PORT env var
+    app.run(host="0.0.0.0", port=port)
