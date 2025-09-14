@@ -6,7 +6,7 @@ services:
     autoDeploy: true
     envVars:
       - key: PORT
-        value: 10000
+        value: "10000"
       - key: REDIS_URL
         value: "redis://default:AVYAAAIncDE3ZGY5MTE5NDhhYzI0NTRhYmNlYjkzNDc3MDkxM2I5ZXAxMjIwMTY@secure-wahoo-22016.upstash.io:6379"
     healthCheckPath: /healthz
@@ -15,6 +15,7 @@ services:
       mountPath: /data
       sizeGB: 1
     buildCommand: ""
+    startCommand: "python app.py"
 
   - type: worker
     name: seamlessdocs-worker
