@@ -2,61 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Processing — SeamlessDocs</title>
+  <title>Conversion in Progress</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f9f9f9; display:flex; justify-content:center; padding:2rem; }
-    .container { background:#fff; padding:2rem; border-radius:8px; max-width:600px; width:100%; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
-    h1 { color:#111; }
-    #progress-bar { width:0%; height:20px; background:#0077cc; border-radius:4px; transition:width 0.4s; }
-    .btn { display:inline-block; margin-top:1rem; padding:0.7rem 1.4rem; border:none; border-radius:6px; background:#0077cc; color:#fff; font-weight:bold; cursor:pointer; text-decoration:none; }
-    .btn:hover { background:#005fa3; }
-    footer { margin-top:2rem; font-size:10.5px; color:#777; line-height:1.4; }
-    footer a { color:#0077cc; font-weight:bold; text-decoration:none; }
-    footer a:hover { text-decoration:underline; }
+    body { font-family: Arial, sans-serif; text-align: center; margin: 50px; color: #333; }
+    h1 { font-size: 26px; }
+    .btn {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+      margin-top: 20px;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .btn:hover { background-color: #0056b3; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>⏳ Processing Your File</h1>
-    <p>Please wait while we convert your document.</p>
-
-    <div style="background:#eee; border-radius:4px; overflow:hidden; margin-top:1rem;">
-      <div id="progress-bar"></div>
-    </div>
-
-    <a id="downloadLink" class="btn" style="display:none;">⬇ Download Your File</a>
-
-    <footer>
-      © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
-      <a href="{{ url_for('terms') }}">Terms of Use</a> |
-      <a href="{{ url_for('privacy') }}">Privacy Policy</a> |
-      <a href="{{ url_for('coffee') }}">Support Us ☕</a>
-    </footer>
-  </div>
-
-  <script>
-    const bar = document.getElementById("progress-bar");
-    const downloadLink = document.getElementById("downloadLink");
-
-    async function checkStatus() {
-      const res = await fetch("/status/{{ job_id }}");
-      const data = await res.json();
-
-      if (data.status === "queued") {
-        bar.style.width = "60%";
-        setTimeout(checkStatus, 2000);
-      } else if (data.status === "done") {
-        bar.style.width = "100%";
-        downloadLink.href = data.download_url;
-        downloadLink.style.display = "inline-block";
-      } else if (data.status === "error") {
-        bar.style.background = "red";
-        bar.style.width = "100%";
-        alert("Error: " + data.message);
-      }
-    }
-    checkStatus();
-  </script>
+  <h1>Your file is being processed...</h1>
+  <p>Job ID: {{ job_id }}</p>
+  <p>Please wait. Your document will be available soon.</p>
+  <a href="/" class="btn">Upload Another File</a>
 </body>
 </html>
