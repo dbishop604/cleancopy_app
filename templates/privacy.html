@@ -4,10 +4,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Privacy Policy — SeamlessDocs</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      margin: 2rem;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 800px;
+      width: 100%;
+    }
+    h1 { text-align: center; margin-bottom: 1rem; color: #111; }
+    h2 { margin-top: 1.5rem; color: #111; }
+    p { color: #555; line-height: 1.6; }
+    footer { margin-top: 2rem; text-align: center; font-size: 0.8rem; color: #777; }
+    footer p { margin: 0.3rem 0; }
+    a { color: #0077cc; text-decoration: none; font-weight: bold; }
+    a:hover { text-decoration: underline; }
+  </style>
 </head>
 <body>
-  {% include 'header.html' %}
-  <main style="padding:2rem;max-width:800px;margin:auto;">
+  <div class="container">
     <h1>Privacy Policy</h1>
     <p><strong>Last Updated:</strong> [Insert Date]</p>
 
@@ -19,28 +46,37 @@
 
     <h2>File Privacy</h2>
     <p>
-      All files you upload are processed automatically by SeamlessDocs. We do not read, review, or access your content.
+      All files you upload are processed automatically by our system. We do not read, review, or access your content.
       Uploaded files are stored temporarily and are automatically deleted from our servers within eight (8) hours of upload.
     </p>
 
     <h2>Use of Information</h2>
     <p>
-      Your email address and account details are used only for authentication and subscription management. We do not sell,
-      rent, or share your personal data with third parties.
+      Your email address and account details are used only for authentication and subscription management.
+      We do not sell, rent, or share your personal data with third parties.
     </p>
 
     <h2>Data Security</h2>
     <p>
-      SeamlessDocs uses industry-standard measures to protect your data while it is being processed. However, as with any
-      online service, we cannot guarantee absolute security.
+      We use industry-standard measures to protect your data while it is being processed.
+      However, as with any online service, we cannot guarantee absolute security.
     </p>
 
     <h2>Policy Updates</h2>
     <p>
-      This Privacy Policy may be updated periodically. Continued use of the service after changes are made constitutes your
-      acceptance of the updated policy.
+      This Privacy Policy may be updated periodically. Continued use of the service after changes are made constitutes
+      your acceptance of the updated policy.
     </p>
-  </main>
-  {% include 'footer.html' %}
+
+    <footer>
+      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
+      <p>
+        <a href="{{ url_for('index') }}">Home</a> |
+        <a href="{{ url_for('contact') }}">Contact</a> |
+        <a href="{{ url_for('terms') }}">Terms of Use</a> |
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      </p>
+    </footer>
+  </div>
 </body>
 </html>
