@@ -8,7 +8,7 @@ from flask import (
 from werkzeug.utils import secure_filename
 from redis import Redis
 from rq import Queue
-from processor import process_file_to_text, text_to_docx
+from rq.job import Job
 from worker import process_file_job
 
 # --- Flask setup ---
@@ -83,45 +83,4 @@ def convert():
     if not redis_conn:
         return jsonify({"status": "error", "message": "Redis is not connected"}), 500
 
-    job = q.enqueue(process_file_job, input_path, output_path, job_id, job_id=job_id)
-
-    return redirect(url_for("success", job_id=job.get_id()))
-
-
-@app.route("/status/<job_id>")
-def job_status(job_id):
-    from rq.job import Job
-    try:
-        job = Job.fetch(job_id, connection=redis_conn)
-        if job.is_finished:
-            return jsonify({"status": "done", "download_url": url_for("download_file", job_id=job_id)})
-        elif job.is_failed:
-            return jsonify({"status": "error", "message": str(job.exc_info)})
-        else:
-            return jsonify({"status": "queued"})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)})
-
-
-@app.route("/download/<job_id>")
-def download_file(job_id):
-    output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.docx")
-    if not os.path.exists(output_path):
-        return "File not found", 404
-    return send_file(
-        output_path,
-        as_attachment=True,
-        download_name=f"{job_id}.docx",
-        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    )
-
-
-# --- Health check ---
-@app.route("/healthz")
-def healthz():
-    return "OK", 200
-
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    job = q.enqueue(process_fi_
