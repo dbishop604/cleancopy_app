@@ -3,93 +3,49 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeamlessDocs — Upload</title>
+  <title>SeamlessDocs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f9f9f9;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
+      margin: 0; padding: 0;
+      display: flex; justify-content: center; align-items: center;
       min-height: 100vh;
-      justify-content: space-between;
     }
     .container {
-      background: #fff;
-      max-width: 700px;
-      margin: 3rem auto;
-      padding: 2rem;
-      border-radius: 8px;
+      background: #fff; padding: 2rem; border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      text-align: center;
+      max-width: 600px; width: 100%; text-align: center;
     }
-    h1 {
-      font-size: 28px;
-      margin-bottom: 1rem;
-      color: #111;
-    }
-    p {
-      font-size: 16px;
-      color: #444;
-      margin-bottom: 1rem;
-      line-height: 1.5;
-    }
-    form {
-      margin-top: 1.5rem;
-    }
-    input[type="file"] {
-      margin: 1rem 0;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
+    h1 { margin-bottom: 1rem; color: #111; }
+    p { color: #555; line-height: 1.6; }
+    .file-input { margin: 1rem 0; }
+    input[type="file"] { display: block; margin: 0.5rem auto; }
     .btn {
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 6px;
-      display: inline-block;
-      text-decoration: none;
-      margin-top: 10px;
+      background: #007BFF; color: #fff; border: none;
+      padding: 10px 20px; font-size: 16px;
+      cursor: pointer; border-radius: 6px;
+      text-decoration: none; display: inline-block;
     }
-    .btn:hover {
-      background-color: #0056b3;
-    }
-    .terms {
-      margin-top: 1.2rem;
-      font-size: 0.9rem;
-      color: #555;
-    }
-    .terms a {
-      color: #007BFF;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .terms a:hover {
-      text-decoration: underline;
-    }
-    footer {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 0.8rem;
-      color: #777;
-    }
-    footer a {
-      color: #007BFF;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    footer a:hover {
-      text-decoration: underline;
-    }
+    .btn:hover { background: #0056b3; }
+    footer { margin-top: 2rem; font-size: 0.8rem; color: #777; }
+    footer a { color: #007BFF; text-decoration: none; font-weight: bold; }
+    footer a:hover { text-decoration: underline; color: #0056b3; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>SeamlessDocs</h1>
-    <p>
-      Upload your PDF or image f
+    <p>Upload your PDF or image files (JPG, PNG, TIFF).<br>
+    Convert them into clean, editable documents (DOCX or TXT).</p>
+
+    <form action="/convert" method="POST" enctype="multipart/form-data">
+      <div class="file-input">
+        <label for="fileUpload">Choose a file:</label>
+        <input id="fileUpload" type="file" name="fileUpload" required/>
+      </div>
+      <div>
+        <label for="format">Output format:</label>
+        <select id="format" name="format">
+          <option value="docx">DOCX</option>
+          <option val
