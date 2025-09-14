@@ -44,7 +44,9 @@
       color: #555;
       margin-bottom: 1.5rem;
     }
-    .row { margin: 1rem 0; }
+    .row {
+      margin: 1rem 0;
+    }
     input[type="file"], select {
       padding: 0.5rem;
       font-size: 14px;
@@ -96,7 +98,6 @@
       font-weight: bold;
     }
     footer a:hover { text-decoration: underline; }
-
     /* Loader overlay */
     #loaderOverlay {
       display: none;
@@ -104,6 +105,7 @@
       inset: 0;
       background: rgba(255,255,255,0.95);
       z-index: 1000;
+      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
@@ -115,13 +117,13 @@
       color: #0077cc;
     }
     .bar {
+      position: relative;
       width: 70%;
       max-width: 400px;
       height: 20px;
       background: #eee;
       border-radius: 999px;
       overflow: hidden;
-      position: relative;
     }
     .bar span {
       display: block;
@@ -142,7 +144,6 @@
     .error {
       color: red;
       font-weight: bold;
-      margin-top: 1rem;
     }
   </style>
 </head>
@@ -155,7 +156,7 @@
     </p>
     <p class="plan"><strong>Free Plan:</strong> Up to 5MB conversions.</p>
 
-    <form id="uploadForm" enctype="multipart/form-data">
+    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
       <div class="row">
         <input type="file" name="fileUpload" id="fileUpload" disabled>
       </div>
@@ -219,15 +220,8 @@
       uploadBtn.disabled = !enabled;
     });
 
-    form.addEventListener("submit", async function(e) {
-      e.preventDefault();
-
-      const file = fileUpload.files[0];
-      if (!file) {
-        alert("Please select a file.");
-        return;
-      }
-
+    form.addEventListener("submit", async function(event) {
+      event.preventDefault();
       overlay.style.display = "flex";
       progressBar.style.width = "0%";
       percentLabel.textContent = "0%";
@@ -260,7 +254,7 @@
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
           downloadLink.href = url;
-          downloadLink.download = file.name.replace(/\.[^.]+$/, "") + "." + formatSelect.value;
+          downloadLink.download = fileUpload.files[0].name.replace(/\.[^.]+$/, "") + "." + formatSelect.value;
           loaderMsg.textContent = "✅ Conversion complete!";
           downloadLink.style.display = "inline-block";
           progressBar.style.width = "100%";
