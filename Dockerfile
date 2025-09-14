@@ -27,3 +27,6 @@ COPY . /app/
 
 # Expose port for web service
 ENV PORT=10000
+
+# Default command (Render overrides this with startCommand in render.yaml if present)
+CMD ["gunicorn", "-w", "2", "-k", "gthread", "-b", "0.0.0.0:10000", "app:app"]
