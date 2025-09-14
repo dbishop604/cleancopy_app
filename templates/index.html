@@ -193,3 +193,71 @@
     const formatSelect = document.getElementById("format");
     const uploadBtn = document.getElementById("uploadBtn");
     const form = document.getElementById("uploadForm");
+    const overlay = document.getElementById("loaderOverlay");
+    const progressBar = document.getElementById("progressBar");
+    const errorMsg = document.getElementById("errorMsg");
+
+    termsCheck.addEventListener("change", function() {
+      const enabled = this.checked;
+      fileUpload.disabled = !enabled;
+      formatSelect.disabled = !enabled;
+      uploadBtn.disabled = !enabled;
+    });
+
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+      errorMsg.style.display = "none";
+
+      const file = fileUpload.files[0];
+      if (!file) {
+        errorMsg.textContent = "⚠️ Please choose a file first.";
+        errorMsg.style.display = "block";
+        return;
+      }
+
+      overlay.style.display = "flex";
+      progressBar.style.width = "0%";
+
+      const data = new FormData();
+      data.append("fileUpload", file);
+      data.append("terms", "yes");
+      data.append("format", formatSelect.value);
+
+      try {
+        const response = await fetch("{{ url_for('convert') }}", {
+          method: "POST",
+          body: data
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || "Unknown server error");
+        }
+
+        const blob = await response.blob();
+        const disposition = response.headers.get("Content-Disposition");
+        let filename = "converted_file";
+        if (disposition && disposition.includes("filename=")) {
+          filename = disposition.split("filename=")[1].replace(/['"]/g, "");
+        }
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        overlay.style.display = "none";
+
+      } catch (err) {
+        overlay.style.display = "none";
+        errorMsg.textContent = "❌ " + err.message;
+        errorMsg.style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>
