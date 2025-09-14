@@ -1,23 +1,29 @@
 import os
-import uuid
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
+import io
+from flask import (
+    Flask, render_template, request, redirect,
+    url_for, flash, send_file, jsonify
+)
 from werkzeug.utils import secure_filename
 from redis import Redis
 from rq import Queue
-from worker import process_file_job
+from processor import process_file_to_text, text_to_docx
 
+# --- Flask setup ---
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "devkey")
 
-# Shared disk paths (both web + worker use /data mount on Render)
-UPLOAD_FOLDER = "/data/uploads"
-OUTPUT_FOLDER = "/data/outputs"
+UPLOAD_FOLDER = "uploads"
+CONVERTED_FOLDER = "converted"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
-# Redis connection
-redis_conn = Redis.from_url(os.environ["REDIS_URL"])
-q = Queue(connection=redis_conn)
+# --- Redis connection (optional for web) ---
+redis_url = os.environ.get("REDIS_URL")
+redis_conn = Redis.from_url(redis_url) if redis_url else None
+q = Queue(connection=redis_conn) if redis_conn else None
+
+# --- Routes ---
 
 @app.route("/")
 def index():
@@ -36,71 +42,64 @@ def success():
     return render_template("success.html")
 
 @app.route("/cancel")
-def cancel_page():
+def cancel():
     return render_template("cancel.html")
 
 @app.route("/coffee")
 def coffee():
     return render_template("coffee.html")
 
-@app.route("/upload", methods=["POST"])
-def upload_file():
+@app.route("/convert", methods=["POST"])
+def convert():
     if "terms" not in request.form:
-        flash("⚠️ You must agree to the terms before uploading.")
+        flash("⚠️ You must agree to the terms of service and privacy policy before uploading.")
         return redirect(url_for("index"))
 
     if "fileUpload" not in request.files:
         flash("⚠️ No file selected")
         return redirect(url_for("index"))
 
+    if not redis_conn or not q:
+        return jsonify({"status": "error", "message": "Redis is not connected. Please try again shortly."}), 500
+
     f = request.files["fileUpload"]
     if f.filename == "":
         flash("⚠️ No selected file")
         return redirect(url_for("index"))
 
-    job_id = str(uuid.uuid4())
-    filename = f"{job_id}_{secure_filename(f.filename)}"
-    input_path = os.path.join(UPLOAD_FOLDER, filename)
-    output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.docx")
+    filename = secure_filename(f.filename)
+    temp_path = os.path.join("/tmp", filename)
+    f.save(temp_path)
 
-    f.save(input_path)
+    try:
+        text = process_file_to_text(temp_path, join_strategy="smart")
 
-    job = q.enqueue(process_file_job, input_path, output_path, job_id)
+        fmt = request.form.get("format", "docx")
+        if fmt == "txt":
+            return send_file(
+                io.BytesIO(text.encode("utf-8")),
+                as_attachment=True,
+                download_name=filename.rsplit(".", 1)[0] + ".txt",
+                mimetype="text/plain"
+            )
+        else:
+            buf = text_to_docx(text)
+            return send_file(
+                buf,
+                as_attachment=True,
+                download_name=filename.rsplit(".", 1)[0] + ".docx",
+                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
 
-    return jsonify({"job_id": job.get_id()})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
-@app.route("/status/<job_id>")
-def status(job_id):
-    job = q.fetch_job(job_id)
-    if job is None:
-        return jsonify({"status": "not_found"}), 404
-
-    if job.is_finished:
-        return jsonify({"status": "finished", "download_url": f"/download/{job_id}"})
-    elif job.is_failed:
-        return jsonify({"status": "failed", "error": str(job.exc_info)})
-    else:
-        return jsonify({"status": "processing"})
-
-@app.route("/cancel/<job_id>", methods=["POST"])
-def cancel_job(job_id):
-    job = q.fetch_job(job_id)
-    if job is None:
-        return jsonify({"status": "not_found"}), 404
-    job.cancel()
-    return jsonify({"status": "cancelled"})
-
-@app.route("/download/<job_id>")
-def download(job_id):
-    output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.docx")
-    if not os.path.exists(output_path):
-        return jsonify({"error": "File not ready"}), 404
-    return send_file(output_path, as_attachment=True)
-
+# --- Health check for Render ---
 @app.route("/healthz")
 def healthz():
     return "OK", 200
 
+# --- Main entrypoint ---
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
