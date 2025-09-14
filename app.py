@@ -12,7 +12,7 @@ from processor import process_file_to_text, text_to_docx
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "devkey")
 
-# Configure logging for Render logs
+# Configure logging
 logging.basicConfig(level=logging.INFO)
 
 UPLOAD_FOLDER = "uploads"
@@ -26,29 +26,23 @@ os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 def index():
     return render_template("index.html", plan="free")
 
-
 @app.route("/terms")
 def terms():
     return render_template("terms.html")
-
 
 @app.route("/privacy")
 def privacy():
     return render_template("privacy.html")
 
-
 @app.route("/success")
 def success():
     return render_template("success.html")
-
 
 @app.route("/cancel")
 def cancel():
     return render_template("cancel.html")
 
-
 # --- File Conversion Route ---
-
 @app.route("/convert", methods=["POST"])
 def convert():
     try:
@@ -91,17 +85,4 @@ def convert():
             return send_file(
                 buf,
                 as_attachment=True,
-                download_name=filename.rsplit(".", 1)[0] + ".docx",
-                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
-
-    except Exception as e:
-        app.logger.error(f"Conversion failed: {e}", exc_info=True)
-        flash(f"❌ Conversion failed: {e}")
-        return redirect(url_for("cancel"))
-
-
-# --- Main entrypoint ---
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))  # Render requires binding to PORT env var
-    app.run(host="0.0.0.0", port=port)
+                download_name=filename.rsplit(".", 1)[0] + "._
