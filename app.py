@@ -97,12 +97,14 @@ def status(job_id):
     if job.is_finished:
         return jsonify({
             "status": "finished",
+            "progress": 100,
             "download_url": url_for("download_file", filename=job.result["output"].split("/")[-1])
         })
     elif job.is_failed:
         return jsonify({"status": "error", "message": str(job.exc_info)})
     else:
-        return jsonify({"status": "pending"})
+        progress = job.meta.get("progress", 0)
+        return jsonify({"status": "pending", "progress": progress})
 
 @app.route("/download/<filename>")
 def download_file(filename):
