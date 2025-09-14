@@ -25,83 +25,23 @@
       width: 100%;
       text-align: center;
     }
-    img.logo {
-      max-width: 140px;
-      margin-bottom: 1rem;
-    }
-    h1 {
-      margin: 0.25rem 0;
-      font-size: 2rem;
-      color: #111;
-    }
-    .tagline {
-      font-size: 1rem;
-      color: #444;
-      margin: 0.75rem 0 1.5rem 0;
-    }
-    .plan {
-      font-size: 0.95rem;
-      color: #555;
-      margin-bottom: 1.5rem;
-    }
-    .row {
-      margin: 1rem 0;
-    }
-    input[type="file"], select {
-      padding: 0.5rem;
-      font-size: 14px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-    }
+    img.logo { max-width: 140px; margin-bottom: 1rem; }
+    h1 { font-size: 2rem; margin: 0.25rem 0; }
+    .tagline { font-size: 1rem; margin: 0.75rem 0 1.5rem; color: #444; }
+    .plan { font-size: 0.95rem; margin-bottom: 1.5rem; color: #555; }
     .btn {
-      display: inline-block;
       padding: 0.7rem 1.4rem;
-      border: none;
-      border-radius: 6px;
-      background: #0077cc;
-      color: #fff;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
+      border: none; border-radius: 6px;
+      background: #0077cc; color: #fff;
+      font-weight: bold; cursor: pointer;
     }
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .btn-coffee {
-      background-color: #FFD200; /* Yellow button */
-      color: #111;
-    }
-    .agree {
-      font-size: 14px;
-      color: #111;
-      margin-top: 1rem;
-      display: block;
-    }
-    .agree a {
-      color: #0077cc;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .agree a:hover { text-decoration: underline; }
-    .notice {
-      font-size: 0.9rem;
-      color: #555;
-      margin-top: 1.5rem;
-      line-height: 1.4;
-    }
-    footer {
-      margin-top: 2rem;
-      font-size: 10.5px; /* ~8pt */
-      color: #777;
-      line-height: 1.4;
-    }
-    footer a {
-      color: #0077cc;
-      text-decoration: none;
-      font-weight: bold;
-    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .agree { font-size: 14px; margin-top: 1rem; display: block; }
+    .notice { font-size: 0.9rem; margin-top: 1.5rem; color: #555; }
+    footer { margin-top: 2rem; font-size: 10.5px; color: #777; }
+    footer a { color: #0077cc; font-weight: bold; text-decoration: none; }
     footer a:hover { text-decoration: underline; }
+
     /* Loader overlay */
     #loaderOverlay {
       display: none;
@@ -109,80 +49,56 @@
       inset: 0;
       background: rgba(255,255,255,0.95);
       z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       gap: 1rem;
     }
-    #loaderOverlay .msg {
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #0077cc;
-    }
     .bar {
-      position: relative;
-      width: 70%;
-      max-width: 400px;
-      height: 12px;
-      background: #eee;
-      border-radius: 999px;
-      overflow: hidden;
+      width: 70%; max-width: 400px; height: 20px;
+      background: #eee; border-radius: 999px;
+      overflow: hidden; position: relative;
     }
     .bar span {
-      display: block;
-      height: 100%;
-      width: 0%;
-      background: #FFD200; /* yellow progress fill */
-      transition: width 0.3s linear;
+      display: block; height: 100%; width: 0;
+      background: #0077cc; transition: width 0.3s ease;
     }
     .percent-label {
-      margin-top: 0.5rem;
-      font-size: 14px;
-      font-weight: bold;
-      color: #111;
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 12px; font-weight: bold; color: #fff;
     }
+    .error { color: red; font-weight: bold; margin-top: 1rem; }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Logo -->
     <img src="/static/logo.png" alt="SeamlessDocs Logo" class="logo"/>
     <h1>SeamlessDocs</h1>
     <p class="tagline">
-      Upload your <strong>PDF</strong> or image file (<strong>JPG, PNG, TIFF</strong>) and SeamlessDocs will convert it into a clean, editable <strong>DOCX</strong> or <strong>TXT</strong> file.
+      Upload your <strong>PDF</strong> or image file (<strong>JPG, PNG, TIFF</strong>) 
+      and SeamlessDocs will convert it into a clean, editable <strong>DOCX</strong> or <strong>TXT</strong> file.
     </p>
     <p class="plan"><strong>Free Plan:</strong> Up to 5MB conversions.</p>
 
-    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
-      <div class="row">
-        <input type="file" name="fileUpload" id="fileUpload" disabled>
-      </div>
-      <div class="row">
-        <label for="format" style="font-size:14px;">Output format:</label>
-        <select name="format" id="format" disabled>
-          <option value="docx">DOCX</option>
-          <option value="txt">TXT</option>
-        </select>
-      </div>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" name="fileUpload" id="fileUpload" disabled><br><br>
+      <label for="format" style="font-size:14px;">Output format:</label>
+      <select name="format" id="format" disabled>
+        <option value="docx">DOCX</option>
+        <option value="txt">TXT</option>
+      </select><br><br>
       <label class="agree">
         <input type="checkbox" id="termsCheck" name="terms">
         By continuing, you agree to the
         <a href="{{ url_for('terms') }}">terms of service</a> and
         <a href="{{ url_for('privacy') }}">privacy policy</a>.
-      </label>
-      <div class="row">
-        <button type="submit" id="uploadBtn" class="btn" disabled>Upload File</button>
-      </div>
+      </label><br>
+      <button type="submit" id="uploadBtn" class="btn" disabled>Upload File</button>
     </form>
 
-    <p class="notice">
-      Download your converted file within 8 hours — files are automatically deleted after that time. We do not read, store, or share them.
-    </p>
-
-    <footer>
-      © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
-      <a href="{{ url_for('terms') }}">Terms of Service</a> |
+    <p class="notice">Download your converted file within 8 hours — files are deleted after that time.</p>
+    <footer>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
+      <a href="{{ url_for('terms') }}">Terms of Use</a> |
       <a href="{{ url_for('privacy') }}">Privacy Policy</a>
     </footer>
   </div>
@@ -190,11 +106,8 @@
   <!-- Loader overlay -->
   <div id="loaderOverlay">
     <div class="msg" id="loaderMsg">Processing your file… please wait.</div>
-    <div class="bar">
-      <span id="progressBar"></span>
-    </div>
-    <div class="percent-label" id="percentLabel">0%</div>
-    <a id="downloadLink" class="btn btn-coffee" style="display:none;" download>⬇ Download File</a>
+    <div class="bar"><span id="progressBar"></span><div class="percent-label" id="percentLabel">0%</div></div>
+    <a id="downloadLink" class="btn" style="display:none;" download>⬇ Download File</a>
     <div class="error" id="errorMsg" style="display:none;"></div>
   </div>
 
@@ -211,14 +124,14 @@
     const downloadLink = document.getElementById("downloadLink");
     const errorMsg = document.getElementById("errorMsg");
 
-    termsCheck.addEventListener("change", function() {
-      const enabled = this.checked;
+    termsCheck.addEventListener("change", () => {
+      const enabled = termsCheck.checked;
       fileUpload.disabled = !enabled;
       formatSelect.disabled = !enabled;
       uploadBtn.disabled = !enabled;
     });
 
-    form.addEventListener("submit", async function(e) {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
       overlay.style.display = "flex";
       progressBar.style.width = "0%";
@@ -228,8 +141,6 @@
       errorMsg.style.display = "none";
 
       const formData = new FormData(form);
-
-      // Fake progress bar (fills gradually to 95%)
       let progress = 0;
       const fakeProgress = setInterval(() => {
         if (progress < 95) {
@@ -242,25 +153,26 @@
 
       try {
         const response = await fetch("{{ url_for('convert') }}", {
-          method: "POST",
-          body: formData
+          method: "POST", body: formData
         });
-
         clearInterval(fakeProgress);
 
-        if (response.ok && response.headers.get("content-type")?.includes("application")) {
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          downloadLink.href = url;
-          downloadLink.download = fileUpload.files[0].name.replace(/\.[^.]+$/, "") + "." + formatSelect.value;
-          progressBar.style.width = "100%";
-          percentLabel.textContent = "100%";
-          loaderMsg.textContent = "✅ Conversion complete!";
-          downloadLink.style.display = "inline-block";
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            progressBar.style.width = "100%";
+            percentLabel.textContent = "100%";
+            loaderMsg.textContent = "✅ Conversion complete!";
+            downloadLink.href = data.download_url;
+            downloadLink.style.display = "inline-block";
+          } else {
+            loaderMsg.textContent = "❌ Conversion failed.";
+            errorMsg.textContent = data.message;
+            errorMsg.style.display = "block";
+          }
         } else {
-          const data = await response.json().catch(() => ({}));
           loaderMsg.textContent = "❌ Conversion failed.";
-          errorMsg.textContent = data.message || "An error occurred. Please try again.";
+          errorMsg.textContent = "Server error.";
           errorMsg.style.display = "block";
         }
       } catch (err) {
