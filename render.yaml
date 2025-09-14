@@ -14,8 +14,7 @@ services:
       name: data
       mountPath: /data
       sizeGB: 1
-    buildCommand: ""  # Let Dockerfile handle build
-    # 🚫 Removed startCommand completely
+    buildCommand: ""
 
   - type: worker
     name: seamlessdocs-worker
