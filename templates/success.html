@@ -25,15 +25,8 @@
       width: 100%;
       text-align: center;
     }
-    h1 {
-      color: #111;
-      margin-bottom: 1rem;
-    }
-    p {
-      color: #555;
-      line-height: 1.6;
-      margin: 1rem 0;
-    }
+    h1 { color: #111; margin-bottom: 1rem; }
+    p { color: #555; line-height: 1.6; margin: 1rem 0; }
     .btn {
       display: inline-block;
       margin-top: 1rem;
@@ -47,9 +40,8 @@
       cursor: pointer;
       text-decoration: none;
     }
-    .btn:hover {
-      background: #005fa3;
-    }
+    .btn:hover { background: #005fa3; }
+    .loading { color: #777; margin-top: 1rem; }
     footer {
       margin-top: 2rem;
       font-size: 10.5px; /* ~8pt */
@@ -67,14 +59,15 @@
 </head>
 <body>
   <div class="container">
-    <h1>✅ Conversion Successful!</h1>
-    <p>Your file has been converted successfully and is ready to download.</p>
+    <h1>⏳ Processing Your File...</h1>
+    <p>Please wait while we convert your document. This may take a few moments.</p>
 
-    {% if download_url %}
-      <a href="{{ download_url }}" class="btn" download>⬇ Download Your File</a>
-    {% else %}
-      <p><em>No download link found. Please return to the <a href="{{ url_for('index') }}">home page</a> and try again.</em></p>
-    {% endif %}
+    <div id="loading" class="loading">Converting...</div>
+    <div id="download" style="display: none;">
+      <h2>✅ Conversion Complete!</h2>
+      <p>Your file is ready to download:</p>
+      <a id="downloadLink" class="btn">⬇ Download Your File</a>
+    </div>
 
     <footer>
       <p>
@@ -85,5 +78,29 @@
       </p>
     </footer>
   </div>
+
+  <script>
+    async function checkStatus() {
+      try {
+        const response = await fetch("/status/{{ job_id }}");
+        const data = await response.json();
+
+        if (data.status === "finished") {
+          document.getElementById("loading").style.display = "none";
+          document.getElementById("download").style.display = "block";
+          document.getElementById("downloadLink").href = data.download_url;
+        } else if (data.status === "pending") {
+          setTimeout(checkStatus, 3000);
+        } else if (data.status === "error") {
+          document.getElementById("loading").innerText = "❌ Conversion failed: " + data.message;
+        }
+      } catch (err) {
+        document.getElementById("loading").innerText = "❌ Error checking job status.";
+      }
+    }
+
+    // Start polling
+    checkStatus();
+  </script>
 </body>
 </html>
