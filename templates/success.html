@@ -1,30 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Conversion in Progress</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 50px; color: #333; }
-    h1 { font-size: 26px; }
-    .btn {
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 6px;
-      margin-top: 20px;
-      display: inline-block;
-      text-decoration: none;
+  <meta charset="utf-8">
+  <title>Processing…</title>
+  <script>
+    async function checkStatus() {
+      const jobId = "{{ job_id }}";
+      const response = await fetch(`/status/${jobId}`);
+      const data = await response.json();
+
+      if (data.status === "done") {
+        document.getElementById("status").innerHTML = `
+          ✅ Done! <br>
+          <a href="/download/${jobId}">Download your file</a>
+        `;
+      } else if (data.status === "error") {
+        document.getElementById("status").innerHTML = "❌ Error: " + data.message;
+      } else {
+        setTimeout(checkStatus, 3000); // poll every 3 seconds
+      }
     }
-    .btn:hover { background-color: #0056b3; }
-  </style>
+    window.onload = checkStatus;
+  </script>
 </head>
 <body>
-  <h1>Your file is being processed...</h1>
+  <h1>Your file is being processed…</h1>
   <p>Job ID: {{ job_id }}</p>
-  <p>Please wait. Your document will be available soon.</p>
-  <a href="/" class="btn">Upload Another File</a>
+  <div id="status">⏳ Please wait. Your document will be available soon.</div>
+  <p><a href="/">Upload Another File</a></p>
 </body>
 </html>
