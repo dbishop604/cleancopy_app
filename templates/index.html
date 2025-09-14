@@ -8,8 +8,8 @@
     .upload-box { border: 2px dashed #999; padding: 20px; text-align: center; }
     .progress { width: 100%; background: #eee; border-radius: 10px; overflow: hidden; margin-top: 20px; }
     .progress-bar { width: 0%; height: 20px; background: #4caf50; transition: width 0.3s; }
-    #status { margin-top: 10px; }
-    button { margin-top: 15px; padding: 10px 20px; font-size: 1rem; }
+    #status { margin-top: 10px; font-weight: bold; }
+    button { margin-top: 15px; padding: 10px 20px; font-size: 1rem; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -53,10 +53,7 @@
       status.innerText = "Uploading...";
       bar.style.width = "10%";
 
-      const res = await fetch("/upload", {
-        method: "POST",
-        body: formData
-      });
+      const res = await fetch("/upload", { method: "POST", body: formData });
       const data = await res.json();
 
       if (data.error) {
@@ -77,19 +74,20 @@
       const data = await res.json();
 
       if (data.status === "processing") {
-        status.innerText = "Processing...";
-        bar.style.width = (parseInt(bar.style.width) + 10) % 90 + "%";
+        let width = parseInt(bar.style.width) || 40;
+        width = Math.min(width + 10, 95);
+        bar.style.width = width + "%";
+        status.innerText = "⏳ Processing...";
       }
       else if (data.status === "finished") {
         clearInterval(pollInterval);
-        status.innerText = "✅ Done! Download ready.";
         bar.style.width = "100%";
-        window.location = data.download_url;
+        status.innerHTML = `✅ Done! <a href="${data.download_url}">Download your file</a>`;
       }
       else if (data.status === "failed") {
         clearInterval(pollInterval);
-        status.innerText = "❌ Failed: " + data.error;
         bar.style.width = "0%";
+        status.innerText = "❌ Conversion failed: " + data.error;
       }
     }
 
@@ -97,8 +95,8 @@
       if (!currentJobId) return;
       await fetch(`/cancel/${currentJobId}`, { method: "POST" });
       clearInterval(pollInterval);
-      status.innerText = "❌ Conversion cancelled.";
       bar.style.width = "0%";
+      status.innerText = "❌ Conversion cancelled.";
     });
   </script>
 </body>
