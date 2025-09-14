@@ -8,12 +8,13 @@ services:
       - key: PORT
         value: 10000
       - key: REDIS_URL
-        value: redis://red-d337uoqdbo4c73avqvng:6379
+        sync: false   # linked to your Redis instance
     healthCheckPath: /healthz
     disk:
       name: data
       mountPath: /data
       sizeGB: 1
+    buildCommand: ""
     startCommand: gunicorn -w 2 -k gthread -b 0.0.0.0:$PORT app:app
 
   - type: worker
@@ -23,9 +24,14 @@ services:
     autoDeploy: true
     envVars:
       - key: REDIS_URL
-        value: redis://red-d337uoqdbo4c73avqvng:6379
+        sync: false
     disk:
       name: data
       mountPath: /data
       sizeGB: 1
+    buildCommand: ""
     startCommand: python worker.py
+
+  - type: redis
+    name: seamlessdocs
+    plan: starter
