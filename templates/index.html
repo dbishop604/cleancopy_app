@@ -118,16 +118,18 @@
     .bar {
       width: 70%;
       max-width: 400px;
-      height: 10px;
+      height: 12px;
       background: #eee;
       border-radius: 999px;
       overflow: hidden;
+      border: 1px solid #ccc;
     }
     .bar span {
       display: block;
       height: 100%;
       width: 0%;
       background: #0077cc;
+      transition: width 0.2s ease;
     }
     #errorMsg {
       margin-top: 1rem;
@@ -204,7 +206,7 @@
       uploadBtn.disabled = !enabled;
     });
 
-    form.addEventListener("submit", async function(e) {
+    form.addEventListener("submit", function(e) {
       e.preventDefault();
       errorMsg.style.display = "none";
 
@@ -223,40 +225,52 @@
       data.append("terms", "yes");
       data.append("format", formatSelect.value);
 
-      try {
-        const response = await fetch("{{ url_for('convert') }}", {
-          method: "POST",
-          body: data
-        });
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "{{ url_for('convert') }}", true);
+      xhr.responseType = "blob";
 
-        if (!response.ok) {
-          const err = await response.json();
-          throw new Error(err.error || "Unknown server error");
+      // Upload progress
+      xhr.upload.addEventListener("progress", function(e) {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = percent + "%";
         }
+      });
 
-        const blob = await response.blob();
-        const disposition = response.headers.get("Content-Disposition");
-        let filename = "converted_file";
-        if (disposition && disposition.includes("filename=")) {
-          filename = disposition.split("filename=")[1].replace(/['"]/g, "");
+      // Response handler
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          const disposition = xhr.getResponseHeader("Content-Disposition");
+          let filename = "converted_file";
+          if (disposition && disposition.includes("filename=")) {
+            filename = disposition.split("filename=")[1].replace(/['"]/g, "");
+          }
+
+          const blob = xhr.response;
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+
+          overlay.style.display = "none";
+        } else {
+          overlay.style.display = "none";
+          errorMsg.textContent = "❌ Error: " + xhr.status + " - " + xhr.statusText;
+          errorMsg.style.display = "block";
         }
+      };
 
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-
+      xhr.onerror = function() {
         overlay.style.display = "none";
-
-      } catch (err) {
-        overlay.style.display = "none";
-        errorMsg.textContent = "❌ " + err.message;
+        errorMsg.textContent = "❌ Network error or server unreachable.";
         errorMsg.style.display = "block";
-      }
+      };
+
+      xhr.send(data);
     });
   </script>
 </body>
