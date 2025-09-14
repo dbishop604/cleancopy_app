@@ -1,28 +1,193 @@
-<form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
-  <input type="file" name="fileUpload" id="fileUpload" disabled><br><br>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SeamlessDocs — Upload</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      color: #555;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem;
+    }
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 800px;
+      width: 100%;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #111;
+    }
+    h2 { margin-top: 1.5rem; color: #111; }
+    .plan-box {
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: #f0f0f0;
+      border-radius: 6px;
+    }
+    p {
+      font-size: 0.95em;
+      color: #555;
+      line-height: 1.6;
+    }
+    .notice {
+      margin-top: 1rem;
+      font-size: 0.9em;
+      color: #555;
+    }
+    .btn {
+      display: inline-block;
+      margin: 0.3rem 0.3rem 0.3rem 0;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn-primary { background-color: #0077cc; color: white; }
+    .btn-secondary { background-color: #eee; color: #333; }
+    /* Flash messages */
+    .flash-messages { margin: 1rem 0; padding: 0.75rem; border-radius: 4px; }
+    .flash-error { background: #ffe5e5; border: 1px solid #cc0000; color: #cc0000; }
+    .flash-success { background: #e5ffe5; border: 1px solid #009900; color: #009900; }
+    /* Progress bar */
+    #progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: #eee; display: none; }
+    #progress-bar { height: 100%; width: 0; background: lavender; transition: width 0.4s ease; }
+    /* Donation button */
+    #donate-section { display:none; margin-top:2rem; text-align:center; }
+    #donate-section a {
+      background:#ffdd00; 
+      color:#111; 
+      padding:0.75rem 1.5rem; 
+      border-radius:6px; 
+      font-weight:bold; 
+      text-decoration:none;
+    }
+  </style>
+</head>
+<body>
+  {% include 'header.html' %}
 
-  <label>
-    <input type="checkbox" id="termsCheck" name="terms" value="accepted">
-    I have read and agree to the 
-    <a href="{{ url_for('terms') }}" target="_blank">Terms of Use</a> and 
-    <a href="{{ url_for('privacy') }}" target="_blank">Privacy Policy</a>.
-  </label><br><br>
+  <!-- Progress bar -->
+  <div id="progress-container"><div id="progress-bar"></div></div>
 
-  <label for="format">Output format:</label>
-  <select name="format" id="format" disabled>
-    <option value="docx">DOCX</option>
-    <option value="txt">TXT</option>
-  </select><br><br>
+  <main>
+    <div class="container">
+      <h1>SeamlessDocs — CleanCopy OCR</h1>
 
-  <button type="submit" id="uploadBtn" disabled>Upload File</button>
+      {% if user and plan == "paid" %}
+        <div class="plan-box">
+          <strong>Logged in as:</strong> {{ user.id }} <br>
+          <strong>Plan:</strong> Pro (50MB uploads) <br>
+          <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+          <a href="{{ url_for('billing_portal') }}" class="btn btn-primary">Manage Billing</a>
+        </div>
+      {% else %}
+        <div class="plan-box">
+          <strong>Plan:</strong> Free (5MB uploads) <br>
+          <a href="{{ url_for('upgrade') }}" class="btn btn-primary">Upgrade to Pro</a>
+        </div>
+      {% endif %}
 
-  <p class="notice">Your files are automatically deleted after 8 hours. We do not read, store, or share them.</p>
-</form>
+      <!-- Flash messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash-messages flash-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
 
-<!-- Hidden donation button -->
-<div id="donate-section" style="display:none;margin-top:2rem;text-align:center;">
-  <a href="https://www.buymeacoffee.com/yourusername" target="_blank" 
-     style="background:#ffdd00;color:#111;padding:0.75rem 1.5rem;border-radius:6px;font-weight:bold;text-decoration:none;">
-    ☕ Buy Us a Coffee
-  </a>
-</div>
+      <h2>Upload Your File</h2>
+      <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
+        <!-- File upload input -->
+        <input type="file" name="fileUpload" id="fileUpload" disabled><br><br>
+
+        <!-- Terms checkbox -->
+        <label>
+          <input type="checkbox" id="termsCheck" name="terms" value="accepted">
+          I have read and agree to the 
+          <a href="{{ url_for('terms') }}" target="_blank">Terms of Use</a> and 
+          <a href="{{ url_for('privacy') }}" target="_blank">Privacy Policy</a>.
+        </label><br><br>
+
+        <!-- Format choice -->
+        <label for="format">Output format:</label>
+        <select name="format" id="format" disabled>
+          <option value="docx">DOCX</option>
+          <option value="txt">TXT</option>
+        </select><br><br>
+
+        <!-- Upload button -->
+        <button type="submit" id="uploadBtn" disabled>Upload File</button>
+
+        <!-- Reassurance line -->
+        <p class="notice">Your files are automatically deleted after 8 hours. We do not read, store, or share them.</p>
+      </form>
+
+      <!-- Donation button -->
+      <div id="donate-section">
+        <a href="https://www.buymeacoffee.com/yourusername" target="_blank">
+          ☕ Buy Us a Coffee
+        </a>
+      </div>
+    </div>
+  </main>
+
+  {% include 'footer.html' %}
+
+  <script>
+    const termsCheck = document.getElementById('termsCheck');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileUpload = document.getElementById('fileUpload');
+    const formatSelect = document.getElementById('format');
+    const form = document.getElementById('uploadForm');
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress-bar');
+    const donateSection = document.getElementById('donate-section');
+
+    // Enable inputs only if Terms are accepted
+    termsCheck.addEventListener('change', function() {
+      const enabled = this.checked;
+      uploadBtn.disabled = !enabled;
+      fileUpload.disabled = !enabled;
+      formatSelect.disabled = !enabled;
+    });
+
+    // Progress bar animation + donation button on submit
+    form.addEventListener('submit', function() {
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '0%';
+      donateSection.style.display = 'block'; // show donation button
+
+      let width = 0;
+      const interval = setInterval(() => {
+        if (width >= 90) {
+          clearInterval(interval);
+        } else {
+          width += 10;
+          progressBar.style.width = width + "%";
+        }
+      }, 500);
+    });
+  </script>
+</body>
+</html>
