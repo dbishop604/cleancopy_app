@@ -7,16 +7,16 @@ from flask import (
 from werkzeug.utils import secure_filename
 from processor import process_file_to_text, text_to_docx
 
-# --- Flask setup ---
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "devkey")
+
 UPLOAD_FOLDER = "uploads"
 CONVERTED_FOLDER = "converted"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
 
-# --- Routes ---
+# --- Core Routes ---
 
 @app.route("/")
 def index():
@@ -33,11 +33,62 @@ def privacy():
     return render_template("privacy.html")
 
 
-@app.route("/contact", methods=["GET", "POST"])
-def contact():
-    if request.method == "POST":
-        name = request.form.get("name")
-        email = request.form.get("email")
-        message = request.form.get("message")
-        # For now, just flash confirmation (no email sending yet)
-        flash("✅ Your mess
+@app.route("/success")
+def success():
+    return render_template("success.html")
+
+
+@app.route("/cancel")
+def cancel():
+    return render_template("cancel.html")
+
+
+@app.route("/convert", methods=["POST"])
+def convert():
+    if "terms" not in request.form:
+        flash("⚠️ You must agree to the terms of use and privacy policy before uploading.")
+        return redirect(url_for("index"))
+
+    if "fileUpload" not in request.files:
+        flash("⚠️ No file selected")
+        return redirect(url_for("index"))
+
+    f = request.files["fileUpload"]
+    if f.filename == "":
+        flash("⚠️ No selected file")
+        return redirect(url_for("index"))
+
+    filename = secure_filename(f.filename)
+    temp_path = os.path.join("/tmp", filename)
+    f.save(temp_path)
+
+    try:
+        text = process_file_to_text(temp_path, join_strategy="smart")
+
+        fmt = request.form.get("format", "docx")
+        if fmt == "txt":
+            return send_file(
+                io.BytesIO(text.encode("utf-8")),
+                as_attachment=True,
+                download_name=filename.rsplit(".", 1)[0] + ".txt",
+                mimetype="text/plain"
+            )
+        else:
+            buf = text_to_docx(text)
+            return send_file(
+                buf,
+                as_attachment=True,
+                download_name=filename.rsplit(".", 1)[0] + ".docx",
+                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+
+    except Exception as e:
+        flash(f"❌ Conversion failed: {e}")
+        return redirect(url_for("cancel"))
+
+
+# --- Main entrypoint ---
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
