@@ -14,8 +14,8 @@ services:
       name: data
       mountPath: /data
       sizeGB: 1
-    buildCommand: ""   # Render will build using Dockerfile
-    startCommand: ""   # ❌ Leave blank so Render uses CMD from Dockerfile
+    buildCommand: ""     # ✅ Leave blank — Dockerfile handles it
+    startCommand: ""     # ✅ Remove this line or keep empty
 
   - type: worker
     name: seamlessdocs-worker
@@ -29,5 +29,5 @@ services:
       name: data
       mountPath: /data
       sizeGB: 1
-    buildCommand: ""   # Render will build using Dockerfile
-    startCommand: "python worker.py"   # ✅ Worker uses worker.py
+    buildCommand: ""     # ✅ OK
+    startCommand: "python worker.py"  # ✅ Required for the worker
