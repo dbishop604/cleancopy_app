@@ -1,14 +1,41 @@
-Flask==3.0.3
-Werkzeug==3.0.3
-gunicorn==22.0.0
+services:
+  - type: web
+    name: cleancopy-ocr-eflg
+    env: docker
+    plan: starter
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: cleancopy-redis
+          property: connectionString
+    healthCheckPath: /healthz
+    disk:
+      name: data
+      mountPath: /app/data
+      sizeGB: 1
 
-# Redis queue support
-redis==5.0.1
-rq==1.16.2
+  - type: worker
+    name: cleancopy-worker
+    env: docker
+    plan: starter
+    autoDeploy: true
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: cleancopy-redis
+          property: connectionString
+    disk:
+      name: data
+      mountPath: /app/data
+      sizeGB: 1
+    startCommand: python worker.py
 
-# File handling & OCR
-pytesseract==0.3.13
-Pillow==10.4.0
-pdf2image==1.17.0
-python-docx==1.1.2
-PyPDF2==3.0.1
+databases:
+  - name: cleancopy-redis
+    plan: free
+    ipAllowList: []
