@@ -1,76 +1,40 @@
-import os
-import uuid
-import io
-from flask import (
-    Flask, render_template, request, redirect,
-    url_for, flash, jsonify, send_file
-)
-from werkzeug.utils import secure_filename
-from redis import Redis
-from rq import Queue
-from rq.job import Job
-from worker import process_file_job
-
-# --- Flask setup ---
-app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "devkey")
-
-UPLOAD_FOLDER = "/data/uploads"
-OUTPUT_FOLDER = "/data/outputs"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(OUTPUT_FOLDER, exist_ok=True)
-
-# --- Redis setup ---
-redis_url = os.environ.get("REDIS_URL")
-redis_conn = Redis.from_url(redis_url) if redis_url else None
-q = Queue("default", connection=redis_conn) if redis_conn else None
-
-# --- Routes ---
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-@app.route("/terms")
-def terms():
-    return render_template("terms.html")
-
-@app.route("/privacy")
-def privacy():
-    return render_template("privacy.html")
-
-@app.route("/success/<job_id>")
-def success(job_id):
-    return render_template("success.html", job_id=job_id)
-
-@app.route("/cancel")
-def cancel():
-    return render_template("cancel.html")
-
-@app.route("/coffee")
-def coffee():
-    return render_template("coffee.html")
-
-@app.route("/convert", methods=["POST"])
-def convert():
-    if "terms" not in request.form:
-        flash("⚠️ You must agree to the terms of service and privacy policy before uploading.")
-        return redirect(url_for("index"))
-
-    if "fileUpload" not in request.files:
-        flash("⚠️ No file selected")
-        return redirect(url_for("index"))
-
-    f = request.files["fileUpload"]
-    if f.filename == "":
-        flash("⚠️ No selected file")
-        return redirect(url_for("index"))
-
-    filename = secure_filename(f.filename)
-    job_id = str(uuid.uuid4())
-
-    input_path = os.path.join(UPLOAD_FOLDER, f"{job_id}_{filename}")
-    output_format = request.form.get("outputFormat", "docx")
-    output_ext = "txt" if output_format == "txt" else "docx"
-    output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.{output_ext}")
-
-    f
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SeamlessDocs</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      text-align: center;
+      color: #333;
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 15px;
+    }
+    form {
+      margin-top: 20px;
+    }
+    .btn {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    .btn:hover {
+      background-color: #0056b3;
+    }
+    a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .messages {
