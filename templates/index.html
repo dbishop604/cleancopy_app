@@ -73,28 +73,12 @@
       background-color: #eee;
       color: #333;
     }
-  </style>
-</head>
-<body>
-  {% include 'header.html' %}
-
-  <main>
-    <div class="container">
-      <h1>CleanCopy OCR</h1>
-
-      {% if user and plan == "paid" %}
-        <div class="plan-box">
-          <strong>Logged in as:</strong> {{ user.id }} <br>
-          <strong>Plan:</strong> Pro (50MB uploads) <br>
-          <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
-          <a href="{{ url_for('billing_portal') }}" class="btn btn-primary">Manage Billing</a>
-        </div>
-      {% else %}
-        <div class="plan-box">
-          <strong>Plan:</strong> Free (5MB uploads) <br>
-          <a href="{{ url_for('login') }}" class="btn btn-primary">Upgrade to Pro</a>
-        </div>
-      {% endif %}
-
-      <h2>Upload Your File</h2>
-      <form id="uploadForm" action="{{ url_for('convert')_
+    .flash-messages {
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    .flash-error {
+      background: #ffe5e5;
+      border: 1px solid #cc00
