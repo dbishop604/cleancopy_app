@@ -45,13 +45,10 @@
     }
     .btn {
       display: inline-block;
-      margin: 0.3rem;
+      margin: 0.3rem 0.3rem 0.3rem 0;
       padding: 0.6rem 1.2rem;
-      background-color: #0077cc;
-      color: white;
       border: none;
       border-radius: 4px;
-      text-decoration: none;
       cursor: pointer;
       font-weight: bold;
     }
@@ -59,43 +56,40 @@
       background-color: #0077cc;
       color: white;
     }
-    .btn-coffee {
-      background-color: #ff813f;
-      color: white;
-    }
-    footer {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 0.85rem;
-      color: #555;
-      line-height: 1.6;
-    }
-    footer p { margin: 0.3rem 0; }
     a {
       color: #0077cc;
       text-decoration: none;
       font-weight: bold;
     }
     a:hover { text-decoration: underline; }
+    footer {
+      margin-top: 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #777;
+    }
+    footer p { margin: 0.3rem 0; }
+    footer a { color: #0077cc; font-weight: bold; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>SeamlessDocs</h1>
+    <p><strong>Free Plan:</strong> Up to 5MB conversions.</p>
+    <p>For files over 5MB up to 50MB, <a href="{{ url_for('upgrade') }}" class="btn-primary" style="padding:0.4rem 1rem;">Upgrade to Pro</a></p>
 
     <h2>Upload Your File</h2>
     <p>Upload your <strong>PDF</strong> or image file (<strong>JPG, PNG, TIFF</strong>) and SeamlessDocs will convert it into a clean, editable <strong>DOCX</strong> or <strong>TXT</strong> file.</p>
 
-    <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
+    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
       <input type="file" name="fileUpload" id="fileUpload" disabled>
       <br><br>
 
-      <!-- Terms modal trigger -->
+      <!-- Terms agreement -->
       <label>
         <input type="checkbox" id="termsCheck">
-        I have read and agree to the 
-        <a href="{{ url_for('terms') }}">terms of service</a> and 
-        <a href="{{ url_for('privacy') }}">privacy policy</a>.
+        By continuing, you agree to the <a href="{{ url_for('terms') }}">terms of service</a> and <a href="{{ url_for('privacy') }}">privacy policy</a>.
       </label>
       <br><br>
 
@@ -108,19 +102,19 @@
       <br><br>
 
       <!-- Upload button -->
-      <button type="submit" id="uploadBtn" class="btn btn-primary" disabled>Upload File</button>
+      <button type="submit" id="uploadBtn" disabled>Upload File</button>
     </form>
 
     <p class="notice">
-      Download your converted file within 8 hours — all uploaded PDFs and images are automatically deleted from our servers after that time. We do not read, store, or share your content.
+      Download your converted file before 8 hours as your files will automatically be deleted after 8 hours. We do not read, store, or share them.
     </p>
 
     <footer>
-      <p><em>By continuing, you agree to the 
-        <a href="{{ url_for('terms') }}">terms of service</a> and 
-        <a href="{{ url_for('privacy') }}">privacy policy</a>.
-      </em></p>
-      <p>© SeamlessDocs. All rights reserved.</p>
+      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
+      <p>
+        <a href="{{ url_for('terms') }}">Terms of Use</a> | 
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      </p>
     </footer>
   </div>
 
@@ -128,16 +122,13 @@
     const termsCheck = document.getElementById('termsCheck');
     const uploadBtn = document.getElementById('uploadBtn');
     const fileUpload = document.getElementById('fileUpload');
+    const formatSelect = document.getElementById('format');
 
     termsCheck.addEventListener('change', function() {
       const enabled = this.checked;
-      fileUpload.disabled = !enabled;
       uploadBtn.disabled = !enabled;
-    });
-
-    document.getElementById('openTerms').addEventListener('click', function(event) {
-      event.preventDefault();
-      window.location.href = "{{ url_for('terms') }}";
+      fileUpload.disabled = !enabled;
+      formatSelect.disabled = !enabled;
     });
   </script>
 </body>
