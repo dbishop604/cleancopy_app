@@ -1,16 +1,10 @@
-# Use official lightweight Python image
+# Start with an official Python runtime
 FROM python:3.11-slim
 
-# Set environment vars for Flask/Render
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PORT=10000
-
-# Install system dependencies (for tesseract & pdf2image)
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install dependencies for pdf2image and tesseract
+RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-eng \
-    libtesseract-dev \
     poppler-utils \
     libsm6 \
     libxext6 \
@@ -21,17 +15,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set work directory
 WORKDIR /app
 
-# Copy requirements first (for better caching)
+# Copy dependency list
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies (include gunicorn here)
+RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
-# Copy project files
+# Copy the app code
 COPY . .
 
-# Expose port for Render
+# Expose the port (Render expects $PORT)
+ENV PORT=10000
 EXPOSE 10000
 
-# Start the app with Gunicorn for production
+# Run the app with Gunicorn, binding to $PORT
 CMD ["gunicorn", "-b", "0.0.0.0:10000", "app:app"]
