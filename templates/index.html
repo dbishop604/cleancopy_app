@@ -79,7 +79,6 @@
       text-decoration: none;
       font-weight: bold;
     }
-    .agree a:hover { text-decoration: underline; }
     .notice {
       font-size: 0.9rem;
       color: #555;
@@ -98,6 +97,7 @@
       font-weight: bold;
     }
     footer a:hover { text-decoration: underline; }
+
     /* Loader overlay */
     #loaderOverlay {
       display: none;
@@ -105,7 +105,6 @@
       inset: 0;
       background: rgba(255,255,255,0.95);
       z-index: 1000;
-      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
@@ -115,8 +114,6 @@
       font-size: 1.1rem;
       font-weight: bold;
       color: #0077cc;
-      text-align: center;
-      max-width: 80%;
     }
     .bar {
       width: 70%;
@@ -129,14 +126,14 @@
     .bar span {
       display: block;
       height: 100%;
-      width: 40%;
+      width: 0%;
       background: #0077cc;
-      animation: slide 1.4s infinite ease-in-out;
     }
-    @keyframes slide {
-      0% { transform: translateX(-100%); }
-      50% { transform: translateX(60%); }
-      100% { transform: translateX(140%); }
+    #errorMsg {
+      margin-top: 1rem;
+      color: red;
+      font-weight: bold;
+      display: none;
     }
   </style>
 </head>
@@ -149,7 +146,7 @@
     </p>
     <p class="plan"><strong>Free Plan:</strong> Up to 5MB conversions.</p>
 
-    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
+    <form id="uploadForm">
       <div class="row">
         <input type="file" name="fileUpload" id="fileUpload" disabled>
       </div>
@@ -171,6 +168,8 @@
       </div>
     </form>
 
+    <p id="errorMsg"></p>
+
     <p class="notice">
       Download your converted file within 8 hours — files are automatically deleted after that time. We do not read, store, or share them.
     </p>
@@ -185,7 +184,7 @@
   <!-- Loader overlay -->
   <div id="loaderOverlay">
     <div class="msg">Processing your file… please wait.</div>
-    <div class="bar"><span></span></div>
+    <div class="bar"><span id="progressBar"></span></div>
   </div>
 
   <script>
@@ -194,64 +193,3 @@
     const formatSelect = document.getElementById("format");
     const uploadBtn = document.getElementById("uploadBtn");
     const form = document.getElementById("uploadForm");
-    const overlay = document.getElementById("loaderOverlay");
-    const msgBox = overlay.querySelector(".msg");
-
-    termsCheck.addEventListener("change", function() {
-      const enabled = this.checked;
-      fileUpload.disabled = !enabled;
-      formatSelect.disabled = !enabled;
-      uploadBtn.disabled = !enabled;
-    });
-
-    form.addEventListener("submit", async function(e) {
-      e.preventDefault();
-
-      overlay.style.display = "flex";
-      msgBox.style.color = "#0077cc";
-      msgBox.textContent = "Processing your file… please wait.";
-
-      const formData = new FormData(form);
-
-      try {
-        const response = await fetch("{{ url_for('convert') }}", {
-          method: "POST",
-          body: formData,
-          headers: { "Accept": "application/json" }
-        });
-
-        if (!response.ok) {
-          const data = await response.json().catch(() => ({}));
-          msgBox.style.color = "red";
-          msgBox.textContent = data.error || `❌ Conversion failed (status ${response.status}). Please try again.`;
-          return;
-        }
-
-        // success → file blob
-        const blob = await response.blob();
-        const disposition = response.headers.get("Content-Disposition") || "";
-        let filename = "converted-file";
-        const match = disposition.match(/filename="?([^"]+)"?/);
-        if (match) filename = match[1];
-
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-
-        msgBox.style.color = "green";
-        msgBox.textContent = "✅ Conversion complete! Your download has started.";
-        setTimeout(() => { overlay.style.display = "none"; }, 4000);
-
-      } catch (err) {
-        msgBox.style.color = "red";
-        msgBox.textContent = `❌ Error: ${err.message}`;
-      }
-    });
-  </script>
-</body>
-</html>
