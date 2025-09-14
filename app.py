@@ -1,7 +1,10 @@
 import os
 import io
+import time
+import threading
+from datetime import datetime, timedelta
 from flask import (
-    Flask, render_template, request, jsonify
+    Flask, render_template, request, jsonify, send_file
 )
 from werkzeug.utils import secure_filename
 from processor import process_file_to_text, text_to_docx
@@ -14,6 +17,28 @@ UPLOAD_FOLDER = "uploads"
 CONVERTED_FOLDER = "converted"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
+
+EXPIRY_HOURS = 8
+
+
+# --- Background cleanup thread ---
+def cleanup_files():
+    while True:
+        try:
+            cutoff = time.time() - (EXPIRY_HOURS * 3600)
+            for folder in [UPLOAD_FOLDER, CONVERTED_FOLDER]:
+                for fname in os.listdir(folder):
+                    fpath = os.path.join(folder, fname)
+                    if os.path.isfile(fpath):
+                        if os.path.getmtime(fpath) < cutoff:
+                            os.remove(fpath)
+                            print(f"[Cleanup] Removed expired file: {fpath}")
+        except Exception as e:
+            print(f"[Cleanup Error] {e}")
+        time.sleep(600)  # check every 10 minutes
+
+
+threading.Thread(target=cleanup_files, daemon=True).start()
 
 # --- Routes ---
 
@@ -84,18 +109,20 @@ def convert():
     except Exception as e:
         return jsonify({"status": "error", "message": f"Unexpected error: {str(e)}"}), 500
 
+
 @app.route("/download/<filename>")
 def download(filename):
     """Serve converted file for download."""
     path = os.path.join(CONVERTED_FOLDER, filename)
     if not os.path.exists(path):
-        return jsonify({"status": "error", "message": "File not found (may have expired)."}), 404
+        return jsonify({"status": "error", "message": "File not found (it may have expired)."}), 404
 
     return send_file(
         path,
         as_attachment=True,
         download_name=filename
     )
+
 
 # --- Main entrypoint ---
 if __name__ == "__main__":
