@@ -130,7 +130,7 @@
       height: 100%;
       width: 0%;
       background: #0077cc;
-      transition: width 0.3s ease;
+      transition: width 0.3s linear;
     }
     .percent-label {
       position: absolute;
@@ -139,7 +139,7 @@
       transform: translate(-50%, -50%);
       font-size: 12px;
       font-weight: bold;
-      color: #fff;
+      color: #111;
     }
     .error {
       color: red;
@@ -167,7 +167,7 @@
           <option value="txt">TXT</option>
         </select>
       </div>
-      <label class="agree">
+      <label class="agree" style="font-size:14px;">
         <input type="checkbox" id="termsCheck" name="terms">
         By continuing, you agree to the
         <a href="{{ url_for('terms') }}">terms of service</a> and
@@ -220,8 +220,8 @@
       uploadBtn.disabled = !enabled;
     });
 
-    form.addEventListener("submit", async function(event) {
-      event.preventDefault();
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
       overlay.style.display = "flex";
       progressBar.style.width = "0%";
       percentLabel.textContent = "0%";
@@ -231,12 +231,10 @@
 
       const formData = new FormData(form);
 
-      // Fake progress (UI only) while waiting for server
       let progress = 0;
       const fakeProgress = setInterval(() => {
         if (progress < 95) {
-          progress += Math.floor(Math.random() * 5) + 1;
-          if (progress > 95) progress = 95;
+          progress += 5;
           progressBar.style.width = progress + "%";
           percentLabel.textContent = progress + "%";
         }
@@ -250,19 +248,19 @@
 
         clearInterval(fakeProgress);
 
-        if (response.headers.get("content-type")?.includes("application")) {
+        if (response.ok && response.headers.get("content-type")?.includes("application")) {
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
           downloadLink.href = url;
           downloadLink.download = fileUpload.files[0].name.replace(/\.[^.]+$/, "") + "." + formatSelect.value;
           loaderMsg.textContent = "✅ Conversion complete!";
-          downloadLink.style.display = "inline-block";
           progressBar.style.width = "100%";
           percentLabel.textContent = "100%";
+          downloadLink.style.display = "inline-block";
         } else {
-          const data = await response.json();
+          const data = await response.json().catch(() => ({}));
           loaderMsg.textContent = "❌ Conversion failed.";
-          errorMsg.textContent = data.message || "Unknown error.";
+          errorMsg.textContent = data.message || "An unknown error occurred.";
           errorMsg.style.display = "block";
           progressBar.style.width = "0%";
           percentLabel.textContent = "0%";
