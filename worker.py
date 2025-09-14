@@ -1,34 +1,19 @@
 import os
 import sys
-import time
-import traceback
-from redis import Redis
+import redis
 from rq import Connection, Worker
 from processor import process_file
 
-# Redis connection
-redis_url = os.environ.get("REDIS_URL")
-if not redis_url:
-    print("❌ ERROR: REDIS_URL not set.")
-    sys.exit(1)
+# Ensure the app directory is on sys.path
+sys.path.append(os.path.dirname(__file__))
 
-redis_conn = Redis.from_url(redis_url)
+listen = ['default']
 
-# Job function
-def process_file_job(input_path, output_path):
-    try:
-        print(f"🚀 Starting OCR job: {input_path} -> {output_path}")
-        process_file(input_path, output_path)
-        print(f"✅ Job complete: {output_path}")
-        return {"status": "done", "output": output_path}
-    except Exception as e:
-        tb = traceback.format_exc()
-        print(f"❌ Error in job: {e}\n{tb}")
-        return {"status": "error", "message": str(e)}
+redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+conn = redis.from_url(redis_url)
 
-# Start worker
-if __name__ == "__main__":
-    with Connection(redis_conn):
-        worker = Worker(["default"])
-        print("👷 Worker started, waiting for jobs...")
-        worker.work(with_scheduler=True)
+# Define a worker that will run process_file jobs
+if __name__ == '__main__':
+    with Connection(conn):
+        worker = Worker(map(str, listen))
+        worker.work()
