@@ -1,310 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeamlessDocs — Upload</title>
+  <title>CleanCopy OCR</title>
+  <meta charset="utf-8">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-    .container {
-      background: #fff;
-      margin: 2rem;
-      padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      max-width: 720px;
-      width: 100%;
-      text-align: center;
-    }
-    img.logo {
-      max-width: 150px;
-      margin-bottom: 0.5rem;
-    }
-    h1 {
-      margin: 0.25rem 0;
-      font-size: 2rem;
-      color: #111;
-    }
-    .tagline {
-      font-size: 1rem;
-      color: #444;
-      margin: 0.75rem 0 1.5rem 0;
-    }
-    .plan {
-      font-size: 0.95rem;
-      color: #555;
-      margin-bottom: 2rem;
-    }
-    .row {
-      margin: 1rem 0;
-    }
-    input[type="file"], select {
-      padding: 0.5rem;
-      font-size: 14px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-    }
-    .btn {
-      display: inline-block;
-      padding: 0.7rem 1.4rem;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    .btn-primary {
-      background: #FFD200; /* Yellow */
-      color: #111;
-    }
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .agree {
-      font-size: 12px; /* smaller */
-      color: #555;
-      margin-top: 1.25rem;
-      display: block;
-    }
-    .agree a {
-      color: #0077cc;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .agree a:hover { text-decoration: underline; }
-    .output-label {
-      font-size: 12px; /* smaller label for "Output format" */
-      color: #555;
-      margin-right: 0.5rem;
-    }
-    .notice {
-      font-size: 0.9rem;
-      color: #555;
-      margin-top: 1.5rem;
-      line-height: 1.4;
-    }
-    footer {
-      margin-top: 2rem;
-      font-size: 8pt;
-      color: #777;
-      line-height: 1.4;
-    }
-    footer a {
-      color: #0077cc;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    footer a:hover { text-decoration: underline; }
-
-    /* Loader modal */
-    #loaderOverlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.4);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-    }
-    .loader-box {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      text-align: center;
-      width: 80%;
-      max-width: 400px;
-    }
-    .msg {
-      font-size: 1.1rem;
-      font-weight: bold;
-      color: #0077cc;
-      margin-bottom: 1rem;
-    }
-    .bar {
-      position: relative;
-      width: 100%;
-      height: 20px;
-      background: #eee;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-bottom: 1rem;
-    }
-    .bar span {
-      display: block;
-      height: 100%;
-      width: 0%;
-      background: #FFD200;
-      transition: width 0.3s ease;
-    }
-    .percent-label {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 12px;
-      font-weight: bold;
-      color: #111;
-    }
-    .error {
-      color: red;
-      font-weight: bold;
-      margin-top: 1rem;
-    }
+    body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; }
+    .upload-box { border: 2px dashed #999; padding: 20px; text-align: center; }
+    .progress { width: 100%; background: #eee; border-radius: 10px; overflow: hidden; margin-top: 20px; }
+    .progress-bar { width: 0%; height: 20px; background: #4caf50; transition: width 0.3s; }
+    #status { margin-top: 10px; }
+    button { margin-top: 15px; padding: 10px 20px; font-size: 1rem; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Logo -->
-    <img src="/static/logo.png" alt="SeamlessDocs Logo" class="logo"/>
-    <h1>SeamlessDocs</h1>
-    <p class="tagline">
-      Upload your <strong>PDF</strong> or image file (<strong>JPG, PNG, TIFF</strong>) and SeamlessDocs will convert it into a clean, editable <strong>DOCX</strong> or <strong>TXT</strong> file.
-    </p>
-
-    <p class="plan"><strong>Free Plan:</strong> Up to 5MB conversions.</p>
-
-    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
-      <div class="row">
-        <input type="file" name="fileUpload" id="fileUpload" disabled>
-      </div>
-      <div class="row">
-        <label for="format" class="output-label">Output format:</label>
-        <select name="format" id="format" disabled>
-          <option value="docx">DOCX</option>
-          <option value="txt">TXT</option>
-        </select>
-      </div>
-      <label class="agree">
-        <input type="checkbox" id="termsCheck" name="terms">
-        By continuing, you agree to the
-        <a href="{{ url_for('terms') }}">terms of service</a> and
-        <a href="{{ url_for('privacy') }}">privacy policy</a>.
-      </label>
-      <div class="row">
-        <button type="submit" id="uploadBtn" class="btn btn-primary" disabled>Upload File</button>
-      </div>
-    </form>
-
-    <p class="notice">
-      Download your converted file within 8 hours — files are automatically deleted after that time. We do not read, store, or share them.
-    </p>
-
-    <footer>
-      © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
-      <a href="{{ url_for('terms') }}">Terms of Use</a> |
-      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
-    </footer>
-  </div>
-
-  <!-- Loader Modal -->
-  <div id="loaderOverlay">
-    <div class="loader-box">
-      <div class="msg" id="loaderMsg">Processing your file… please wait.</div>
-      <div class="bar">
-        <span id="progressBar"></span>
-        <div class="percent-label" id="percentLabel">0%</div>
-      </div>
-      <button class="btn btn-primary" id="cancelBtn" type="button">✖ Cancel</button>
-      <a id="downloadLink" class="btn btn-primary" style="display:none;" download>⬇ Download File</a>
-      <div class="error" id="errorMsg" style="display:none;"></div>
+  <h1>📄 CleanCopy OCR</h1>
+  <form id="uploadForm" method="POST" enctype="multipart/form-data" action="/upload">
+    <div class="upload-box">
+      <input type="file" name="fileUpload" required>
     </div>
+    <label>
+      <input type="checkbox" name="terms" required>
+      I agree to the <a href="/terms" target="_blank">terms of service</a> and <a href="/privacy" target="_blank">privacy policy</a>.
+    </label><br><br>
+    <label>Output format:
+      <select name="format">
+        <option value="docx">DOCX</option>
+        <option value="txt">TXT</option>
+      </select>
+    </label><br><br>
+    <button type="submit">Upload & Convert</button>
+  </form>
+
+  <div id="progress" style="display:none;">
+    <div class="progress"><div id="bar" class="progress-bar"></div></div>
+    <p id="status">Uploading...</p>
+    <button id="cancelBtn" type="button">✖ Cancel</button>
   </div>
 
   <script>
-    const termsCheck = document.getElementById("termsCheck");
-    const fileUpload = document.getElementById("fileUpload");
-    const formatSelect = document.getElementById("format");
-    const uploadBtn = document.getElementById("uploadBtn");
     const form = document.getElementById("uploadForm");
-    const overlay = document.getElementById("loaderOverlay");
-    const progressBar = document.getElementById("progressBar");
-    const percentLabel = document.getElementById("percentLabel");
-    const loaderMsg = document.getElementById("loaderMsg");
-    const errorMsg = document.getElementById("errorMsg");
-    const downloadLink = document.getElementById("downloadLink");
+    const progress = document.getElementById("progress");
+    const bar = document.getElementById("bar");
+    const status = document.getElementById("status");
     const cancelBtn = document.getElementById("cancelBtn");
+    let currentJobId = null;
+    let pollInterval = null;
 
-    let xhr;
-
-    termsCheck.addEventListener("change", function() {
-      const enabled = this.checked;
-      fileUpload.disabled = !enabled;
-      formatSelect.disabled = !enabled;
-      uploadBtn.disabled = !enabled;
-    });
-
-    form.addEventListener("submit", function(e) {
+    form.addEventListener("submit", async function(e) {
       e.preventDefault();
-      overlay.style.display = "flex";
-      progressBar.style.width = "0%";
-      percentLabel.textContent = "0%";
-      loaderMsg.textContent = "Processing your file… please wait.";
-      errorMsg.style.display = "none";
-      downloadLink.style.display = "none";
-
       const formData = new FormData(form);
-      xhr = new XMLHttpRequest();
-      xhr.open("POST", "{{ url_for('convert') }}", true);
-      xhr.responseType = "blob";
+      progress.style.display = "block";
+      status.innerText = "Uploading...";
+      bar.style.width = "10%";
 
-      xhr.upload.onprogress = function(event) {
-        if (event.lengthComputable) {
-          const percent = Math.round((event.loaded / event.total) * 50); // Upload progress to 50%
-          progressBar.style.width = percent + "%";
-          percentLabel.textContent = percent + "%";
-        }
-      };
+      const res = await fetch("/upload", {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
 
-      xhr.onload = async function() {
-        if (xhr.status === 200) {
-          const blob = xhr.response;
-          const url = window.URL.createObjectURL(blob);
-          downloadLink.href = url;
-          downloadLink.download = formData.get("fileUpload").name.replace(/\.[^.]+$/, "") + "." + formData.get("format");
-          downloadLink.style.display = "inline-block";
-          loaderMsg.textContent = "✅ Conversion complete!";
-          progressBar.style.width = "100%";
-          percentLabel.textContent = "100%";
-        } else {
-          handleError("❌ Conversion failed: " + xhr.status + " " + xhr.statusText);
-        }
-      };
-
-      xhr.onerror = function() {
-        handleError("❌ Server error: Unable to process the file.");
-      };
-
-      xhr.send(formData);
-    });
-
-    cancelBtn.addEventListener("click", function() {
-      if (xhr) {
-        xhr.abort();
+      if (data.error) {
+        status.innerText = "❌ " + data.error;
+        return;
       }
-      overlay.style.display = "none";
+
+      currentJobId = data.job_id;
+      status.innerText = "Processing...";
+      bar.style.width = "40%";
+
+      pollInterval = setInterval(checkStatus, 5000);
     });
 
-    function handleError(message) {
-      progressBar.style.width = "0%";
-      percentLabel.textContent = "0%";
-      loaderMsg.textContent = message;
-      errorMsg.textContent = message;
-      errorMsg.style.display = "block";
-      downloadLink.style.display = "none";
+    async function checkStatus() {
+      if (!currentJobId) return;
+      const res = await fetch(`/status/${currentJobId}`);
+      const data = await res.json();
+
+      if (data.status === "processing") {
+        status.innerText = "Processing...";
+        bar.style.width = (parseInt(bar.style.width) + 10) % 90 + "%";
+      }
+      else if (data.status === "finished") {
+        clearInterval(pollInterval);
+        status.innerText = "✅ Done! Download ready.";
+        bar.style.width = "100%";
+        window.location = data.download_url;
+      }
+      else if (data.status === "failed") {
+        clearInterval(pollInterval);
+        status.innerText = "❌ Failed: " + data.error;
+        bar.style.width = "0%";
+      }
     }
+
+    cancelBtn.addEventListener("click", async function() {
+      if (!currentJobId) return;
+      await fetch(`/cancel/${currentJobId}`, { method: "POST" });
+      clearInterval(pollInterval);
+      status.innerText = "❌ Conversion cancelled.";
+      bar.style.width = "0%";
+    });
   </script>
 </body>
 </html>
