@@ -67,9 +67,8 @@
 <body>
   <div class="container">
     <h1>✅ Conversion Successful!</h1>
-    <p>Your file has been converted successfully.</p>
+    <p>Your file has been converted successfully and is ready to download.</p>
 
-    <!-- Direct download link -->
     {% if download_url %}
       <a href="{{ download_url }}" class="btn" download>⬇ Download Your File</a>
     {% else %}
@@ -79,7 +78,8 @@
     <footer>
       © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
       <a href="{{ url_for('terms') }}">Terms of Use</a> |
-      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a> |
+      <a href="{{ url_for('coffee') }}">Support Us ☕</a>
     </footer>
   </div>
 </body>
