@@ -4,7 +4,7 @@ from docx import Document
 
 def process_file_to_text(input_path, join_strategy="smart"):
     """
-    Convert a PDF into text using OCR.
+    Convert PDF pages to text using OCR (pytesseract + pdf2image).
     """
     images = convert_from_path(input_path)
     texts = []
@@ -18,7 +18,7 @@ def process_file_to_text(input_path, join_strategy="smart"):
 
 def text_to_docx(text, output_path):
     """
-    Save OCR text into a .docx file.
+    Save extracted text into a DOCX file.
     """
     doc = Document()
     for line in text.splitlines():
