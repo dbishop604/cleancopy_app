@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>CleanCopy OCR — Upload</title>
+  <title>SeamlessDocs Online — Upload</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -14,7 +14,6 @@
       justify-content: center;
       align-items: flex-start;
       min-height: 100vh;
-      color: #555; /* 60% black text */
     }
     .container {
       background: #fff;
@@ -30,37 +29,15 @@
       margin-bottom: 1rem;
       color: #111;
     }
-    h2 {
-      margin-top: 1.5rem;
-      color: #111;
-    }
-    .plan-box {
-      margin-bottom: 1rem;
-      padding: 1rem;
-      background: #f0f0f0;
-      border-radius: 6px;
+    p {
+      font-size: 0.95em;
+      color: #555;
+      line-height: 1.6;
     }
     .notice {
+      margin-top: 1rem;
       font-size: 0.9em;
       color: #555;
-      margin: 0.5rem 0 1rem;
-    }
-    .btn {
-      display: inline-block;
-      margin: 0.3rem 0.3rem 0.3rem 0;
-      padding: 0.6rem 1.2rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .btn-primary {
-      background-color: #0077cc;
-      color: white;
-    }
-    .btn-secondary {
-      background-color: #eee;
-      color: #333;
     }
     footer {
       margin-top: 2rem;
@@ -68,65 +45,48 @@
       font-size: 0.8rem;
       color: #777;
     }
-    a { color: #0077cc; text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    footer p { margin: 0.3rem 0; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>CleanCopy OCR</h1>
-
-    {% if user and plan == "paid" %}
-      <div class="plan-box">
-        <strong>Logged in as:</strong> {{ user.id }} <br>
-        <strong>Plan:</strong> Pro (50MB uploads) <br>
-        <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
-        <a href="{{ url_for('billing_portal') }}" class="btn btn-primary">Manage Billing</a>
-      </div>
-    {% else %}
-      <div class="plan-box">
-        <strong>Plan:</strong> Free (5MB uploads)  
-        <br>
-        <a href="{{ url_for('login') }}" class="btn btn-primary">Upgrade to Pro</a>
-      </div>
-    {% endif %}
+    <h1>SeamlessDocs Online</h1>
+    <p>Your Plan: {{ plan|capitalize }}</p>
+    <p>
+      Free plan limit: 5MB.<br>
+      Upgrade to <strong>Pro</strong> ($16/month) for uploads up to 50MB.
+    </p>
 
     <h2>Upload Your File</h2>
-
     <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
-      <!-- File upload input -->
       <input type="file" name="file" id="fileUpload" disabled>
       <br><br>
 
-      <!-- Reassurance line -->
       <p class="notice">
         Your files are automatically deleted after 8 hours. We do not read, store, or share them.
       </p>
 
-      <!-- Terms checkbox -->
       <label>
         <input type="checkbox" id="termsCheck">
-        I have read and agree to the <a href="{{ url_for('terms') }}" target="_blank">Terms of Use</a> and 
-        <a href="{{ url_for('privacy') }}" target="_blank">Privacy Policy</a>.
+        I have read and agree to the <a href="{{ url_for('terms') }}" target="_blank">Terms of Use</a> and <a href="{{ url_for('privacy') }}" target="_blank">Privacy Policy</a>.
       </label>
       <br><br>
 
-      <!-- Format choice -->
-      <label for="format">Output format:</label>
-      <select name="format" id="format" disabled>
+      <label for="format">Output Format:</label>
+      <select name="format" id="format">
         <option value="docx">DOCX</option>
         <option value="txt">TXT</option>
       </select>
       <br><br>
 
-      <!-- Upload button -->
       <button type="submit" id="uploadBtn" disabled>Upload File</button>
     </form>
 
     <footer>
-      <p>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute. |
-         <a href="{{ url_for('terms') }}">Terms of Use</a> | 
-         <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      <p>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</p>
+      <p>
+        <a href="{{ url_for('terms') }}" target="_blank">Terms of Use</a><br>
+        <a href="{{ url_for('privacy') }}" target="_blank">Privacy Policy</a>
       </p>
     </footer>
   </div>
@@ -135,14 +95,17 @@
     const termsCheck = document.getElementById('termsCheck');
     const uploadBtn = document.getElementById('uploadBtn');
     const fileUpload = document.getElementById('fileUpload');
-    const formatSelect = document.getElementById('format');
 
     termsCheck.addEventListener('change', function() {
-      const enabled = this.checked;
-      uploadBtn.disabled = !enabled;
-      fileUpload.disabled = !enabled;
-      formatSelect.disabled = !enabled;
+      if (this.checked) {
+        uploadBtn.disabled = false;
+        fileUpload.disabled = false;
+      } else {
+        uploadBtn.disabled = true;
+        fileUpload.disabled = true;
+      }
     });
   </script>
 </body>
 </html>
+
