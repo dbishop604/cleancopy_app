@@ -1,63 +1,37 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file
-from werkzeug.utils import secure_filename
 import os
-import redis
-from worker import convert_file_task
 import uuid
+from flask import Flask, request, render_template, send_file, jsonify
+from werkzeug.utils import secure_filename
+from redis import Redis
+from rq import Queue
+from processor import process_file_job
 
 app = Flask(__name__)
-app.config["UPLOAD_FOLDER"] = "uploads"
-app.config["OUTPUT_FOLDER"] = "output"
+app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['OUTPUT_FOLDER'] = 'output'
 
-os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-os.makedirs(app.config["OUTPUT_FOLDER"], exist_ok=True)
+# Ensure upload/output folders exist
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs(app.config['OUTPUT_FOLDER'], exist_ok=True)
 
-# Initialize Redis (safely)
-redis_url = os.getenv("REDIS_URL")
-r = None
+# Redis connection
+try:
+    redis_conn = Redis(host='localhost', port=6379)
+    redis_conn.ping()
+except Exception as e:
+    print("Redis connection failed:", e)
 
-if redis_url:
-    try:
-        r = redis.from_url(redis_url)
-        r.ping()
-        print("Redis connection successful")
-    except Exception as e:
-        print("Redis connection failed")
-        r = None
+# Task queue
+q = Queue(connection=redis_conn)
 
-@app.route("/")
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template("index.html")
+    if request.method == 'POST':
+        uploaded_file = request.files.get('file')
+        output_format = request.form.get('format')
 
-@app.route("/terms")
-def terms():
-    return render_template("terms.html")
+        if not uploaded_file or not output_format:
+            return 'Missing file or format.', 400
 
-@app.route("/privacy")
-def privacy():
-    return render_template("privacy.html")
-
-@app.route("/success")
-def success():
-    return render_template("success.html")
-
-@app.route("/cancel")
-def cancel():
-    return render_template("cancel.html")
-
-@app.route("/upload", methods=["POST"])
-def upload_file():
-    if "file" not in request.files:
-        return "No file part", 400
-
-    file = request.files["file"]
-
-    if file.filename == "":
-        return "No selected file", 400
-
-    filename = secure_filename(file.filename)
-    input_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-    file.save(input_path)
-
-    task_id = str(uuid.uuid4())
-    convert_file_t
+        filename = secure_filename(uploaded_file.filename)
+        file_id = str(uuid.u_
