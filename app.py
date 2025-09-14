@@ -1,9 +1,8 @@
 import os
-import io
 import uuid
 from flask import (
     Flask, render_template, request, redirect,
-    url_for, flash, jsonify, send_file
+    url_for, flash, jsonify
 )
 from werkzeug.utils import secure_filename
 from redis import Redis
@@ -80,7 +79,42 @@ def convert():
 
     f.save(input_path)
 
+    if not redis_conn or not q:
+        return jsonify({"status": "error", "message": "Redis is not connected"}), 500
+
+    # enqueue background job
+    job = q.enqueue(process_file_job, input_path, output_path, job_id)
+
+    return redirect(url_for("check_status", job_id=job.get_id()))
+
+
+@app.route("/status/<job_id>")
+def check_status(job_id):
     if not redis_conn:
         return jsonify({"status": "error", "message": "Redis is not connected"}), 500
 
-    job = q.enqueue(process_fi_
+    job = Job.fetch(job_id, connection=redis_conn)
+    if job.is_finished:
+        return jsonify({"status": "finished", "download_url": url_for("download_file", job_id=job_id, _external=True)})
+    elif job.is_failed:
+        return jsonify({"status": "failed", "error": str(job.exc_info)})
+    else:
+        return jsonify({"status": "queued"})
+
+
+@app.route("/download/<job_id>")
+def download_file(job_id):
+    output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.docx")
+    if not os.path.exists(output_path):
+        return "File not found", 404
+
+    return send_file(output_path, as_attachment=True, download_name=f"{job_id}.docx")
+
+
+@app.route("/healthz")
+def healthz():
+    return "OK", 200
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
