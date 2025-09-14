@@ -1,146 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeamlessDocs — Upload</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-    .container {
-      background: #fff;
-      margin: 2rem;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 800px;
-      width: 100%;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 1rem;
-      color: #111;
-    }
-    h2 {
-      margin-top: 1.5rem;
-      color: #111;
-    }
-    p {
-      font-size: 0.95em;
-      color: #555;
-      line-height: 1.6;
-    }
-    .notice {
-      font-size: 0.9em;
-      margin: 0.5rem 0 1rem;
-      color: #555;
-    }
-    .btn {
-      display: inline-block;
-      margin: 0.3rem;
-      padding: 0.6rem 1.2rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .btn-primary { background-color: #0077cc; color: white; }
-    .btn-coffee { background-color: #ff813f; color: white; }
-    a { color: #0077cc; text-decoration: none; font-weight: bold; }
-    a:hover { text-decoration: underline; }
-    footer {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 0.8rem;
-      color: #777;
-    }
-    footer p { margin: 0.3rem 0; }
-    /* Progress bar */
-    #progressBar {
-      display: none;
-      width: 0;
-      height: 6px;
-      background-color: #c59de8;
-      margin-top: 1rem;
-      border-radius: 3px;
-      transition: width 0.3s;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>SeamlessDocs</h1>
-    <p><strong>Free Plan:</strong> Up to 5MB conversions.</p>
-    <p>For files over 5MB up to 50MB, 
-      <a href="/upgrade" class="btn btn-primary" style="padding:0.4rem 1rem;">Upgrade to Pro</a>
-    </p>
+<h2>Upload Your File</h2>
+<p>Upload your <strong>PDF</strong> or image file (<strong>JPG, PNG, TIFF</strong>) and SeamlessDocs will convert it into a clean, editable <strong>DOCX</strong> or <strong>TXT</strong> file.</p>
 
-    <h2>Upload Your File</h2>
-    <form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
-      <input type="file" name="fileUpload" id="fileUpload" required>
-      <br><br>
+<form id="uploadForm" action="/convert" method="post" enctype="multipart/form-data">
+  <input type="file" name="fileUpload" id="fileUpload" disabled>
+  <br><br>
 
-      <label>
-        <input type="checkbox" name="terms" id="termsCheck" required>
-        By continuing, you agree to the 
-        <a href="/terms" target="_blank">terms of service</a> and 
-        <a href="/privacy" target="_blank">privacy policy</a>.
-      </label>
-      <br><br>
+  <!-- Terms modal trigger -->
+  <label>
+    <input type="checkbox" id="termsCheck">
+    I have read and agree to the <a href="#" id="openTerms">terms of service and privacy policy</a>.
+  </label>
+  <br><br>
 
-      <label for="format">Output format:</label>
-      <select name="format" id="format">
-        <option value="docx">DOCX</option>
-        <option value="txt">TXT</option>
-      </select>
-      <br><br>
+  <!-- Format choice -->
+  <label for="format">Output format:</label>
+  <select name="format" id="format" disabled>
+    <option value="docx">DOCX</option>
+    <option value="txt">TXT</option>
+  </select>
+  <br><br>
 
-      <button type="submit" id="uploadBtn" class="btn btn-primary">Upload File</button>
-      <a href="https://www.buymeacoffee.com/seamlessdocs" target="_blank" class="btn btn-coffee">☕ Buy us a coffee</a>
-    </form>
-
-    <div id="progressBar"></div>
-
-    <p class="notice">
-      Download your converted file before 8 hours as your files will automatically be deleted after 8 hours. 
-      We do not read, store, or share them.
-    </p>
-
-    <footer>
-      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
-      <p>
-        <a href="/">Home</a> |
-        <a href="/terms">Terms of Service</a> |
-        <a href="/privacy">Privacy Policy</a>
-      </p>
-    </footer>
-  </div>
-
-  <script>
-    const form = document.getElementById('uploadForm');
-    const progressBar = document.getElementById('progressBar');
-
-    form.addEventListener('submit', function() {
-      progressBar.style.display = 'block';
-      progressBar.style.width = '0%';
-      let width = 0;
-      const interval = setInterval(() => {
-        if (width >= 100) {
-          clearInterval(interval);
-        } else {
-          width += 5;
-          progressBar.style.width = width + "%";
-        }
-      }, 300);
-    });
-  </script>
-</body>
-</html>
+  <!-- Upload button -->
+  <button type="submit" id="uploadBtn" disabled>Upload File</button>
+</form>
