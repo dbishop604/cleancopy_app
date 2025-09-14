@@ -25,6 +25,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . /app/
 
-# Expose port
+# Expose port for web service
 ENV PORT=10000
-CMD ["gunicorn", "-w", "2", "-k", "gthread", "-b", "0.0.0.0:10000", "app:app"]
