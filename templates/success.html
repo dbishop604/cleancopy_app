@@ -1,92 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Success — SeamlessDocs</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-    .container {
-      background: #fff;
-      margin: 3rem;
-      padding: 2.5rem;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      max-width: 700px;
-      width: 100%;
-      text-align: center;
-    }
-    h1 {
-      margin-bottom: 1rem;
-      color: #111;
-      font-size: 2rem;
-    }
-    p {
-      color: #444;
-      line-height: 1.6;
-      margin: 1rem 0;
-      font-size: 1rem;
-      text-align: center;
-    }
-    .btn {
-      display: inline-block;
-      margin: 1rem 0;
-      padding: 0.7rem 1.4rem;
-      background-color: #0077cc;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      text-decoration: none;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 1rem;
-      transition: background 0.3s;
-    }
-    .btn:hover {
-      background-color: #005fa3;
-    }
-    footer {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 0.75rem; /* ~8pt */
-      color: #777;
-      line-height: 1.4;
-    }
-    footer a {
-      color: #0077cc;
-      font-weight: bold;
-      text-decoration: none;
-    }
-    footer a:hover { text-decoration: underline; }
+    body { font-family: Arial, sans-serif; background:#f9f9f9; text-align:center; padding:3rem; }
+    .box { background:#fff; padding:2rem; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); display:inline-block; }
+    h1 { color:#0077cc; }
+    .btn { display:inline-block; margin-top:1rem; padding:0.8rem 1.6rem; background:#0077cc; color:white; border:none; border-radius:6px; text-decoration:none; font-weight:bold; }
+    .btn:hover { background:#005fa3; }
+    footer { margin-top:2rem; font-size:0.8rem; color:#777; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Logo -->
-    <img src="/static/logo.png" alt="SeamlessDocs Logo" style="max-width:150px; margin-bottom:1.5rem; display:block; margin-left:auto; margin-right:auto;"/>
-
-    <!-- Heading -->
-    <h1>🎉 Conversion Successful!</h1>
-
-    <!-- Message -->
-    <p>Your file has been converted successfully.  
-    Click below to download your document.</p>
-
-    <!-- Button -->
-    <a href="/" class="btn">⬅ Back to Home</a>
-
-    <!-- Footer -->
-    <footer>
-      <p><em>By continuing, you agree to the 
-        <a href="{{ url_for('terms') }}">terms of service</a> and 
-        <a href="{{ url_for('privacy') }}">privacy policy</a>.
-      </em></p>
+  <div class="box">
+    <h1>✅ Conversion Complete!</h1>
+    <p>Your file is ready to download:</p>
+    <a href="{{ url_for('download', filename=request.args.get('file')) }}" class="btn">⬇ Download File</a>
+  </div>
+  <footer>
+    © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.
+  </footer>
+</body>
+</html>
