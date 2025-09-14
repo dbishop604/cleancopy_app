@@ -7,8 +7,33 @@ services:
     envVars:
       - key: PORT
         value: 10000
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: cleancopy-redis
+          property: connectionString
     healthCheckPath: /healthz
     disk:
       name: data
-      mountPath: /app/uploads
-      sizeGB: 1
+      mountPath: /data
+      sizeGB: 5   # increased for large files
+
+  - type: worker
+    name: cleancopy-worker
+    env: docker
+    plan: starter
+    autoDeploy: true
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: cleancopy-redis
+          property: connectionString
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 5   # share same volume with web service
+
+databases:
+  - name: cleancopy-redis
+    plan: free
