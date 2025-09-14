@@ -1,6 +1,6 @@
 flask
 redis
-rq
+rq==1.15.1
 gunicorn
 pytesseract
 pdf2image
