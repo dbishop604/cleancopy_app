@@ -1,71 +1,75 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Subscription Successful — CleanCopy OCR</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        background: #f0fdf4;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-      }
-      .container {
-        background: #fff;
-        padding: 2rem;
-        border-radius: 12px;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-        max-width: 500px;
-        width: 100%;
-        text-align: center;
-      }
-      h1 {
-        color: #16a34a;
-        margin-bottom: 1rem;
-      }
-      p {
-        margin-bottom: 1rem;
-        color: #333;
-      }
-      a {
-        display: inline-block;
-        margin-top: 1rem;
-        padding: 0.6rem 1.2rem;
-        background: #16a34a;
-        color: #fff;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: bold;
-      }
-      a:hover {
-        background: #15803d;
-      }
-      .note {
-        background: #ecfdf5;
-        border-left: 4px solid #10b981;
-        padding: 0.75rem;
-        margin-top: 1.5rem;
-        font-size: 0.9rem;
-        color: #065f46;
-        text-align: left;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>🎉 Subscription Successful!</h1>
-      <p>Thank you for upgrading to <strong>CleanCopy Pro</strong>.  
-         You can now upload files up to <strong>50MB</strong> for continuous text conversion.</p>
-      <a href="{{ url_for('index') }}">Go to CleanCopy</a>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscription Successful — CleanCopy OCR</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    p {
+      color: #555;
+      margin-bottom: 1.5rem;
+    }
+    a.button {
+      display: inline-block;
+      background: #007bff;
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    a.button:hover {
+      background: #0056b3;
+    }
+    footer {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: #555;
+    }
+    footer a {
+      color: #007bff;
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎉 Subscription Successful!</h1>
+    <p>Thank you for upgrading to the <strong>Pro Plan</strong>. You can now upload files up to 50MB for conversion into clean, continuous text.</p>
+    <a href="{{ url_for('index') }}" class="button">Back to Upload</a>
 
-      <div class="note">
-        ✅ As a Pro member, you can upload files up to <strong>50MB</strong>.<br>
-        🔒 All uploaded files are stored securely and automatically deleted after <strong>8 hours</strong> — so your
-
-        
+    <footer>
+      <small>
+        © Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute. |
+        <a href="terms.html" target="_blank">Terms</a> |
+        <a href="privacy.html" target="_blank">Privacy</a>
+      </small>
+    </footer>
+  </div>
+</body>
+</html>
