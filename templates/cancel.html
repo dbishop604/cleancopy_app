@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Conversion Failed — SeamlessDocs</title>
+  <title>Cancelled — SeamlessDocs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -32,16 +32,24 @@
     p {
       color: #555;
       line-height: 1.6;
+      margin: 1rem 0;
     }
-    a.btn {
+    .btn {
       display: inline-block;
-      margin-top: 1rem;
+      margin: 0.5rem;
       padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      font-weight: bold;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .btn-primary {
       background-color: #0077cc;
       color: white;
-      border-radius: 4px;
-      text-decoration: none;
-      font-weight: bold;
+    }
+    .btn-coffee {
+      background-color: #ff813f;
+      color: white;
     }
     footer {
       margin-top: 2rem;
@@ -56,15 +64,15 @@
 </head>
 <body>
   <div class="container">
-    <h1>❌ Conversion Failed</h1>
-    <p>We were unable to convert your file. Please try again.</p>
-    <a href="{{ url_for('index') }}" class="btn">Try Again</a>
+    <h1>⚠ Conversion Cancelled</h1>
+    <p>Something went wrong or the process was stopped. Please try again.</p>
+    <a href="/" class="btn btn-primary">⬅ Back to Home</a>
+    <a href="https://www.buymeacoffee.com/seamlessdocs" target="_blank" class="btn btn-coffee">☕ Buy SeamlessDocs a coffee</a>
 
     <footer>
       <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
       <p>
-        <a href="{{ url_for('index') }}">Home</a> |
-        <a href="{{ url_for('terms') }}">Terms of Use</a> |
+        <a href="{{ url_for('terms') }}">Terms of Use</a> | 
         <a href="{{ url_for('privacy') }}">Privacy Policy</a>
       </p>
     </footer>
