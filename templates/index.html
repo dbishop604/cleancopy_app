@@ -117,7 +117,7 @@
     .bar {
       width: 70%;
       max-width: 400px;
-      height: 12px;
+      height: 20px;
       background: #eee;
       border-radius: 999px;
       overflow: hidden;
@@ -129,6 +129,15 @@
       width: 0%;
       background: #0077cc;
       transition: width 0.3s ease;
+    }
+    .percent-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 12px;
+      font-weight: bold;
+      color: #fff;
     }
     .error {
       color: red;
@@ -182,7 +191,10 @@
   <!-- Loader overlay -->
   <div id="loaderOverlay">
     <div class="msg" id="loaderMsg">Processing your file… please wait.</div>
-    <div class="bar"><span id="progressBar"></span></div>
+    <div class="bar">
+      <span id="progressBar"></span>
+      <div class="percent-label" id="percentLabel">0%</div>
+    </div>
     <a id="downloadLink" class="btn" style="display:none;" download>⬇ Download File</a>
     <div class="error" id="errorMsg" style="display:none;"></div>
   </div>
@@ -195,6 +207,7 @@
     const form = document.getElementById("uploadForm");
     const overlay = document.getElementById("loaderOverlay");
     const progressBar = document.getElementById("progressBar");
+    const percentLabel = document.getElementById("percentLabel");
     const loaderMsg = document.getElementById("loaderMsg");
     const downloadLink = document.getElementById("downloadLink");
     const errorMsg = document.getElementById("errorMsg");
@@ -217,11 +230,23 @@
 
       overlay.style.display = "flex";
       progressBar.style.width = "0%";
+      percentLabel.textContent = "0%";
       loaderMsg.textContent = "Processing your file… please wait.";
       downloadLink.style.display = "none";
       errorMsg.style.display = "none";
 
       const formData = new FormData(form);
+
+      // Fake progress (UI only) while waiting for server
+      let progress = 0;
+      const fakeProgress = setInterval(() => {
+        if (progress < 95) {
+          progress += Math.floor(Math.random() * 5) + 1;
+          if (progress > 95) progress = 95;
+          progressBar.style.width = progress + "%";
+          percentLabel.textContent = progress + "%";
+        }
+      }, 500);
 
       try {
         const response = await fetch("{{ url_for('convert') }}", {
@@ -229,8 +254,9 @@
           body: formData
         });
 
-        // If the server returns a file, trigger download
-        if (response.headers.get("content-type").includes("application")) {
+        clearInterval(fakeProgress);
+
+        if (response.headers.get("content-type")?.includes("application")) {
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
           downloadLink.href = url;
@@ -238,17 +264,22 @@
           loaderMsg.textContent = "✅ Conversion complete!";
           downloadLink.style.display = "inline-block";
           progressBar.style.width = "100%";
+          percentLabel.textContent = "100%";
         } else {
-          // Otherwise handle JSON error
           const data = await response.json();
           loaderMsg.textContent = "❌ Conversion failed.";
           errorMsg.textContent = data.message || "Unknown error.";
           errorMsg.style.display = "block";
+          progressBar.style.width = "0%";
+          percentLabel.textContent = "0%";
         }
       } catch (err) {
+        clearInterval(fakeProgress);
         loaderMsg.textContent = "❌ Server error.";
         errorMsg.textContent = err.message;
         errorMsg.style.display = "block";
+        progressBar.style.width = "0%";
+        percentLabel.textContent = "0%";
       }
     });
   </script>
