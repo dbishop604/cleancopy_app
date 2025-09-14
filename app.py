@@ -79,7 +79,7 @@ def convert():
     output_path = os.path.join(CONVERTED_FOLDER, output_filename)
 
     # Queue background job (runs in worker.py)
-    job = q.enqueue("worker.process_file_job", upload_path, fmt, output_filename)
+    job = q.enqueue("worker.process_file_job", upload_path, output_path, job_timeout="10m")
 
     return redirect(url_for("success", job_id=job.get_id()))
 
@@ -98,7 +98,7 @@ def status(job_id):
         return jsonify({
             "status": "finished",
             "progress": 100,
-            "download_url": url_for("download_file", filename=job.result["output"].split("/")[-1])
+            "download_url": url_for("download_file", filename=os.path.basename(job.result["output"]))
         })
     elif job.is_failed:
         return jsonify({"status": "error", "message": str(job.exc_info)})
@@ -118,7 +118,7 @@ def download_file(filename):
 def healthz():
     return "OK", 200
 
-# --- Local run ---
+# --- Main entrypoint (local only) ---
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
