@@ -72,7 +72,12 @@
       margin-top: 1rem;
       display: block;
     }
-    .agree a { color: #0077cc; text-decoration: none; font-weight: bold; }
+    .agree a {
+      color: #0077cc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .agree a:hover { text-decoration: underline; }
     .notice {
       font-size: 0.9rem;
       color: #555;
@@ -85,7 +90,12 @@
       color: #777;
       line-height: 1.4;
     }
-    footer a { color: #0077cc; text-decoration: none; font-weight: bold; }
+    footer a {
+      color: #0077cc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    footer a:hover { text-decoration: underline; }
 
     /* Loader overlay */
     #loaderOverlay {
@@ -104,7 +114,6 @@
       font-weight: bold;
       color: #0077cc;
     }
-    #percent { font-size: 1rem; font-weight: bold; color: #333; }
     .bar {
       width: 70%;
       max-width: 400px;
@@ -112,30 +121,19 @@
       background: #eee;
       border-radius: 999px;
       overflow: hidden;
-      border: 1px solid #ccc;
+      position: relative;
     }
     .bar span {
       display: block;
       height: 100%;
       width: 0%;
       background: #0077cc;
-      transition: width 0.2s ease;
+      transition: width 0.3s ease;
     }
-    #errorMsg {
-      margin-top: 1rem;
+    .error {
       color: red;
       font-weight: bold;
-      display: none;
-    }
-    #okBtn {
-      display: none;
-      padding: 0.6rem 1.2rem;
-      background: #0077cc;
-      color: #fff;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
+      margin-top: 1rem;
     }
   </style>
 </head>
@@ -148,8 +146,10 @@
     </p>
     <p class="plan"><strong>Free Plan:</strong> Up to 5MB conversions.</p>
 
-    <form id="uploadForm">
-      <div class="row"><input type="file" name="fileUpload" id="fileUpload" disabled></div>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <div class="row">
+        <input type="file" name="fileUpload" id="fileUpload" disabled>
+      </div>
       <div class="row">
         <label for="format" style="font-size:14px;">Output format:</label>
         <select name="format" id="format" disabled>
@@ -163,11 +163,15 @@
         <a href="{{ url_for('terms') }}">terms of service</a> and
         <a href="{{ url_for('privacy') }}">privacy policy</a>.
       </label>
-      <div class="row"><button type="submit" id="uploadBtn" class="btn" disabled>Upload File</button></div>
+      <div class="row">
+        <button type="submit" id="uploadBtn" class="btn" disabled>Upload File</button>
+      </div>
     </form>
 
-    <p id="errorMsg"></p>
-    <p class="notice">Download your converted file within 8 hours — files are automatically deleted after that time. We do not read, store, or share them.</p>
+    <p class="notice">
+      Download your converted file within 8 hours — files are automatically deleted after that time. We do not read, store, or share them.
+    </p>
+
     <footer>
       © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
       <a href="{{ url_for('terms') }}">Terms of Use</a> |
@@ -178,9 +182,9 @@
   <!-- Loader overlay -->
   <div id="loaderOverlay">
     <div class="msg" id="loaderMsg">Processing your file… please wait.</div>
-    <div id="percent">0%</div>
     <div class="bar"><span id="progressBar"></span></div>
-    <button id="okBtn">OK</button>
+    <a id="downloadLink" class="btn" style="display:none;" download>⬇ Download File</a>
+    <div class="error" id="errorMsg" style="display:none;"></div>
   </div>
 
   <script>
@@ -190,11 +194,10 @@
     const uploadBtn = document.getElementById("uploadBtn");
     const form = document.getElementById("uploadForm");
     const overlay = document.getElementById("loaderOverlay");
-    const loaderMsg = document.getElementById("loaderMsg");
     const progressBar = document.getElementById("progressBar");
-    const percentText = document.getElementById("percent");
+    const loaderMsg = document.getElementById("loaderMsg");
+    const downloadLink = document.getElementById("downloadLink");
     const errorMsg = document.getElementById("errorMsg");
-    const okBtn = document.getElementById("okBtn");
 
     termsCheck.addEventListener("change", function() {
       const enabled = this.checked;
@@ -203,78 +206,50 @@
       uploadBtn.disabled = !enabled;
     });
 
-    okBtn.addEventListener("click", function() {
-      overlay.style.display = "none";
-      okBtn.style.display = "none";
-    });
-
-    form.addEventListener("submit", function(e) {
+    form.addEventListener("submit", async function(e) {
       e.preventDefault();
-      errorMsg.style.display = "none";
 
       const file = fileUpload.files[0];
       if (!file) {
-        errorMsg.textContent = "⚠️ Please choose a file first.";
-        errorMsg.style.display = "block";
+        alert("Please select a file.");
         return;
       }
 
       overlay.style.display = "flex";
       progressBar.style.width = "0%";
-      percentText.textContent = "0%";
       loaderMsg.textContent = "Processing your file… please wait.";
-      okBtn.style.display = "none";
+      downloadLink.style.display = "none";
+      errorMsg.style.display = "none";
 
-      const data = new FormData();
-      data.append("fileUpload", file);
-      data.append("terms", "yes");
-      data.append("format", formatSelect.value);
+      const formData = new FormData(form);
 
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "{{ url_for('convert') }}", true);
-      xhr.responseType = "blob";
+      try {
+        const response = await fetch("{{ url_for('convert') }}", {
+          method: "POST",
+          body: formData
+        });
 
-      xhr.upload.addEventListener("progress", function(e) {
-        if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          progressBar.style.width = percent + "%";
-          percentText.textContent = percent + "%";
-        }
-      });
-
-      xhr.onload = function() {
-        if (xhr.status === 200) {
-          const disposition = xhr.getResponseHeader("Content-Disposition");
-          let filename = "converted_file";
-          if (disposition && disposition.includes("filename=")) {
-            filename = disposition.split("filename=")[1].replace(/['"]/g, "");
-          }
-          const blob = xhr.response;
+        // If the server returns a file, trigger download
+        if (response.headers.get("content-type").includes("application")) {
+          const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          window.URL.revokeObjectURL(url);
-
-          loaderMsg.textContent = "✅ Conversion Complete!";
+          downloadLink.href = url;
+          downloadLink.download = file.name.replace(/\.[^.]+$/, "") + "." + formatSelect.value;
+          loaderMsg.textContent = "✅ Conversion complete!";
+          downloadLink.style.display = "inline-block";
           progressBar.style.width = "100%";
-          percentText.textContent = "100%";
-          okBtn.style.display = "inline-block";
         } else {
-          loaderMsg.textContent = "❌ Error: " + xhr.status + " - " + xhr.statusText;
-          okBtn.style.display = "inline-block";
+          // Otherwise handle JSON error
+          const data = await response.json();
+          loaderMsg.textContent = "❌ Conversion failed.";
+          errorMsg.textContent = data.message || "Unknown error.";
+          errorMsg.style.display = "block";
         }
-      };
-
-      xhr.onerror = function() {
-        loaderMsg.textContent = "❌ Network error or server unreachable.";
-        okBtn.style.display = "inline-block";
-      };
-
-      xhr.send(data);
+      } catch (err) {
+        loaderMsg.textContent = "❌ Server error.";
+        errorMsg.textContent = err.message;
+        errorMsg.style.display = "block";
+      }
     });
   </script>
 </body>
