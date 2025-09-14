@@ -4,20 +4,23 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from werkzeug.utils import secure_filename
 from redis import Redis
 from rq import Queue
+
 from worker import process_file_job
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "devkey")
 
-# Shared disk paths (same in web + worker)
+# Shared disk paths (mounted on Render as /data)
 UPLOAD_FOLDER = "/data/uploads"
 OUTPUT_FOLDER = "/data/outputs"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# Redis connection (Render provides REDIS_URL)
+# Redis connection
 redis_conn = Redis.from_url(os.environ["REDIS_URL"])
 q = Queue(connection=redis_conn)
+
+# --- Routes ---
 
 @app.route("/")
 def index():
@@ -36,7 +39,7 @@ def success():
     return render_template("success.html")
 
 @app.route("/cancel")
-def cancel():
+def cancel_page():
     return render_template("cancel.html")
 
 @app.route("/coffee")
@@ -46,7 +49,7 @@ def coffee():
 @app.route("/upload", methods=["POST"])
 def upload_file():
     if "terms" not in request.form:
-        flash("⚠️ You must agree to the terms of service and privacy policy before uploading.")
+        flash("⚠️ You must agree to the terms before uploading.")
         return redirect(url_for("index"))
 
     if "fileUpload" not in request.files:
@@ -65,7 +68,6 @@ def upload_file():
 
     f.save(input_path)
 
-    # enqueue job
     job = q.enqueue(process_file_job, input_path, output_path, job_id)
 
     return jsonify({"job_id": job.get_id()})
@@ -75,6 +77,7 @@ def status(job_id):
     job = q.fetch_job(job_id)
     if job is None:
         return jsonify({"status": "not_found"}), 404
+
     if job.is_finished:
         return jsonify({"status": "finished", "download_url": f"/download/{job_id}"})
     elif job.is_failed:
@@ -82,12 +85,24 @@ def status(job_id):
     else:
         return jsonify({"status": "processing"})
 
+@app.route("/cancel/<job_id>", methods=["POST"])
+def cancel_job(job_id):
+    job = q.fetch_job(job_id)
+    if job is None:
+        return jsonify({"status": "not_found"}), 404
+    job.cancel()
+    return jsonify({"status": "cancelled"})
+
 @app.route("/download/<job_id>")
 def download(job_id):
     output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.docx")
     if not os.path.exists(output_path):
         return jsonify({"error": "File not ready"}), 404
     return send_file(output_path, as_attachment=True)
+
+@app.route("/healthz")
+def healthz():
+    return "OK", 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
