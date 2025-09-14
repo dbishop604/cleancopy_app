@@ -1,8 +1,12 @@
-<header>
-  <h1>By.Storytellers</h1>
+<header style="background:#0077cc;color:white;padding:1rem;text-align:center;">
+  <h1>By.Storytellers — CleanCopy OCR</h1>
   <nav>
-    <a href="{{ url_for('index') }}">Home</a>
-    <a href="{{ url_for('contact') }}">Contact</a>
-    <a href="{{ url_for('login') }}">Login</a>
+    <a href="{{ url_for('index') }}" style="color:white;margin:0 1rem;">Home</a>
+    <a href="{{ url_for('contact') }}" style="color:white;margin:0 1rem;">Contact</a>
+
+    {% if user and plan == "paid" %}
+      <a href="{{ url_for('logout') }}" style="color:white;margin:0 1rem;">Logout</a>
+      <a href="{{ url_for('billing_portal') }}" style="color:white;margin:0 1rem;">Manage Billing</a>
+    {% endif %}
   </nav>
 </header>
