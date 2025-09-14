@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Terms of Service — SeamlessDocs</title>
+  <title>Terms of Use — SeamlessDocs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -24,49 +24,46 @@
       max-width: 800px;
       width: 100%;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 1rem;
-      color: #111;
-    }
-    h2 {
-      margin-top: 1.5rem;
-      color: #111;
-    }
-    p {
-      color: #555;
-      line-height: 1.6;
-    }
-    ul {
-      margin: 1rem 0;
-      padding-left: 1.5rem;
-    }
-    footer {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 0.85rem;
-      color: #555;
-      line-height: 1.6;
-    }
+    h1 { text-align: center; margin-bottom: 1rem; color: #111; }
+    h2 { margin-top: 1.5rem; color: #111; }
+    p { color: #555; line-height: 1.6; }
+    footer { margin-top: 2rem; text-align: center; font-size: 0.8rem; color: #777; }
     footer p { margin: 0.3rem 0; }
-    a { color: #0077cc; text-decoration: none; font-weight: bold; }
-    a:hover { text-decoration: underline; }
+    footer a { color: #0077cc; font-weight: bold; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Terms of Service</h1>
+    <h1>Terms of Use</h1>
     <p><strong>Last Updated:</strong> [Insert Date]</p>
 
     <h2>Acceptance of Terms</h2>
-    <p>By accessing or using SeamlessDocs, you agree to be bound by these Terms of Service. If you do not agree, please do not use our services.</p>
+    <p>By accessing or using SeamlessDocs, you agree to comply with these Terms of Use. If you do not agree, please do not use the service.</p>
 
     <h2>Use of the Service</h2>
-    <ul>
-      <li>You may upload documents solely for the purpose of file conversion.</li>
-      <li>You are responsible for ensuring that you have the legal right to upload and convert any files you submit.</li>
-      <li>You agree not to upload any content that is illegal, harmful, or infringes on the rights of others.</li>
-    </ul>
+    <p>You may upload PDF or image files (JPG, PNG, TIFF) for the sole purpose of converting them into editable document formats such as DOCX or TXT. You may not use the service for unlawful purposes, including but not limited to uploading or distributing malicious, illegal, or copyrighted material without authorization.</p>
 
-    <h2>Account Responsibilities</h2>
-    <p>You are responsible for maintaining the confidentiality of your account credentials an
+    <h2>File Handling</h2>
+    <p>All uploaded files are processed automatically and deleted within eight (8) hours. We do not retain, review, or share your files.</p>
+
+    <h2>Accounts and Subscriptions</h2>
+    <p>Free accounts allow uploads of up to 5MB per file. Pro accounts support files up to 50MB. You are responsible for maintaining the confidentiality of your account credentials.</p>
+
+    <h2>Disclaimer</h2>
+    <p>SeamlessDocs is provided “as is” without warranties of any kind. We do not guarantee that the service will be error-free, uninterrupted, or suitable for every use case.</p>
+
+    <h2>Limitation of Liability</h2>
+    <p>To the maximum extent permitted by law, SeamlessDocs shall not be liable for any damages arising from your use of the service.</p>
+
+    <footer>
+      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
+      <p>
+        <a href="{{ url_for('index') }}">Home</a> | 
+        <a href="{{ url_for('terms') }}">Terms of Use</a> | 
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
