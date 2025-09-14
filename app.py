@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file
 import os
+from processor import process_file_to_text, text_to_docx
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "devkey")
@@ -25,11 +26,17 @@ def convert():
         flash("No selected file.", "error")
         return redirect(url_for("index"))
 
-    # Example success flow
-    # Here you’d call processor.py functions to handle the file
-    # text = process_file_to_text(f)
-    # output = text_to_docx(text)
-    # return send_file(output, as_attachment=True)
+    try:
+        # Step 1: Run OCR → plain text
+        text = process_file_to_text(f)
 
-    flash("File uploaded and is being processed!", "success")
-    return redirect(url_for("index"))
+        # Step 2: Convert text → DOCX file
+        output_path = text_to_docx(text)
+
+        # Step 3: Send back file as download
+        return send_file(output_path, as_attachment=True)
+
+    except Exception as e:
+        print("Conversion error:", e)
+        flash("Something went wrong during conversion. Please try again.", "error")
+        return redirect(url_for("index"))
