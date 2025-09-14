@@ -1,6 +1,5 @@
-FROM python:3.11.9-slim
-
-ENV DEBIAN_FRONTEND=noninteractive
+# Use official lightweight Python image
+FROM python:3.11-slim
 
 # Install system dependencies for OCR + PDF handling
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -14,19 +13,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsm6 \
     libxext6 \
     libxrender1 \
-    && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/*
 
+# Set working directory
 WORKDIR /app
 
-# Install Python dependencies
+# Copy dependencies first (better caching)
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all app code
+# Copy project files
 COPY . /app/
 
-# Expose port (Render sets $PORT automatically)
-EXPOSE 10000
-
-# Use shell form to expand $PORT at runtime
-CMD exec gunicorn app:app --bind 0.0.0.0:$PORT --workers=2 --threads=2 --timeout=120
+# Expose port
+ENV PORT=10000
+CMD ["gunicorn", "-w", "2", "-k", "gthread", "-b", "0.0.0.0:10000", "app:app"]
