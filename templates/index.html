@@ -1,110 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeamlessDocs — Upload</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-    .container {
-      background: #fff;
-      margin: 2rem;
-      padding: 2rem 2rem 3rem 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 720px;
-      width: 100%;
-    }
-    img.logo {
-      max-width: 140px;
-      margin-bottom: 1rem;
-    }
-    h1 {
-      margin: 0.25rem 0;
-      font-size: 2rem;
-      color: #111;
-    }
-    .tagline {
-      font-size: 1rem;
-      color: #444;
-      margin: 0.75rem 0 1.5rem;
-      text-align: center;
-    }
-    .plan {
-      font-size: 0.95rem;
-      color: #555;
-      margin-bottom: 1.5rem;
-      text-align: center;
-    }
-    .row {
-      margin: 1rem 0;
-    }
-    input[type="file"], select {
-      padding: 0.5rem;
-      font-size: 14px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-    }
-    .btn {
-      display: inline-block;
-      padding: 0.7rem 1.4rem;
-      border: none;
-      border-radius: 6px;
-      background: #FFD200; /* Yellow button */
-      color: #111;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .agree {
-      display: block;
-      margin: 1rem 0;
-      font-size: 14px;
-      color: #111;
-    }
-    .agree a {
-      color: #0077cc;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .agree a:hover {
-      text-decoration: underline;
-    }
-    .notice {
-      font-size: 0.9rem;
-      color: #555;
-      margin-top: 1.5rem;
-      text-align: center;
-      line-height: 1.4;
-    }
-    footer {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 8pt; /* Smaller footer text */
-      color: #777;
-      line-height: 1.4;
-    }
-    footer a {
-      color: #0077cc;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    footer a:hover {
-      text-decoration: underline;
-    }
     /* Loader overlay */
     #loaderOverlay {
       display: none;
@@ -121,22 +14,23 @@
     #loaderOverlay .msg {
       font-size: 1.1rem;
       font-weight: bold;
-      color: #0077cc;
+      color: #111;
     }
     .bar {
       position: relative;
       width: 70%;
       max-width: 400px;
       height: 20px;
-      background: #eee;
-      border-radius: 6px;
+      background: #ccc; /* darker track for contrast */
+      border-radius: 8px;
       overflow: hidden;
+      border: 1px solid #999; /* adds visibility */
     }
     .bar span {
       display: block;
       height: 100%;
       width: 0%;
-      background: #FFD200;
+      background: #f4c400; /* stronger yellow/gold */
       transition: width 0.3s ease;
     }
     .percent-label {
@@ -146,151 +40,5 @@
       transform: translate(-50%, -50%);
       font-size: 14px;
       font-weight: bold;
-      color: #111;
+      color: #000; /* black text for better readability */
     }
-    .hidden { display: none; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <!-- Logo -->
-    <img src="/static/logo.png" alt="SeamlessDocs Logo" class="logo"/>
-
-    <!-- Heading -->
-    <h1>SeamlessDocs</h1>
-    <p class="tagline">
-      Upload your <strong>PDF</strong> or image file (<strong>JPG, PNG, TIFF</strong>) 
-      and SeamlessDocs will convert it into a clean, editable <strong>DOCX</strong> or <strong>TXT</strong> file.
-    </p>
-    <p class="plan"><strong>Free Plan:</strong> Up to 5MB conversions.</p>
-
-    <!-- Upload form -->
-    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
-      <div class="row">
-        <input type="file" name="fileUpload" id="fileUpload" disabled>
-      </div>
-      <div class="row">
-        <label for="format" style="font-size:14px;">Output format:</label>
-        <select name="format" id="format" disabled>
-          <option value="docx">DOCX</option>
-          <option value="txt">TXT</option>
-        </select>
-      </div>
-      <label class="agree">
-        <input type="checkbox" id="termsCheck" name="terms">
-        By continuing, you agree to the
-        <a href="{{ url_for('terms') }}">terms of service</a> and
-        <a href="{{ url_for('privacy') }}">privacy policy</a>.
-      </label>
-      <div class="row">
-        <button type="submit" id="uploadBtn" class="btn" disabled>Upload File</button>
-      </div>
-    </form>
-
-    <!-- Status -->
-    <p class="notice">
-      Download your converted file within 8 hours — files are automatically deleted after that time. 
-      We do not read, store, or share them.
-    </p>
-
-    <!-- Footer -->
-    <footer>
-      © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
-      <a href="{{ url_for('terms') }}">Terms of Service</a> |
-      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
-    </footer>
-  </div>
-
-  <!-- Loader overlay -->
-  <div id="loaderOverlay">
-    <div class="msg" id="loaderMsg">Processing your file… please wait.</div>
-    <div class="bar">
-      <span id="progressBar"></span>
-      <div class="percent-label" id="percentLabel">0%</div>
-    </div>
-    <a id="downloadLink" class="btn hidden" download>⬇ Download File</a>
-    <div class="error hidden" id="errorMsg"></div>
-  </div>
-
-  <script>
-    const termsCheck = document.getElementById("termsCheck");
-    const fileUpload = document.getElementById("fileUpload");
-    const formatSelect = document.getElementById("format");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const form = document.getElementById("uploadForm");
-    const overlay = document.getElementById("loaderOverlay");
-    const progressBar = document.getElementById("progressBar");
-    const percentLabel = document.getElementById("percentLabel");
-    const downloadLink = document.getElementById("downloadLink");
-    const errorMsg = document.getElementById("errorMsg");
-
-    termsCheck.addEventListener("change", function() {
-      const enabled = this.checked;
-      fileUpload.disabled = !enabled;
-      formatSelect.disabled = !enabled;
-      uploadBtn.disabled = !enabled;
-    });
-
-    form.addEventListener("submit", async function(e) {
-      e.preventDefault();
-
-      overlay.style.display = "flex";
-      progressBar.style.width = "0%";
-      percentLabel.textContent = "0%";
-      loaderMsg.textContent = "Processing your file… please wait.";
-      downloadLink.classList.add("hidden");
-      errorMsg.classList.add("hidden");
-
-      const formData = new FormData(form);
-      const xhr = new XMLHttpRequest();
-
-      xhr.open("POST", "{{ url_for('convert') }}", true);
-      xhr.responseType = "blob";
-
-      xhr.upload.onprogress = function(e) {
-        if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          progressBar.style.width = percent + "%";
-          percentLabel.textContent = percent + "%";
-        }
-      };
-
-      xhr.onload = function() {
-        if (xhr.status === 200) {
-          loaderMsg.textContent = "✅ Conversion complete!";
-          progressBar.style.width = "100%";
-          percentLabel.textContent = "100%";
-          const blob = xhr.response;
-          const url = window.URL.createObjectURL(blob);
-          downloadLink.href = url;
-          downloadLink.download = fileUpload.files[0].name.replace(/\.[^.]+$/, "") + "." + formatSelect.value;
-          downloadLink.classList.remove("hidden");
-        } else {
-          loaderMsg.textContent = "❌ Conversion failed.";
-          errorMsg.textContent = "Server error: " + xhr.status + " — " + xhr.statusText;
-          errorMsg.classList.remove("hidden");
-        }
-      };
-
-      xhr.onerror = function() {
-        clearInterval(fakeProgress);
-        loaderMsg.textContent = "❌ Network error. Please try again.";
-        errorMsg.classList.remove("hidden");
-      };
-
-      xhr.send(formData);
-
-      // Simulated progress bar
-      let progress = 0;
-      const fakeProgress = setInterval(() => {
-        if (progress < 95) {
-          progress += Math.floor(Math.random() * 8) + 2;
-          if (progress > 95) progress = 95;
-          progressBar.style.width = progress + "%";
-          percentLabel.textContent = progress + "%";
-        }
-      }, 400);
-    });
-  </script>
-</body>
-</html>
