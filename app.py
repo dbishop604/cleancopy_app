@@ -1,5 +1,4 @@
 import os
-import io
 import uuid
 from flask import (
     Flask, render_template, request, redirect,
@@ -9,7 +8,7 @@ from werkzeug.utils import secure_filename
 from redis import Redis
 from rq import Queue
 from rq.job import Job
-from worker import process_file_job
+from processor import process_file_job  # now properly imported
 
 # --- Flask setup ---
 app = Flask(__name__)
@@ -25,7 +24,6 @@ redis_url = os.environ.get("REDIS_URL")
 redis_conn = Redis.from_url(redis_url) if redis_url else None
 q = Queue("default", connection=redis_conn) if redis_conn else None
 
-# --- Routes ---
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -52,34 +50,39 @@ def coffee():
 
 @app.route("/convert", methods=["POST"])
 def convert():
-    if "terms" not in request.form:
-        flash("⚠️ You must agree to the terms of service and privacy policy before uploading.")
-        return redirect(url_for("index"))
+    try:
+        if "terms" not in request.form:
+            flash("⚠️ You must agree to the terms.")
+            return redirect(url_for("index"))
 
-    if "fileUpload" not in request.files:
-        flash("⚠️ No file selected")
-        return redirect(url_for("index"))
+        if "fileUpload" not in request.files:
+            flash("⚠️ No file selected")
+            return redirect(url_for("index"))
 
-    f = request.files["fileUpload"]
-    if f.filename == "":
-        flash("⚠️ No selected file")
-        return redirect(url_for("index"))
+        f = request.files["fileUpload"]
+        if f.filename == "":
+            flash("⚠️ No selected file")
+            return redirect(url_for("index"))
 
-    filename = secure_filename(f.filename)
-    job_id = str(uuid.uuid4())
+        filename = secure_filename(f.filename)
+        job_id = str(uuid.uuid4())
 
-    input_path = os.path.join(UPLOAD_FOLDER, f"{job_id}_{filename}")
-    output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.docx")
+        input_path = os.path.join(UPLOAD_FOLDER, f"{job_id}_{filename}")
+        output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.docx")
 
-    f.save(input_path)
+        f.save(input_path)
 
-    if not redis_conn:
-        return jsonify({"status": "error", "message": "Redis is not connected"}), 500
+        if not redis_conn:
+            app.logger.error("Redis connection failed")
+            return jsonify({"status": "error", "message": "Redis is not connected"}), 500
 
-    # enqueue the background job
-    job = q.enqueue(process_file_job, input_path, output_path, job_id)
+        job = q.enqueue(process_file_job, input_path, output_path, job_id)
 
-    return redirect(url_for("success", job_id=job.id))
+        return redirect(url_for("success", job_id=job.id))
+
+    except Exception as e:
+        app.logger.error(f"Error in /convert: {e}", exc_info=True)
+        return "Internal Server Error", 500
 
 @app.route("/status/<job_id>")
 def job_status(job_id):
@@ -95,8 +98,8 @@ def job_status(job_id):
         return jsonify({"status": "done", "result": job.result})
     elif job.is_failed:
         return jsonify({"status": "error", "message": str(job.exc_info)})
-    else:
-        return jsonify({"status": "processing"})
+
+    return jsonify({"status": "processing"})
 
 @app.route("/download/<job_id>")
 def download(job_id):
