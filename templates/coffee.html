@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Buy Us a Coffee — SeamlessDocs</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      margin: 2rem;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      max-width: 700px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      color: #111;
+    }
+    p {
+      color: #555;
+      line-height: 1.6;
+      margin: 1rem 0;
+      font-size: 1rem;
+    }
+    img.logo {
+      max-width: 150px;
+      margin-bottom: 1rem;
+    }
+    .btn-coffee {
+      display: inline-block;
+      padding: 0.8rem 1.6rem;
+      background-color: #FFD200; /* Bright yellow */
+      color: #111;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      margin-top: 1rem;
+      transition: background 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .btn-coffee:hover {
+      background-color: #f5c400;
+    }
+    footer {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: #777;
+    }
+    footer a {
+      color: #0077cc;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Logo -->
+    <img src="/static/logo.png" alt="SeamlessDocs Logo" class="logo"/>
+
+    <!-- Heading -->
+    <h1>Support SeamlessDocs</h1>
+
+    <!-- Description -->
+    <p>
+      SeamlessDocs turns your <strong>PDF</strong> or image files 
+      (<strong>JPG, PNG, TIFF</strong>) into clean, editable documents — 
+      no messy paragraph boxes, no separate windows.  
+    </p>
+    <p>
+      If this tool makes your work easier, consider buying us a coffee ☕.  
+      Your support helps us keep improving SeamlessDocs for everyone.
+    </p>
+
+    <!-- Buy me a coffee button -->
+    <a href="https://www.buymeacoffee.com/YOURNAME" target="_blank" class="btn-coffee">
+      ☕ Buy Us a Coffee
+    </a>
+
+    <!-- Footer -->
+    <footer>
+      <p>© SeamlessDocs. All rights reserved.</p>
+      <p>
+        <a href="{{ url_for('index') }}">Home</a> | 
+        <a href="{{ url_for('terms') }}">Terms of Use</a> | 
+        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
