@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SeamlessDocs — Upload</title>
+  <title>SeamlessDocs</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -17,43 +17,76 @@
     }
     .container {
       background: #fff;
-      margin: 2rem;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 800px;
+      margin: 3rem;
+      padding: 2.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      max-width: 700px;
       width: 100%;
     }
     h1 {
-      text-align: center;
-      margin-bottom: 0.5rem;
+      margin: 0 0 1rem 0;
       color: #111;
+      text-align: center;
+      font-size: 2rem;
     }
     p {
-      font-size: 14px;
-      color: #555;
+      color: #444;
       line-height: 1.6;
-      margin: 0.75rem 0;
+      margin: 1rem 0;
+      font-size: 1rem;
+      text-align: left;
+    }
+    img.logo {
+      max-width: 150px;
+      display: block;
+      margin: 0 auto 1.5rem auto;
+    }
+    form {
+      margin-top: 2rem;
+      text-align: center;
+    }
+    input[type="file"], select {
+      margin: 1rem 0;
+      padding: 0.6rem;
+      font-size: 14px;
     }
     .btn {
       display: inline-block;
-      margin: 0.3rem;
-      padding: 0.6rem 1.2rem;
+      margin: 1rem 0;
+      padding: 0.7rem 1.4rem;
+      background-color: #FFD200; /* bright yellow button */
+      color: #111;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       text-decoration: none;
       cursor: pointer;
       font-weight: bold;
+      font-size: 1rem;
+      transition: background 0.3s;
     }
-    .btn-primary {
-      background-color: #FFD200; /* Yellow button */
-      color: #111;
+    .btn:hover {
+      background-color: #e6c200;
+    }
+    label {
+      font-size: 14px;
+      display: block;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      text-align: left;
+    }
+    .notice {
+      margin-top: 1.5rem;
+      color: #555;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      text-align: center;
     }
     footer {
       margin-top: 2rem;
       text-align: center;
-      font-size: 8pt;
-      color: #555;
+      font-size: 0.75rem; /* smaller ~8pt */
+      color: #777;
       line-height: 1.4;
     }
     footer a {
@@ -62,105 +95,28 @@
       text-decoration: none;
     }
     footer a:hover { text-decoration: underline; }
-    /* Overlay */
-    #overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      z-index: 2000;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      color: #fff;
-      font-size: 1.2rem;
-    }
-    .spinner {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid #FFD200;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      animation: spin 1s linear infinite;
-      margin-bottom: 1rem;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>SeamlessDocs</h1>
-    <p>Upload your <strong>PDF</strong> or image file (<strong>JPG, PNG, TIFF</strong>) and SeamlessDocs will convert it into a clean, editable <strong>DOCX</strong> or <strong>TXT</strong> file.</p>
+    <!-- Logo -->
+    <img src="/static/logo.png" alt="SeamlessDocs Logo" class="logo"/>
 
+    <!-- Heading -->
+    <h1>SeamlessDocs</h1>
+
+    <!-- Intro text -->
+    <p style="font-size:14px; text-align:center;">
+      Upload your <strong>PDF</strong> or image file (<strong>JPG, PNG, TIFF</strong>) and SeamlessDocs will convert it into a clean, editable <strong>DOCX</strong> or <strong>TXT</strong> file.
+    </p>
+
+    <!-- Plan info -->
+    <p><strong>Free Plan:</strong> Up to 5MB conversions.</p>
+
+    <!-- Upload form -->
     <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
       <input type="file" name="fileUpload" id="fileUpload" disabled>
       <br><br>
 
       <!-- Terms agreement -->
-      <label>
-        <input type="checkbox" id="termsCheck">
-        <span style="font-size:14px;">By continuing, you agree to the 
-        <a href="{{ url_for('terms') }}">terms of service</a> and 
-        <a href="{{ url_for('privacy') }}">privacy policy</a>.
-        </span>
-      </label>
-      <br><br>
-
-      <!-- Format choice -->
-      <label for="format" style="font-size:14px;">Output format:</label>
-      <select name="format" id="format" disabled>
-        <option value="docx">DOCX</option>
-        <option value="txt">TXT</option>
-      </select>
-      <br><br>
-
-      <!-- Upload button -->
-      <button type="submit" id="uploadBtn" class="btn btn-primary" disabled>Upload File</button>
-    </form>
-
-    <p class="notice">
-      Download your converted file before 8 hours as your files will automatically be deleted after 8 hours. We do not read, store, or share them.
-    </p>
-
-    <footer>
-      <p>By continuing, you agree to the 
-        <a href="{{ url_for('terms') }}">terms of service</a> and 
-        <a href="{{ url_for('privacy') }}">privacy policy</a>.
-      </p>
-      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
-      <p>
-        <a href="{{ url_for('index') }}">Home</a>
-      </p>
-    </footer>
-  </div>
-
-  <!-- Overlay -->
-  <div id="overlay">
-    <div class="spinner"></div>
-    <div>Processing your file… Please wait.</div>
-  </div>
-
-  <script>
-    const termsCheck = document.getElementById('termsCheck');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const fileUpload = document.getElementById('fileUpload');
-    const formatSelect = document.getElementById('format');
-    const overlay = document.getElementById('overlay');
-
-    termsCheck.addEventListener('change', function() {
-      const enabled = this.checked;
-      fileUpload.disabled = !enabled;
-      formatSelect.disabled = !enabled;
-      uploadBtn.disabled = !enabled;
-    });
-
-    document.getElementById('uploadForm').addEventListener('submit', function() {
-      overlay.style.display = 'flex';
-    });
-  </script>
-</body>
-</html>
+      <label style="font-size:14px; text-a
