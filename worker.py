@@ -5,12 +5,11 @@ from processor import process_file_to_text, text_to_docx
 
 UPLOAD_FOLDER = "/data/uploads"
 OUTPUT_FOLDER = "/data/outputs"
-
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 def process_file_job(input_path, output_path, job_id):
-    """Background job to OCR PDF → DOCX."""
+    """Background job to OCR a PDF and save DOCX output."""
     try:
         text = process_file_to_text(input_path, join_strategy="smart")
         text_to_docx(text, output_path)
