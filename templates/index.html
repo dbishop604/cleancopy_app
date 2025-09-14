@@ -1,15 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>CleanCopy OCR</title>
-  <meta charset="utf-8">
   <style>
-    body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; }
-    .upload-box { border: 2px dashed #999; padding: 20px; text-align: center; }
-    .progress { width: 100%; background: #eee; border-radius: 10px; overflow: hidden; margin-top: 20px; }
-    .progress-bar { width: 0%; height: 20px; background: #4caf50; transition: width 0.3s; }
-    #status { margin-top: 10px; font-weight: bold; }
-    button { margin-top: 15px; padding: 10px 20px; font-size: 1rem; cursor: pointer; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 0 1rem;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    .upload-box {
+      border: 2px dashed #999;
+      padding: 20px;
+      text-align: center;
+      border-radius: 10px;
+      background: #fafafa;
+    }
+    .progress {
+      width: 100%;
+      background: #eee;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 20px;
+      height: 20px;
+    }
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: #4caf50;
+      transition: width 0.4s ease;
+    }
+    #status {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #4caf50;
+      color: white;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    #cancelBtn {
+      background: #e74c3c;
+      margin-left: 10px;
+    }
   </style>
 </head>
 <body>
@@ -28,18 +75,20 @@
         <option value="txt">TXT</option>
       </select>
     </label><br><br>
-    <button type="submit">Upload & Convert</button>
+    <button type="submit" id="submitBtn">Upload & Convert</button>
   </form>
 
   <div id="progress" style="display:none;">
-    <div class="progress"><div id="bar" class="progress-bar"></div></div>
+    <div class="progress">
+      <div id="bar" class="progress-bar"></div>
+    </div>
     <p id="status">Uploading...</p>
     <button id="cancelBtn" type="button">✖ Cancel</button>
   </div>
 
   <script>
     const form = document.getElementById("uploadForm");
-    const progress = document.getElementById("progress");
+    const progressBox = document.getElementById("progress");
     const bar = document.getElementById("bar");
     const status = document.getElementById("status");
     const cancelBtn = document.getElementById("cancelBtn");
@@ -48,56 +97,28 @@
 
     form.addEventListener("submit", async function(e) {
       e.preventDefault();
+
       const formData = new FormData(form);
-      progress.style.display = "block";
-      status.innerText = "Uploading...";
+      progressBox.style.display = "block";
+      status.innerText = "⬆️ Uploading...";
       bar.style.width = "10%";
+      document.getElementById("submitBtn").disabled = true;
 
-      const res = await fetch("/upload", { method: "POST", body: formData });
-      const data = await res.json();
+      try {
+        const res = await fetch("/upload", {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
 
-      if (data.error) {
-        status.innerText = "❌ " + data.error;
-        return;
-      }
+        if (data.error) {
+          status.innerText = "❌ " + data.error;
+          document.getElementById("submitBtn").disabled = false;
+          return;
+        }
 
-      currentJobId = data.job_id;
-      status.innerText = "Processing...";
-      bar.style.width = "40%";
-
-      pollInterval = setInterval(checkStatus, 5000);
-    });
-
-    async function checkStatus() {
-      if (!currentJobId) return;
-      const res = await fetch(`/status/${currentJobId}`);
-      const data = await res.json();
-
-      if (data.status === "processing") {
-        let width = parseInt(bar.style.width) || 40;
-        width = Math.min(width + 10, 95);
-        bar.style.width = width + "%";
+        currentJobId = data.job_id;
         status.innerText = "⏳ Processing...";
-      }
-      else if (data.status === "finished") {
-        clearInterval(pollInterval);
-        bar.style.width = "100%";
-        status.innerHTML = `✅ Done! <a href="${data.download_url}">Download your file</a>`;
-      }
-      else if (data.status === "failed") {
-        clearInterval(pollInterval);
-        bar.style.width = "0%";
-        status.innerText = "❌ Conversion failed: " + data.error;
-      }
-    }
+        bar.style.width = "30%";
 
-    cancelBtn.addEventListener("click", async function() {
-      if (!currentJobId) return;
-      await fetch(`/cancel/${currentJobId}`, { method: "POST" });
-      clearInterval(pollInterval);
-      bar.style.width = "0%";
-      status.innerText = "❌ Conversion cancelled.";
-    });
-  </script>
-</body>
-</html>
+        pollInterval = setInterval(checkSt
