@@ -1,77 +1,235 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Privacy Policy — CleanCopy OCR</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-    .container {
-      background: #fff;
-      margin: 2rem;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 800px;
-      width: 100%;
-    }
-    h1 {
-      text-align: center;
-      margin-bottom: 1rem;
-      color: #111;
-    }
-    h2 {
-      margin-top: 1.5rem;
-      color: #111;
-    }
-    p {
-      color: #555;
-      line-height: 1.6;
-    }
-    footer {
-      margin-top: 2rem;
-      text-align: center;
-      font-size: 0.8rem;
-      color: #777;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Privacy Policy</h1>
-    <p><strong>Last Updated:</strong> [Insert Date]</p>
+from flask import (
+    Flask,
+    render_template,
+    request,
+    send_file,
+    redirect,
+    url_for,
+    flash,
+)
+from werkzeug.utils import secure_filename
+from flask_login import (
+    LoginManager,
+    UserMixin,
+    login_user,
+    login_required,
+    logout_user,
+    current_user,
+)
+import os
+import io
+import stripe
 
-    <h2>Information We Collect</h2>
-    <p>We only collect the information necessary to provide this service, such as your login credentials and file uploads. We do not track your browsing activity, and we do not collect unnecessary personal information.</p>
+from processor import process_file_to_text, text_to_docx
 
-    <h2>File Privacy</h2>
-    <p>All files you upload are processed automatically by our system. We do not read, review, or access your content. Uploaded files are stored temporarily and are automatically deleted from our servers within eight (8) hours of upload.</p>
+# -----------------------------
+# CONFIG
+# -----------------------------
+ALLOWED_EXTENSIONS = {"pdf", "png", "jpg", "jpeg", "tiff", "tif", "bmp"}
 
-    <h2>Use of Information</h2>
-    <p>Your email address and account details are used only for authentication and subscription management. We do not sell, rent, or share your personal data with third parties.</p>
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
-    <h2>Indemnification</h2>
-    <p>By uploading content, you confirm that you own or have the legal right to use it. You agree to indemnify and hold harmless the site owner(s) from any claims, disputes, or legal actions related to your uploaded materials. You also acknowledge that the site owner(s) may independently create, publish, or distribute material that may be similar in theme, subject matter, or expression to your uploaded content, and you waive any claims of infringement, plagiarism, or misappropriation in such cases.</p>
+app = Flask(__name__)
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-key")
+app.config["MAX_CONTENT_LENGTH"] = 100 * 1024 * 1024  # 100MB max upload
 
-    <h2>Data Security</h2>
-    <p>We use industry-standard measures to protect your data while it is being processed. However, as with any online service, we cannot guarantee absolute security.</p>
+# Stripe setup (replace with real keys in Render dashboard env vars)
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "sk_test_placeholder")
+STRIPE_PRICE_ID = os.environ.get("STRIPE_PRICE_ID", "price_placeholder")
 
-    <h2>Policy Updates</h2>
-    <p>This Privacy Policy may be updated periodically. Continued use of the service after changes are made constitutes your acceptance of the updated policy.</p>
+# -----------------------------
+# LOGIN SETUP
+# -----------------------------
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
 
-    <footer>
-      <p><a href="{{ url_for('index') }}">⬅ Back to Upload Page</a></p>
-      <small>© Debbie Bishop. All rights reserved. Do not scrape, index, or redistribute.</small>
-    </footer>
-  </div>
-</body>
-</html>
+# Temporary in-memory user store (replace with database later)
+USERS = {
+    "freeuser": {"password": "free123", "plan": "free"},
+    "paiduser": {"password": "paid123", "plan": "paid"},
+}
+
+class User(UserMixin):
+    def __init__(self, username, plan):
+        self.id = username
+        self.plan = plan
+
+@login_manager.user_loader
+def load_user(user_id):
+    user = USERS.get(user_id)
+    if user:
+        return User(user_id, user["plan"])
+    return None
+
+# -----------------------------
+# ROUTES
+# -----------------------------
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+        user = USERS.get(username)
+        if user and user["password"] == password:
+            login_user(User(username, user["plan"]))
+            flash("✅ Logged in successfully!")
+            return redirect(url_for("index"))
+        else:
+            flash("❌ Invalid username or password")
+    return render_template("login.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("👋 Logged out.")
+    return redirect(url_for("login"))
+
+@app.route("/", methods=["GET"])
+@login_required
+def index():
+    return render_template("index.html", plan=current_user.plan)
+
+# -----------------------------
+# STRIPE CHECKOUT
+# -----------------------------
+@app.route("/upgrade", methods=["GET"])
+@login_required
+def upgrade():
+    try:
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[
+                {
+                    "price": STRIPE_PRICE_ID,
+                    "quantity": 1,
+                }
+            ],
+            mode="subscription",
+            success_url=url_for("success", _external=True),
+            cancel_url=url_for("cancel", _external=True),
+            customer_email=f"{current_user.id}@example.com",  # placeholder
+        )
+        return redirect(checkout_session.url, code=303)
+    except Exception as e:
+        flash(f"Error starting checkout: {e}")
+        return redirect(url_for("index"))
+
+@app.route("/success")
+@login_required
+def success():
+    # TODO: Update user plan in real DB after webhook confirmation
+    current_user.plan = "paid"
+    flash("🎉 Subscription successful! You now have Pro access.")
+    return render_template("success.html", plan=current_user.plan)
+
+@app.route("/cancel")
+@login_required
+def cancel():
+    # Reset plan back to free
+    current_user.plan = "free"
+    flash("⚠️ Your subscription has been canceled. You are now on the Free plan (5MB file limit).")
+    return render_template("cancel.html", plan=current_user.plan)
+
+@app.route("/billing-portal")
+@login_required
+def billing_portal():
+    try:
+        # Replace with real customer_id from your DB in production
+        customer_id = f"cus_{current_user.id}"
+        session = stripe.billing_portal.Session.create(
+            customer=customer_id,
+            return_url=url_for("index", _external=True),
+        )
+        return redirect(session.url)
+    except Exception as e:
+        flash(f"Error opening billing portal: {e}")
+        return redirect(url_for("index"))
+
+# -----------------------------
+# TERMS & PRIVACY PAGES
+# -----------------------------
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+# -----------------------------
+# FILE CONVERSION
+# -----------------------------
+@app.route("/convert", methods=["POST"])
+@login_required
+def convert():
+    if "file" not in request.files:
+        flash("No file selected")
+        return redirect(url_for("index"))
+
+    f = request.files["file"]
+    if f.filename == "":
+        flash("No file selected")
+        return redirect(url_for("index"))
+    if not allowed_file(f.filename):
+        flash("Unsupported file type")
+        return redirect(url_for("index"))
+
+    # Enforce plan limits
+    f.seek(0, os.SEEK_END)
+    file_size = f.tell()
+    f.seek(0)
+    size_mb = file_size / (1024 * 1024)
+
+    if current_user.plan == "free" and size_mb > 5:
+        flash("❌ Free plan limit is 5MB. Upgrade to Pro ($16/month) for up to 50MB.")
+        return redirect(url_for("index"))
+
+    if current_user.plan == "paid" and size_mb > 50:
+        flash("❌ Pro plan limit is 50MB. Please reduce file size.")
+        return redirect(url_for("index"))
+
+    # Save file temporarily
+    os.makedirs("uploads", exist_ok=True)
+    filename = secure_filename(f.filename)
+    tmp_path = os.path.join("uploads", filename)
+    f.save(tmp_path)
+
+    try:
+        text = process_file_to_text(tmp_path, join_strategy=request.form.get("join_strategy", "smart"))
+
+        output_fmt = request.form.get("format", "docx")
+        if output_fmt == "txt":
+            buf = io.BytesIO(text.encode("utf-8"))
+            return send_file(
+                buf,
+                as_attachment=True,
+                download_name=f"{os.path.splitext(filename)[0]}_cleancopy.txt",
+                mimetype="text/plain"
+            )
+        else:
+            docx_buf = text_to_docx(text)
+            return send_file(
+                docx_buf,
+                as_attachment=True,
+                download_name=f"{os.path.splitext(filename)[0]}_cleancopy.docx",
+                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            )
+    except Exception as e:
+        app.logger.exception("Conversion failed")
+        flash(f"Conversion failed: {e}")
+        return redirect(url_for("index"))
+    finally:
+        try:
+            os.remove(tmp_path)
+        except Exception:
+            pass
+
+# -----------------------------
+# RUN APP
+# -----------------------------
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
