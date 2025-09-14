@@ -1,23 +1,26 @@
+# Use official Python 3.11 slim image
 FROM python:3.11-slim
 
+# Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    poppler-utils \
+# Install system dependencies for Tesseract + PDF
+RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
-    libtesseract-dev \
+    poppler-utils \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Copy requirement file first for caching
 COPY requirements.txt .
+
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app source
+# Copy app code
 COPY . .
 
-# Expose Flask port
-EXPOSE 5000
+# Expose Render’s required port
+EXPOSE 10000
 
-# Run the Flask app
+# Run Flask with python (ensures it binds to 0.0.0.0:$PORT correctly)
 CMD ["python", "app.py"]
