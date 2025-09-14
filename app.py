@@ -16,7 +16,7 @@ CONVERTED_FOLDER = "converted"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
-# --- Core Routes ---
+# --- Routes ---
 
 @app.route("/")
 def index():
@@ -30,10 +30,6 @@ def terms():
 def privacy():
     return render_template("privacy.html")
 
-@app.route("/coffee")
-def coffee():
-    return render_template("coffee.html")
-
 @app.route("/success")
 def success():
     return render_template("success.html")
@@ -41,6 +37,10 @@ def success():
 @app.route("/cancel")
 def cancel():
     return render_template("cancel.html")
+
+@app.route("/coffee")
+def coffee():
+    return render_template("coffee.html")
 
 @app.route("/convert", methods=["POST"])
 def convert():
