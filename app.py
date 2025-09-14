@@ -1,5 +1,6 @@
 import os
 import io
+import time
 from flask import (
     Flask, render_template, request, redirect,
     url_for, flash, send_file
@@ -15,6 +16,19 @@ UPLOAD_FOLDER = "uploads"
 CONVERTED_FOLDER = "converted"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
+
+# --- Auto cleanup function ---
+def cleanup_old_files(folder, max_age=28800):  # 8 hours = 28800 seconds
+    now = time.time()
+    for filename in os.listdir(folder):
+        path = os.path.join(folder, filename)
+        if os.path.isfile(path):
+            age = now - os.path.getmtime(path)
+            if age > max_age:
+                try:
+                    os.remove(path)
+                except Exception:
+                    pass
 
 # --- Routes ---
 
@@ -44,6 +58,10 @@ def coffee():
 
 @app.route("/convert", methods=["POST"])
 def convert():
+    # Clean old files before handling new upload
+    cleanup_old_files(UPLOAD_FOLDER)
+    cleanup_old_files(CONVERTED_FOLDER)
+
     if "terms" not in request.form:
         flash("⚠️ You must agree to the terms of service and privacy policy before uploading.")
         return redirect(url_for("index"))
