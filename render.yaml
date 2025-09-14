@@ -4,9 +4,9 @@ services:
     env: docker
     plan: starter
     autoDeploy: true
-    healthCheckPath: /
-    # Make sure to set a disk if you expect big PDFs (optional)
+    healthCheckPath: /healthz
     disk:
       name: data
       mountPath: /app/uploads
       sizeGB: 1
+
