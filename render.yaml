@@ -8,12 +8,14 @@ services:
       - key: PORT
         value: 10000
       - key: REDIS_URL
-        sync: false   # will be filled from the Redis instance
+        sync: false   # filled from Redis
     healthCheckPath: /healthz
     disk:
       name: data
       mountPath: /data
       sizeGB: 1
+    buildCommand: ""
+    startCommand: gunicorn -w 2 -k gthread -b 0.0.0.0:$PORT app:app
 
   - type: worker
     name: seamlessdocs-worker
@@ -22,11 +24,13 @@ services:
     autoDeploy: true
     envVars:
       - key: REDIS_URL
-        sync: false   # will be filled from the Redis instance
+        sync: false
     disk:
       name: data
       mountPath: /data
       sizeGB: 1
+    buildCommand: ""
+    startCommand: python worker.py
 
   - type: redis
     name: seamlessdocs
