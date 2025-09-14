@@ -44,9 +44,7 @@
       color: #555;
       margin-bottom: 1.5rem;
     }
-    .row {
-      margin: 1rem 0;
-    }
+    .row { margin: 1rem 0; }
     input[type="file"], select {
       padding: 0.5rem;
       font-size: 14px;
@@ -74,11 +72,7 @@
       margin-top: 1rem;
       display: block;
     }
-    .agree a {
-      color: #0077cc;
-      text-decoration: none;
-      font-weight: bold;
-    }
+    .agree a { color: #0077cc; text-decoration: none; font-weight: bold; }
     .notice {
       font-size: 0.9rem;
       color: #555;
@@ -91,12 +85,7 @@
       color: #777;
       line-height: 1.4;
     }
-    footer a {
-      color: #0077cc;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    footer a:hover { text-decoration: underline; }
+    footer a { color: #0077cc; text-decoration: none; font-weight: bold; }
 
     /* Loader overlay */
     #loaderOverlay {
@@ -115,11 +104,7 @@
       font-weight: bold;
       color: #0077cc;
     }
-    #percent {
-      font-size: 1rem;
-      font-weight: bold;
-      color: #333;
-    }
+    #percent { font-size: 1rem; font-weight: bold; color: #333; }
     .bar {
       width: 70%;
       max-width: 400px;
@@ -142,6 +127,16 @@
       font-weight: bold;
       display: none;
     }
+    #okBtn {
+      display: none;
+      padding: 0.6rem 1.2rem;
+      background: #0077cc;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -154,133 +149,6 @@
     <p class="plan"><strong>Free Plan:</strong> Up to 5MB conversions.</p>
 
     <form id="uploadForm">
+      <div class="row"><input type="file" name="fileUpload" id="fileUpload" disabled></div>
       <div class="row">
-        <input type="file" name="fileUpload" id="fileUpload" disabled>
-      </div>
-      <div class="row">
-        <label for="format" style="font-size:14px;">Output format:</label>
-        <select name="format" id="format" disabled>
-          <option value="docx">DOCX</option>
-          <option value="txt">TXT</option>
-        </select>
-      </div>
-      <label class="agree">
-        <input type="checkbox" id="termsCheck" name="terms">
-        By continuing, you agree to the
-        <a href="{{ url_for('terms') }}">terms of service</a> and
-        <a href="{{ url_for('privacy') }}">privacy policy</a>.
-      </label>
-      <div class="row">
-        <button type="submit" id="uploadBtn" class="btn" disabled>Upload File</button>
-      </div>
-    </form>
-
-    <p id="errorMsg"></p>
-
-    <p class="notice">
-      Download your converted file within 8 hours — files are automatically deleted after that time. We do not read, store, or share them.
-    </p>
-
-    <footer>
-      © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
-      <a href="{{ url_for('terms') }}">Terms of Use</a> |
-      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
-    </footer>
-  </div>
-
-  <!-- Loader overlay -->
-  <div id="loaderOverlay">
-    <div class="msg" id="loaderMsg">Processing your file… please wait.</div>
-    <div id="percent">0%</div>
-    <div class="bar"><span id="progressBar"></span></div>
-  </div>
-
-  <script>
-    const termsCheck = document.getElementById("termsCheck");
-    const fileUpload = document.getElementById("fileUpload");
-    const formatSelect = document.getElementById("format");
-    const uploadBtn = document.getElementById("uploadBtn");
-    const form = document.getElementById("uploadForm");
-    const overlay = document.getElementById("loaderOverlay");
-    const loaderMsg = document.getElementById("loaderMsg");
-    const progressBar = document.getElementById("progressBar");
-    const percentText = document.getElementById("percent");
-    const errorMsg = document.getElementById("errorMsg");
-
-    termsCheck.addEventListener("change", function() {
-      const enabled = this.checked;
-      fileUpload.disabled = !enabled;
-      formatSelect.disabled = !enabled;
-      uploadBtn.disabled = !enabled;
-    });
-
-    form.addEventListener("submit", function(e) {
-      e.preventDefault();
-      errorMsg.style.display = "none";
-
-      const file = fileUpload.files[0];
-      if (!file) {
-        errorMsg.textContent = "⚠️ Please choose a file first.";
-        errorMsg.style.display = "block";
-        return;
-      }
-
-      overlay.style.display = "flex";
-      progressBar.style.width = "0%";
-      percentText.textContent = "0%";
-      loaderMsg.textContent = "Processing your file… please wait.";
-
-      const data = new FormData();
-      data.append("fileUpload", file);
-      data.append("terms", "yes");
-      data.append("format", formatSelect.value);
-
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "{{ url_for('convert') }}", true);
-      xhr.responseType = "blob";
-
-      // Upload progress
-      xhr.upload.addEventListener("progress", function(e) {
-        if (e.lengthComputable) {
-          const percent = Math.round((e.loaded / e.total) * 100);
-          progressBar.style.width = percent + "%";
-          percentText.textContent = percent + "%";
-        }
-      });
-
-      // Response handler
-      xhr.onload = function() {
-        if (xhr.status === 200) {
-          const disposition = xhr.getResponseHeader("Content-Disposition");
-          let filename = "converted_file";
-          if (disposition && disposition.includes("filename=")) {
-            filename = disposition.split("filename=")[1].replace(/['"]/g, "");
-          }
-
-          const blob = xhr.response;
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          window.URL.revokeObjectURL(url);
-
-          // Show success message briefly
-          loaderMsg.textContent = "✅ Conversion Complete!";
-          progressBar.style.width = "100%";
-          percentText.textContent = "100%";
-          setTimeout(() => {
-            overlay.style.display = "none";
-          }, 2000);
-        } else {
-          overlay.style.display = "none";
-          errorMsg.textContent = "❌ Error: " + xhr.status + " - " + xhr.statusText;
-          errorMsg.style.display = "block";
-        }
-      };
-
-      xhr.onerror = function() {
-        overlay.style.display = "none";
-        error
+        <label for="format" style="f
