@@ -27,20 +27,20 @@ def convert():
         return redirect(url_for("index"))
 
     try:
-        # Save uploaded file to a temporary path
+        # Save uploaded file temporarily
         tmp = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(f.filename)[1])
         f.save(tmp.name)
 
-        # Step 1: Run OCR → plain text
+        # Step 1: Run OCR → text
         text = process_file_to_text(tmp.name)
 
-        # Step 2: Convert text → DOCX file (returns BytesIO)
+        # Step 2: Text → DOCX (BytesIO)
         buf = text_to_docx(text)
 
         # Step 3: Clean up temp file
         os.unlink(tmp.name)
 
-        # Step 4: Send DOCX to user
+        # Step 4: Return DOCX download
         return send_file(
             buf,
             as_attachment=True,
@@ -52,3 +52,7 @@ def convert():
         print("Conversion error:", e)
         flash("Something went wrong during conversion. Please try again.", "error")
         return redirect(url_for("index"))
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
