@@ -13,7 +13,7 @@ from processor import process_file_to_text, text_to_docx
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "devkey")
 
-# Use shared disk mounted at /app/data
+# Shared disk (must match render.yaml)
 BASE_FOLDER = "/app/data"
 UPLOAD_FOLDER = os.path.join(BASE_FOLDER, "uploads")
 CONVERTED_FOLDER = os.path.join(BASE_FOLDER, "converted")
@@ -21,7 +21,7 @@ CONVERTED_FOLDER = os.path.join(BASE_FOLDER, "converted")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
-# --- Redis connection (optional for web) ---
+# --- Redis queue connection ---
 redis_url = os.environ.get("REDIS_URL")
 redis_conn = Redis.from_url(redis_url) if redis_url else None
 q = Queue(connection=redis_conn) if redis_conn else None
@@ -50,4 +50,44 @@ def cancel():
 
 @app.route("/coffee")
 def coffee():
-    return render_template("coff_
+    return render_template("coffee.html")
+
+@app.route("/convert", methods=["POST"])
+def convert():
+    if "terms" not in request.form:
+        flash("⚠️ You must agree to the terms of service and privacy policy before uploading.")
+        return redirect(url_for("index"))
+
+    if "fileUpload" not in request.files:
+        flash("⚠️ No file selected")
+        return redirect(url_for("index"))
+
+    if not redis_conn or not q:
+        return jsonify({"status": "error", "message": "Redis is not connected. Please try again shortly."}), 500
+
+    f = request.files["fileUpload"]
+    if f.filename == "":
+        flash("⚠️ No selected file")
+        return redirect(url_for("index"))
+
+    filename = secure_filename(f.filename)
+    upload_path = os.path.join(UPLOAD_FOLDER, filename)
+    f.save(upload_path)
+
+    fmt = request.form.get("format", "docx")
+    output_filename = filename.rsplit(".", 1)[0] + f".{fmt}"
+    output_path = os.path.join(CONVERTED_FOLDER, output_filename)
+
+    # Queue background job (handled in worker.py)
+    job = q.enqueue("worker.process_file_job", upload_path, fmt, output_filename)
+
+    return redirect(url_for("success", job_id=job.get_id()))
+
+@app.route("/status/<job_id>")
+def status(job_id):
+    if not redis_conn:
+        return jsonify({"status": "error", "message": "Redis not available"}), 500
+    from rq.job import Job
+    try:
+        job = Job.fetch(job_id, connection=redis_conn)
+    except Excep
