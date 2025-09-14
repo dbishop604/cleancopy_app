@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Install system dependencies for OCR
+# Install system dependencies for OCR and PDFs
 RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-eng \
@@ -10,10 +10,13 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+
+# Install Python requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy the rest of the app
 COPY . .
 
-# Run with gunicorn for production
+# Run the app with Gunicorn for production
 CMD ["gunicorn", "-w", "2", "-b", "0.0.0.0:10000", "app:app", "--timeout", "120"]
