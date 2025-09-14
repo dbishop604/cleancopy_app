@@ -1,41 +1,28 @@
-import os
 import pytesseract
 from pdf2image import convert_from_path
 from docx import Document
 from PIL import Image
+import os
 
-UPLOAD_FOLDER = "/data/uploads"
-OUTPUT_FOLDER = "/data/outputs"
+def process_file(input_path, output_path):
+    text = ""
 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+    # Check file extension
+    ext = os.path.splitext(input_path)[1].lower()
 
-
-def process_file(input_path: str, output_path: str):
-    """
-    Convert an uploaded PDF or image into a clean DOCX with OCR.
-    """
-    text_chunks = []
-
-    # Handle PDF
-    if input_path.lower().endswith(".pdf"):
+    if ext == ".pdf":
         pages = convert_from_path(input_path)
         for i, page in enumerate(pages):
-            text = pytesseract.image_to_string(page)
-            text_chunks.append(text)
-
-    # Handle image files (JPG, PNG, TIFF)
-    else:
+            text += pytesseract.image_to_string(page) + "\n"
+    elif ext in [".png", ".jpg", ".jpeg", ".tif", ".tiff"]:
         img = Image.open(input_path)
         text = pytesseract.image_to_string(img)
-        text_chunks.append(text)
+    else:
+        raise ValueError("Unsupported file type. Please upload PDF or image.")
 
-    # Write to DOCX
+    # Save as DOCX
     doc = Document()
-    for chunk in text_chunks:
-        doc.add_paragraph(chunk.strip())
-        doc.add_paragraph("")  # blank line between pages
-
+    doc.add_paragraph(text.strip())
     doc.save(output_path)
 
     return output_path
