@@ -25,25 +25,10 @@
       width: 100%;
       text-align: center;
     }
-    h1 {
-      color: #111;
-      margin-bottom: 1rem;
-    }
-    p {
-      color: #555;
-      line-height: 1.6;
-      margin: 1rem 0;
-    }
-    form {
-      margin-top: 1.5rem;
-    }
-    input[type="file"] {
-      display: block;
-      margin: 1rem auto;
-    }
-    label, select, input[type="checkbox"] {
-      margin: 0.5rem 0;
-    }
+    h1 { color: #111; margin-bottom: 1rem; }
+    p { color: #555; line-height: 1.6; margin: 1rem 0; }
+    form { margin-top: 1.5rem; }
+    input[type="file"] { display: block; margin: 1rem auto; }
     .btn {
       display: inline-block;
       margin-top: 1rem;
@@ -57,23 +42,15 @@
       cursor: pointer;
       text-decoration: none;
     }
-    .btn:hover {
-      background: #005fa3;
+    .btn:hover { background: #005fa3; }
+    footer { margin-top: 2rem; font-size: 10.5px; color: #777; line-height: 1.4; }
+    footer a, a { color: #0077cc; font-weight: bold; text-decoration: none; }
+    footer a:hover, a:hover { text-decoration: underline; }
+    #progress { margin-top: 1rem; display: none; }
+    #progress-bar {
+      width: 0%; height: 20px; background: #0077cc;
+      border-radius: 4px; transition: width 0.4s;
     }
-    footer {
-      margin-top: 2rem;
-      font-size: 10.5px; /* ~8pt */
-      color: #777;
-      line-height: 1.4;
-    }
-    footer a {
-      color: #0077cc;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    footer a:hover { text-decoration: underline; }
-    a { color: #0077cc; font-weight: bold; text-decoration: none; }
-    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -92,7 +69,7 @@
       {% endif %}
     {% endwith %}
 
-    <form method="POST" action="{{ url_for('convert') }}" enctype="multipart/form-data">
+    <form id="uploadForm" method="POST" action="{{ url_for('convert') }}" enctype="multipart/form-data">
       <label for="fileUpload">Choose a file:</label>
       <input type="file" name="fileUpload" id="fileUpload" required>
 
@@ -112,6 +89,57 @@
       <button type="submit" class="btn">⬆ Upload & Convert</button>
     </form>
 
+    <div id="progress">
+      <p>Processing your file...</p>
+      <div style="background:#eee; border-radius:4px; overflow:hidden;">
+        <div id="progress-bar"></div>
+      </div>
+      <a id="downloadLink" class="btn" style="display:none; margin-top:1rem;">⬇ Download Your File</a>
+    </div>
+
     <footer>
       © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. | 
-      <a href="{{ url_for('te_
+      <a href="{{ url_for('terms') }}">Terms of Use</a> | 
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a> | 
+      <a href="{{ url_for('coffee') }}">Support Us ☕</a>
+    </footer>
+  </div>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    const progress = document.getElementById("progress");
+    const bar = document.getElementById("progress-bar");
+    const downloadLink = document.getElementById("downloadLink");
+
+    form.addEventListener("submit", function(e) {
+      progress.style.display = "block";
+      bar.style.width = "30%";
+    });
+
+    // Poll job status
+    async function checkStatus(jobId) {
+      const res = await fetch(`/status/${jobId}`);
+      const data = await res.json();
+
+      if (data.status === "queued") {
+        bar.style.width = "60%";
+        setTimeout(() => checkStatus(jobId), 2000);
+      } else if (data.status === "done") {
+        bar.style.width = "100%";
+        downloadLink.href = data.download_url;
+        downloadLink.style.display = "inline-block";
+      } else if (data.status === "error") {
+        bar.style.background = "red";
+        bar.style.width = "100%";
+        alert("Error: " + data.message);
+      }
+    }
+
+    // If job_id exists in URL, auto-check
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("job")) {
+      checkStatus(urlParams.get("job"));
+    }
+  </script>
+</body>
+</html>
