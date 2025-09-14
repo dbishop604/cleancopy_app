@@ -20,10 +20,9 @@ try:
     redis_conn.ping()
 except Exception as e:
     print("Redis connection failed:", e)
-    redis_conn = None  # Prevent crash if Redis fails
 
-# Task queue (only if Redis is connected)
-q = Queue(connection=redis_conn) if redis_conn else None
+# Task queue
+q = Queue(connection=redis_conn)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -36,12 +35,9 @@ def index():
 
         filename = secure_filename(uploaded_file.filename)
         file_id = str(uuid.uuid4())
-        input_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{file_id}_{filename}")
-        output_path = os.path.join(app.config['OUTPUT_FOLDER'], f"{file_id}.{output_format.lower()}")
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{file_id}_{filename}")
+        uploaded_file.save(file_path)
 
-        uploaded_file.save(input_path)
+        job = q.enqueue(process_file_job, file_path, output_format, file_id)
 
-        # Add job to queue
-        if q:
-            job = q.enqueue(process_file_job, input_path, output_path, output_format)
-            return jsonify({"job_id": job.id, "message": "File up_
+        return jsonify({"job_id": job.id, "message": "File uploaded and job queued_
