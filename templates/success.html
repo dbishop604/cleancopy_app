@@ -11,55 +11,28 @@
       margin: 0;
       padding: 0;
       display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      color: #555;
-    }
-    main {
-      flex: 1;
-      display: flex;
       justify-content: center;
-      align-items: center;
-      padding: 2rem;
+      align-items: flex-start;
+      min-height: 100vh;
     }
     .container {
       background: #fff;
+      margin: 2rem;
       padding: 2rem;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 500px;
+      max-width: 600px;
+      width: 100%;
       text-align: center;
     }
-    h1 { color: green; }
-    #donate-section { margin-top: 2rem; }
-    #donate-section a {
-      background:#ffdd00;
-      color:#111;
-      padding:0.75rem 1.5rem;
-      border-radius:6px;
-      font-weight:bold;
-      text-decoration:none;
-    }
+    h1 { color: #28a745; margin-bottom: 1rem; }
+    p { color: #555; line-height: 1.6; }
+    footer { margin-top: 2rem; font-size: 0.8rem; color: #777; }
+    a { color: #0077cc; text-decoration: none; font-weight: bold; }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  {% include 'header.html' %}
-
-  <main>
-    <div class="container">
-      <h1>✅ Success!</h1>
-      <p>Your file has been converted successfully.</p>
-      <p><a href="{{ url_for('index') }}">Return to Home</a></p>
-
-      <!-- Donation button -->
-      <div id="donate-section">
-        <a href="https://www.buymeacoffee.com/yourusername" target="_blank">
-          ☕ Buy Us a Coffee
-        </a>
-      </div>
-    </div>
-  </main>
-
-  {% include 'footer.html' %}
-</body>
-</html>
+  <div class="container">
+    <h1>✅ Success!</h1>
+    <p>Your action was successful. You may now return
