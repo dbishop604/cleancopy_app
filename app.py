@@ -16,33 +16,30 @@ CONVERTED_FOLDER = "converted"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(CONVERTED_FOLDER, exist_ok=True)
 
-
 # --- Core Routes ---
-
 @app.route("/")
 def index():
     return render_template("index.html", plan="free")
-
 
 @app.route("/terms")
 def terms():
     return render_template("terms.html")
 
-
 @app.route("/privacy")
 def privacy():
     return render_template("privacy.html")
-
 
 @app.route("/success")
 def success():
     return render_template("success.html")
 
-
 @app.route("/cancel")
 def cancel():
     return render_template("cancel.html")
 
+@app.route("/upgrade")
+def upgrade():
+    return render_template("upgrade.html")
 
 @app.route("/convert", methods=["POST"])
 def convert():
@@ -82,15 +79,4 @@ def convert():
                 buf,
                 as_attachment=True,
                 download_name=filename.rsplit(".", 1)[0] + ".docx",
-                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            )
-
-    except Exception as e:
-        flash(f"❌ Conversion failed: {e}")
-        return redirect(url_for("cancel"))
-
-
-# --- Main entrypoint ---
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+                mimetype="applicati
