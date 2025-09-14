@@ -1,5 +1,8 @@
-# Use official lightweight Python image
-FROM python:3.11-slim
+# Use a pinned Python 3.11 slim image for stability
+FROM python:3.11.9-slim
+
+# Prevent interactive prompts during package install
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install system dependencies for OCR + PDF handling
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -18,15 +21,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Set working directory
 WORKDIR /app
 
-# Install Python dependencies
-COPY requirements.txt .
+# Copy requirements first (for Docker layer caching)
+COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all app files
-COPY . .
+# Copy all app code
+COPY . /app/
 
 # Expose the port Render expects
+ENV PORT=10000
 EXPOSE 10000
 
-# Default command (for web service)
-CMD ["gunicorn",]()
+# Default: run the Flask app with Gunicorn
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:10000", "--workers=2", "--threads=2", "--timeout=120"]
