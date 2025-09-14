@@ -17,10 +17,10 @@
     }
     .container {
       background: #fff;
-      margin: 2rem;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin: 3rem;
+      padding: 2.5rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       max-width: 700px;
       width: 100%;
       text-align: center;
@@ -28,46 +28,50 @@
     h1 {
       margin-bottom: 1rem;
       color: #111;
+      font-size: 2rem;
     }
     p {
-      color: #555;
+      color: #444;
       line-height: 1.6;
       margin: 1rem 0;
       font-size: 1rem;
+      text-align: center;
     }
     img.logo {
       max-width: 150px;
-      margin-bottom: 1rem;
+      display: block;
+      margin: 0 auto 1.5rem auto;
     }
     .btn-coffee {
       display: inline-block;
       padding: 0.8rem 1.6rem;
-      background-color: #FFD200; /* Bright yellow */
+      background-color: #FFD200; /* bright yellow */
       color: #111;
       border: none;
       border-radius: 6px;
       text-decoration: none;
       font-weight: bold;
+      font-size: 1rem;
       margin-top: 1rem;
       transition: background 0.3s;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     .btn-coffee:hover {
-      background-color: #f5c400;
+      background-color: #e6c200;
     }
     footer {
       margin-top: 2rem;
-      font-size: 0.8rem;
+      text-align: center;
+      font-size: 0.75rem; /* ~8pt */
       color: #777;
+      line-height: 1.4;
     }
     footer a {
       color: #0077cc;
       font-weight: bold;
       text-decoration: none;
     }
-    footer a:hover {
-      text-decoration: underline;
-    }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -79,10 +83,10 @@
     <h1>Support SeamlessDocs</h1>
 
     <!-- Description -->
-    <p>
+    <p style="font-size:14px;">
       SeamlessDocs turns your <strong>PDF</strong> or image files 
       (<strong>JPG, PNG, TIFF</strong>) into clean, editable documents — 
-      no messy paragraph boxes, no separate windows.  
+      no messy paragraph boxes, no separate windows.
     </p>
     <p>
       If this tool makes your work easier, consider buying us a coffee ☕.  
@@ -96,12 +100,11 @@
 
     <!-- Footer -->
     <footer>
-      <p>© SeamlessDocs. All rights reserved.</p>
-      <p>
-        <a href="{{ url_for('index') }}">Home</a> | 
-        <a href="{{ url_for('terms') }}">Terms of Use</a> | 
-        <a href="{{ url_for('privacy') }}">Privacy Policy</a>
-      </p>
+      <p><em>By continuing, you agree to the 
+        <a href="{{ url_for('terms') }}">terms of service</a> and 
+        <a href="{{ url_for('privacy') }}">privacy policy</a>.
+      </em></p>
+      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
     </footer>
   </div>
 </body>
