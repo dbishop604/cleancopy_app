@@ -1,100 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8">
   <title>SeamlessDocs</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
-    .container {
-      background: #fff;
-      margin: 2rem;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      max-width: 600px;
-      width: 100%;
-      text-align: center;
-    }
-    h1 {
-      color: #111;
-      margin-bottom: 1rem;
-    }
-    p {
-      color: #555;
-      line-height: 1.6;
-    }
-    input[type="file"] {
-      margin: 1rem 0;
-    }
-    button {
-      background: #0077cc;
-      color: #fff;
-      border: none;
-      padding: 0.7rem 1.4rem;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 1rem;
-    }
-    button:hover {
-      background: #005fa3;
-    }
-    footer {
-      margin-top: 2rem;
-      font-size: 0.9rem;
-      color: #777;
-    }
-    footer a {
-      color: #0077cc;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    footer a:hover {
-      text-decoration: underline;
-    }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>SeamlessDocs</h1>
-    <p>Upload your PDF or image files (JPG, PNG, TIFF)<br/>and convert them into clean, editable documents (DOCX or TXT).</p>
+  <h1>SeamlessDocs</h1>
+  <p>Upload your script or PDF and we’ll convert it into an editable Word document.</p>
 
-    <form action="/convert" method="post" enctype="multipart/form-data">
-      <label for="fileUpload">Choose a file:</label><br/>
-      <input type="file" id="fileUpload" name="fileUpload" required><br/>
-
-      <label for="format">Output format:</label><br/>
-      <select id="format" name="format">
-        <option value="docx">DOCX</option>
-        <option value="txt">TXT</option>
-      </select><br/><br/>
-
+  <form action="/convert" method="post" enctype="multipart/form-data">
+    <p>
+      <input type="file" name="fileUpload" required>
+    </p>
+    <p>
       <label>
-        <input type="checkbox" name="terms" value="agree" required>
-        I agree to the terms of service and privacy policy.
-      </label><br/><br/>
-
-      <button type="submit">⬆ Upload & Convert</button>
-    </form>
-
-    <footer>
-      <p>© SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute.</p>
-      <p>
-        <a href="{{ url_for('terms') }}">Terms of Use</a> |
-        <a href="{{ url_for('privacy') }}">Privacy Policy</a> |
-        <a href="{{ url_for('coffee') }}">Support Us ☕</a>
-      </p>
-    </footer>
-  </div>
+        <input type="checkbox" name="terms" required>
+        I agree to the <a href="/terms" target="_blank">terms</a> and 
+        <a href="/privacy" target="_blank">privacy policy</a>.
+      </label>
+    </p>
+    <p>
+      <button type="submit">Convert</button>
+    </p>
+  </form>
 </body>
 </html>
