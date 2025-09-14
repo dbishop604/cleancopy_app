@@ -1,14 +1,15 @@
 import os
+import io
 import uuid
 from flask import (
     Flask, render_template, request, redirect,
     url_for, flash, jsonify, send_file
 )
 from werkzeug.utils import secure_filename
-from redis import Redis
+import redis
 from rq import Queue
 from rq.job import Job
-from processor import process_file_job  # now properly imported
+from processor import process_file_job
 
 # --- Flask setup ---
 app = Flask(__name__)
@@ -19,11 +20,18 @@ OUTPUT_FOLDER = "/data/outputs"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-# --- Redis setup ---
+# --- Redis setup (with TLS for Upstash) ---
 redis_url = os.environ.get("REDIS_URL")
-redis_conn = Redis.from_url(redis_url) if redis_url else None
-q = Queue("default", connection=redis_conn) if redis_conn else None
+redis_conn = None
+q = None
+if redis_url:
+    try:
+        redis_conn = redis.from_url(redis_url, ssl=True, decode_responses=False)
+        q = Queue("default", connection=redis_conn)
+    except Exception as e:
+        print(f"Redis connection failed: {e}")
 
+# --- Routes ---
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -50,39 +58,34 @@ def coffee():
 
 @app.route("/convert", methods=["POST"])
 def convert():
-    try:
-        if "terms" not in request.form:
-            flash("⚠️ You must agree to the terms.")
-            return redirect(url_for("index"))
+    if "terms" not in request.form:
+        flash("⚠️ You must agree to the terms of service and privacy policy before uploading.")
+        return redirect(url_for("index"))
 
-        if "fileUpload" not in request.files:
-            flash("⚠️ No file selected")
-            return redirect(url_for("index"))
+    if "fileUpload" not in request.files:
+        flash("⚠️ No file selected")
+        return redirect(url_for("index"))
 
-        f = request.files["fileUpload"]
-        if f.filename == "":
-            flash("⚠️ No selected file")
-            return redirect(url_for("index"))
+    f = request.files["fileUpload"]
+    if f.filename == "":
+        flash("⚠️ No selected file")
+        return redirect(url_for("index"))
 
-        filename = secure_filename(f.filename)
-        job_id = str(uuid.uuid4())
+    filename = secure_filename(f.filename)
+    job_id = str(uuid.uuid4())
 
-        input_path = os.path.join(UPLOAD_FOLDER, f"{job_id}_{filename}")
-        output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.docx")
+    input_path = os.path.join(UPLOAD_FOLDER, f"{job_id}_{filename}")
+    output_path = os.path.join(OUTPUT_FOLDER, f"{job_id}.docx")
 
-        f.save(input_path)
+    f.save(input_path)
 
-        if not redis_conn:
-            app.logger.error("Redis connection failed")
-            return jsonify({"status": "error", "message": "Redis is not connected"}), 500
+    if not redis_conn or not q:
+        return jsonify({"status": "error", "message": "Redis is not connected"}), 500
 
-        job = q.enqueue(process_file_job, input_path, output_path, job_id)
+    # enqueue the background job
+    job = q.enqueue(process_file_job, input_path, output_path, job_id)
 
-        return redirect(url_for("success", job_id=job.id))
-
-    except Exception as e:
-        app.logger.error(f"Error in /convert: {e}", exc_info=True)
-        return "Internal Server Error", 500
+    return redirect(url_for("success", job_id=job.id))
 
 @app.route("/status/<job_id>")
 def job_status(job_id):
@@ -98,8 +101,8 @@ def job_status(job_id):
         return jsonify({"status": "done", "result": job.result})
     elif job.is_failed:
         return jsonify({"status": "error", "message": str(job.exc_info)})
-
-    return jsonify({"status": "processing"})
+    else:
+        return jsonify({"status": "processing"})
 
 @app.route("/download/<job_id>")
 def download(job_id):
@@ -110,4 +113,10 @@ def download(job_id):
 
 @app.route("/healthz")
 def healthz():
-    return "OK", 200
+    try:
+        if redis_conn:
+            redis_conn.ping()
+            return "OK", 200
+        return "Redis not connected", 500
+    except redis.exceptions.ConnectionError:
+        return "Redis not connected", 500
