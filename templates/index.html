@@ -115,6 +115,11 @@
       font-weight: bold;
       color: #0077cc;
     }
+    #percent {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #333;
+    }
     .bar {
       width: 70%;
       max-width: 400px;
@@ -186,6 +191,7 @@
   <!-- Loader overlay -->
   <div id="loaderOverlay">
     <div class="msg">Processing your file… please wait.</div>
+    <div id="percent">0%</div>
     <div class="bar"><span id="progressBar"></span></div>
   </div>
 
@@ -197,6 +203,7 @@
     const form = document.getElementById("uploadForm");
     const overlay = document.getElementById("loaderOverlay");
     const progressBar = document.getElementById("progressBar");
+    const percentText = document.getElementById("percent");
     const errorMsg = document.getElementById("errorMsg");
 
     termsCheck.addEventListener("change", function() {
@@ -219,6 +226,7 @@
 
       overlay.style.display = "flex";
       progressBar.style.width = "0%";
+      percentText.textContent = "0%";
 
       const data = new FormData();
       data.append("fileUpload", file);
@@ -234,6 +242,7 @@
         if (e.lengthComputable) {
           const percent = Math.round((e.loaded / e.total) * 100);
           progressBar.style.width = percent + "%";
+          percentText.textContent = percent + "%";
         }
       });
 
