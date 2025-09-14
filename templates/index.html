@@ -151,4 +151,131 @@
     <form id="uploadForm">
       <div class="row"><input type="file" name="fileUpload" id="fileUpload" disabled></div>
       <div class="row">
-        <label for="format" style="f
+        <label for="format" style="font-size:14px;">Output format:</label>
+        <select name="format" id="format" disabled>
+          <option value="docx">DOCX</option>
+          <option value="txt">TXT</option>
+        </select>
+      </div>
+      <label class="agree">
+        <input type="checkbox" id="termsCheck" name="terms">
+        By continuing, you agree to the
+        <a href="{{ url_for('terms') }}">terms of service</a> and
+        <a href="{{ url_for('privacy') }}">privacy policy</a>.
+      </label>
+      <div class="row"><button type="submit" id="uploadBtn" class="btn" disabled>Upload File</button></div>
+    </form>
+
+    <p id="errorMsg"></p>
+    <p class="notice">Download your converted file within 8 hours — files are automatically deleted after that time. We do not read, store, or share them.</p>
+    <footer>
+      © SeamlessDocs. All rights reserved. Do not scrape, index, or redistribute. |
+      <a href="{{ url_for('terms') }}">Terms of Use</a> |
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+    </footer>
+  </div>
+
+  <!-- Loader overlay -->
+  <div id="loaderOverlay">
+    <div class="msg" id="loaderMsg">Processing your file… please wait.</div>
+    <div id="percent">0%</div>
+    <div class="bar"><span id="progressBar"></span></div>
+    <button id="okBtn">OK</button>
+  </div>
+
+  <script>
+    const termsCheck = document.getElementById("termsCheck");
+    const fileUpload = document.getElementById("fileUpload");
+    const formatSelect = document.getElementById("format");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const form = document.getElementById("uploadForm");
+    const overlay = document.getElementById("loaderOverlay");
+    const loaderMsg = document.getElementById("loaderMsg");
+    const progressBar = document.getElementById("progressBar");
+    const percentText = document.getElementById("percent");
+    const errorMsg = document.getElementById("errorMsg");
+    const okBtn = document.getElementById("okBtn");
+
+    termsCheck.addEventListener("change", function() {
+      const enabled = this.checked;
+      fileUpload.disabled = !enabled;
+      formatSelect.disabled = !enabled;
+      uploadBtn.disabled = !enabled;
+    });
+
+    okBtn.addEventListener("click", function() {
+      overlay.style.display = "none";
+      okBtn.style.display = "none";
+    });
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      errorMsg.style.display = "none";
+
+      const file = fileUpload.files[0];
+      if (!file) {
+        errorMsg.textContent = "⚠️ Please choose a file first.";
+        errorMsg.style.display = "block";
+        return;
+      }
+
+      overlay.style.display = "flex";
+      progressBar.style.width = "0%";
+      percentText.textContent = "0%";
+      loaderMsg.textContent = "Processing your file… please wait.";
+      okBtn.style.display = "none";
+
+      const data = new FormData();
+      data.append("fileUpload", file);
+      data.append("terms", "yes");
+      data.append("format", formatSelect.value);
+
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", "{{ url_for('convert') }}", true);
+      xhr.responseType = "blob";
+
+      xhr.upload.addEventListener("progress", function(e) {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          progressBar.style.width = percent + "%";
+          percentText.textContent = percent + "%";
+        }
+      });
+
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          const disposition = xhr.getResponseHeader("Content-Disposition");
+          let filename = "converted_file";
+          if (disposition && disposition.includes("filename=")) {
+            filename = disposition.split("filename=")[1].replace(/['"]/g, "");
+          }
+          const blob = xhr.response;
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+
+          loaderMsg.textContent = "✅ Conversion Complete!";
+          progressBar.style.width = "100%";
+          percentText.textContent = "100%";
+          okBtn.style.display = "inline-block";
+        } else {
+          loaderMsg.textContent = "❌ Error: " + xhr.status + " - " + xhr.statusText;
+          okBtn.style.display = "inline-block";
+        }
+      };
+
+      xhr.onerror = function() {
+        loaderMsg.textContent = "❌ Network error or server unreachable.";
+        okBtn.style.display = "inline-block";
+      };
+
+      xhr.send(data);
+    });
+  </script>
+</body>
+</html>
