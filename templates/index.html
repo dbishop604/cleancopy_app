@@ -85,17 +85,4 @@
     </p>
 
     <h2>Upload Your File</h2>
-    <form id="uploadForm" action="{{ url_for('convert') }}" method="post" enctype="multipart/form-data">
-      <!-- File upload input -->
-      <input type="file" name="fileUpload" id="fileUpload" required>
-      <br><br>
-
-      <!-- Hidden input for terms agreement -->
-      <input type="hidden" name="terms" id="termsField" value="">
-
-      <!-- Terms checkbox -->
-      <label>
-        <input type="checkbox" id="termsCheck">
-        I have read and agree to the 
-        <a href="{{ url_for('terms') }}" target="_blank">terms of use</a> and 
-        <a href="{{ url_for('privacy') }}" target="_blank">privacy poli
+    <form id="uploadForm" action="{{ url_for('convert_
