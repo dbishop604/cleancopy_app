@@ -14,8 +14,6 @@ services:
       name: data
       mountPath: /data
       sizeGB: 1
-    buildCommand: ""
-    startCommand: gunicorn -w 2 -k gthread -b 0.0.0.0:$PORT app:app
 
   - type: worker
     name: seamlessdocs-worker
@@ -29,5 +27,3 @@ services:
       name: data
       mountPath: /data
       sizeGB: 1
-    buildCommand: ""
-    startCommand: python worker.py
