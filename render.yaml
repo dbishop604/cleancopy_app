@@ -8,12 +8,14 @@ services:
       - key: PORT
         value: "10000"
       - key: REDIS_URL
-        value: "rediss://default:YOUR_UPSTASH_TOKEN@secure-wahoo-22016.upstash.io:6379"
+        value: "redis://red-d337uoqdbo4c73avqvng:6379"  # Use internal Render Valkey URL
     healthCheckPath: /healthz
     disk:
       name: data
       mountPath: /data
       sizeGB: 1
+    buildCommand: ""  # Build handled via Dockerfile
+    startCommand: "python app.py"
 
   - type: worker
     name: seamlessdocs-worker
@@ -22,9 +24,10 @@ services:
     autoDeploy: true
     envVars:
       - key: REDIS_URL
-        value: "rediss://default:YOUR_UPSTASH_TOKEN@secure-wahoo-22016.upstash.io:6379"
+        value: "redis://red-d337uoqdbo4c73avqvng:6379"  # Same internal URL
     disk:
       name: data
       mountPath: /data
       sizeGB: 1
+    buildCommand: ""
     startCommand: "python worker.py"
