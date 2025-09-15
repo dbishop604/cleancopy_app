@@ -1,20 +1,19 @@
+# Web framework
 Flask==3.0.0
+Werkzeug==3.0.1
+Flask-Cors==4.0.0
+Flask-Session==0.5.0
 gunicorn==23.0.0
 
-# Redis + Queue
+# Redis Queue
 redis==5.0.1
 rq==1.15.1
 
-# OCR + PDF/Image processing
+# PDF/Image processing
 pytesseract==0.3.10
 pdf2image==1.17.0
 Pillow==10.2.0
 
-# PDF/Doc output
+# File output formats
 reportlab==4.1.0
 python-docx==1.1.2
-
-# Utilities
-Werkzeug==3.0.1
-Flask-Cors==4.0.0
-Flask-Session==0.5.0
