@@ -1,3 +1,4 @@
+# render.yaml
 services:
   - type: web
     name: seamlessdocs
@@ -8,7 +9,7 @@ services:
       - key: PORT
         value: "10000"
       - key: REDIS_URL
-        value: "redis://default:AVYAAAIncDE3ZGY5MTE5NDhhYzI0NTRhYmNlYjkzNDc3MDkxM2I5ZXAxMjIwMTY@secure-wahoo-22016.upstash.io:6379"
+        value: "redis://...your-upstash-url..."
     healthCheckPath: /healthz
     disk:
       name: data
@@ -24,7 +25,7 @@ services:
     autoDeploy: true
     envVars:
       - key: REDIS_URL
-        value: "redis://default:AVYAAAIncDE3ZGY5MTE5NDhhYzI0NTRhYmNlYjkzNDc3MDkxM2I5ZXAxMjIwMTY@secure-wahoo-22016.upstash.io:6379"
+        value: "redis://...your-upstash-url..."
     disk:
       name: data
       mountPath: /data
