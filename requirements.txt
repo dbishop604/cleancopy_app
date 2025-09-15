@@ -1,7 +1,17 @@
-flask
-gunicorn
-python-docx
-pytesseract
-pdf2image
-Pillow
-PyPDF2
+Flask==3.0.0
+gunicorn==23.0.0
+
+# Redis + Queue
+redis==5.0.1
+rq==1.15.1
+
+# OCR + PDF/Image processing
+pytesseract==0.3.10
+pdf2image==1.17.0
+Pillow==10.2.0
+
+# PDF output
+reportlab==4.1.0
+
+# Utilities
+Werkzeug==3.0.1
