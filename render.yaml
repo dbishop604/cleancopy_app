@@ -8,13 +8,13 @@ services:
       - key: PORT
         value: "10000"
       - key: REDIS_URL
-        value: "redis://default:YOUR_REAL_UPSTASH_KEY@secure-xxxxx.upstash.io:6379"
+        value: "redis://default:AVYAAAIncDE3ZGY5MTE5NDhhYzI0NTRhYmNlYjkzNDc3MDkxM2I5ZXAxMjIwMTY@secure-wahoo-22016.upstash.io:6379"
     healthCheckPath: /healthz
     disk:
       name: data
       mountPath: /data
       sizeGB: 1
-    buildCommand: ""  # Build handled via Dockerfile
+    buildCommand: ""
     startCommand: "python app.py"
 
   - type: worker
@@ -24,7 +24,7 @@ services:
     autoDeploy: true
     envVars:
       - key: REDIS_URL
-        value: "redis://default:YOUR_REAL_UPSTASH_KEY@secure-xxxxx.upstash.io:6379"
+        value: "redis://default:AVYAAAIncDE3ZGY5MTE5NDhhYzI0NTRhYmNlYjkzNDc3MDkxM2I5ZXAxMjIwMTY@secure-wahoo-22016.upstash.io:6379"
     disk:
       name: data
       mountPath: /data
