@@ -10,8 +10,9 @@ def extract_text_from_pdf(pdf_path):
         reader = PdfReader(pdf_path)
         for page in reader.pages:
             text += page.extract_text() or ""
+        text = text.strip()
 
-        if not text.strip():
+        if not text:
             images = convert_from_path(pdf_path)
             for image in images:
                 text += pytesseract.image_to_string(image)
@@ -25,25 +26,3 @@ def extract_text_from_image(image_path):
         return pytesseract.image_to_string(image)
     except Exception as e:
         return f"[Error processing image: {e}]"
-
-def process_file_job(file_path):
-    try:
-        output_folder = "/data/output"
-        os.makedirs(output_folder, exist_ok=True)
-
-        name, ext = os.path.splitext(os.path.basename(file_path))
-        output_file = os.path.join(output_folder, f"{name}.txt")
-
-        if ext.lower() == ".pdf":
-            text = extract_text_from_pdf(file_path)
-        elif ext.lower() in [".jpg", ".jpeg", ".png", ".tiff", ".bmp"]:
-            text = extract_text_from_image(file_path)
-        else:
-            return f"Unsupported file type: {ext}"
-
-        with open(output_file, "w", encoding="utf-8") as f:
-            f.write(text.strip() or "[No readable text found]")
-
-        return os.path.basename(output_file)
-    except Exception as e:
-        return f"[Error processing file: {e}]"
