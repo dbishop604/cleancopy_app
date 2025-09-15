@@ -1,27 +1,27 @@
 import os
-from flask import Flask, request, jsonify
-from processor import process_file
+import sys
+import redis
+from rq import Connection, Worker
+from processor import process_file_job
 
-app = Flask(__name__)
+# Ensure current directory is on sys.path
+sys.path.append(os.path.dirname(__file__))
 
+listen = ['default']
+redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
 
-@app.route("/process", methods=["POST"])
-def handle_process():
-    if "file" not in request.files or "format" not in request.form:
-        return jsonify({"error": "Missing file or format."}), 400
+try:
+    conn = redis.from_url(redis_url)
+    conn.ping()
+except Exception as e:
+    print(f"❌ Redis connection failed: {e}")
+    conn = None
 
-    uploaded_file = request.files["file"]
-    output_format = request.form["format"]
-    filename = uploaded_file.filename
+if __name__ == "__main__":
+    if not conn:
+        print("❌ Worker exiting due to Redis error.")
+        sys.exit(1)
 
-    if not filename.lower().endswith(".pdf"):
-        return jsonify({"error": "Only PDF files are supported."}), 400
-
-    file_path = os.path.join("/tmp", filename)
-    uploaded_file.save(file_path)
-
-    try:
-        output_path = process_file(file_path, output_format)
-        return jsonify({"success": True, "output_path": output_path})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    with Connection(conn):
+        worker = Worker(map(str, listen))
+        worker.work()
