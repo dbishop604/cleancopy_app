@@ -1,62 +1,44 @@
 import os
-from flask import Flask, request, jsonify, render_template
-from flask_cors import CORS
-from flask_session import Session
+import redis
+from rq import Queue
+from flask import Flask, request, jsonify, send_from_directory
+from worker import process_file_job  # This is just for local import
 from werkzeug.utils import secure_filename
-from worker import get_queue
+
+# Redis connection
+redis_url = os.getenv("REDIS_URL")
+if not redis_url:
+    raise ValueError("REDIS_URL environment variable is not set.")
+redis_conn = redis.from_url(redis_url)
+queue = Queue(connection=redis_conn)
+
+UPLOAD_FOLDER = "/data/uploads"
+OUTPUT_FOLDER = "/data/output"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 app = Flask(__name__)
-CORS(app)
-app.secret_key = os.getenv("SECRET_KEY", "super-secret-key")
-app.config['UPLOAD_FOLDER'] = '/data/uploads'
-app.config['SESSION_TYPE'] = 'filesystem'
-Session(app)
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-# Ensure upload folder exists
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/upload', methods=['POST'])
+@app.route("/upload", methods=["POST"])
 def upload_file():
-    if 'file' not in request.files:
-        return jsonify({"message": "No file part", "status": "error"}), 400
+    if "file" not in request.files:
+        return jsonify({"message": "No file uploaded", "status": "error"}), 400
 
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"message": "No selected file", "status": "error"}), 400
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"message": "No filename found", "status": "error"}), 400
 
     filename = secure_filename(file.filename)
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    file.save(file_path)
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    file.save(filepath)
 
-    # Lazy load processor to avoid import-time Redis error
-    from processor import process_file_job
-    q = get_queue()
-    job = q.enqueue(process_file_job, file_path)
+    job = queue.enqueue("worker.process_file_job", filepath)
+    return jsonify({"message": "File uploaded successfully", "job_id": job.id, "status": "queued"}), 202
 
-    return jsonify({"message": "File received", "job_id": job.id, "status": "success"})
-
-@app.route('/status/<job_id>', methods=['GET'])
-def check_status(job_id):
-    q = get_queue()
-    job = q.fetch_job(job_id)
-    if not job:
-        return jsonify({"message": "Invalid job ID", "status": "error"}), 404
-
-    if job.is_finished:
-        return jsonify({"status": "complete", "result": job.result})
-    elif job.is_failed:
-        return jsonify({"status": "failed", "error": str(job.exc_info)})
-    else:
-        return jsonify({"status": "processing"})
-
-@app.route('/healthz')
-def health_check():
-    return "OK", 200
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+@app.route("/result/<filename>", methods=["GET"])
+def get_result(filename):
+    filepath = os.path.join(OUTPUT_FOLDER, filename)
+    if os.path.exists(filepath):
+        return send_from_directory(OUTPUT_FOLDER, filename)
+    return jsonify({"message": "F
