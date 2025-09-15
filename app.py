@@ -1,26 +1,44 @@
 import os
-import uuid
-from flask import Flask, request, jsonify, render_template, send_from_directory
-from werkzeug.utils import secure_filename
+from flask import Flask, request, jsonify, send_from_directory, render_template
+from flask_cors import CORS
+from flask_session import Session
 import redis
 from rq import Queue
-from worker import process_file_job as process_file  # ensure worker.py has this
+from worker import process_file_job
 
-# Flask setup
 app = Flask(__name__)
-app.config["UPLOAD_FOLDER"] = "/data/uploads"
-os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+CORS(app)
+
+# Setup session
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
 
 # Redis connection
 redis_url = os.getenv("REDIS_URL")
 if not redis_url:
     raise ValueError("REDIS_URL environment variable is not set.")
-r = redis.from_url(redis_url)
-q = Queue(connection=r)
+redis_conn = redis.from_url(redis_url)
+queue = Queue(connection=redis_conn)
+
+# Log to confirm Redis connection
+try:
+    redis_conn.ping()
+    print("✅ Successfully connected to Redis at:", redis_url)
+except Exception as e:
+    print("❌ Failed to connect to Redis:", e)
+
+UPLOAD_FOLDER = "/data/uploads"
+OUTPUT_FOLDER = "/data/output"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/healthz")
+def healthz():
+    return "OK", 200
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
@@ -31,36 +49,31 @@ def upload_file():
     if file.filename == "":
         return jsonify({"error": "Empty filename"}), 400
 
-    filename = secure_filename(file.filename)
-    file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(file_path)
 
-    job = q.enqueue(process_file, file_path)
+    job = queue.enqueue(process_file_job, file_path)
+    return jsonify({"job_id": job.get_id()}), 202
 
-    return jsonify({
-        "job_id": job.id,
-        "message": "File uploaded and queued for processing."
-    })
-
-@app.route("/results/<job_id>", methods=["GET"])
-def get_results(job_id):
-    job = q.fetch_job(job_id)
-    if not job:
-        return jsonify({"error": "Job not found"}), 404
-    if job.is_finished:
-        return jsonify({"status": "finished", "result": job.result})
-    elif job.is_failed:
-        return jsonify({"status": "failed", "error": str(job.exc_info)})
-    else:
-        return jsonify({"status": "processing"})
-
-@app.route("/healthz")
-def healthz():
+@app.route("/result/<job_id>", methods=["GET"])
+def get_result(job_id):
+    from rq.job import Job
     try:
-        r.ping()
-        return jsonify({"status": "ok"}), 200
+        job = Job.fetch(job_id, connection=redis_conn)
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+    if job.is_finished:
+        return jsonify({"status": "finished", "result": job.result})
+    elif job.is_failed:
+        return jsonify({"status": "failed", "message": str(job.exc_info)})
+    else:
+        return jsonify({"status": "processing"})
+
+@app.route("/download/<filename>", methods=["GET"])
+def download_file(filename):
+    return send_from_directory(OUTPUT_FOLDER, filename, as_attachment=True)
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
