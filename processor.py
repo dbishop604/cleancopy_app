@@ -1,53 +1,50 @@
 import os
-from pdf2image import convert_from_path
-from PIL import Image
-import pytesseract
+from docx import Document
 from PyPDF2 import PdfReader
+import pytesseract
+from pdf2image import convert_from_path
+from tempfile import TemporaryDirectory
+from PIL import Image
 
-def extract_text_from_pdf(pdf_path):
+
+def process_file_job(file_path, output_format="docx"):
+    """
+    Converts a scanned PDF into an editable DOCX file using OCR.
+
+    Args:
+        file_path (str): Path to the uploaded PDF file.
+        output_format (str): Desired output format ("docx" supported).
+
+    Returns:
+        str: Path to the generated DOCX file.
+    """
+    if output_format.lower() != "docx":
+        raise ValueError("❌ Only DOCX output is supported.")
+
+    output_path = file_path.replace(".pdf", ".docx")
     text = ""
+
+    # Try extracting text directly first
     try:
-        reader = PdfReader(pdf_path)
+        reader = PdfReader(file_path)
         for page in reader.pages:
-            text += page.extract_text() or ""
-        text = text.strip()
-
-        if not text:
-            images = convert_from_path(pdf_path)
-            for image in images:
-                text += pytesseract.image_to_string(image)
-
+            if page.extract_text():
+                text += page.extract_text() + "\n"
     except Exception as e:
-        text = f"[Error processing PDF: {e}]"
-    return text
+        print("⚠️ Error reading PDF directly:", e)
 
-def extract_text_from_image(image_path):
-    try:
-        image = Image.open(image_path)
-        return pytesseract.image_to_string(image)
-    except Exception as e:
-        return f"[Error processing image: {e}]"
+    # If no text found, fall back to OCR
+    if not text.strip():
+        print("🔎 No text found, switching to OCR...")
+        with TemporaryDirectory() as tempdir:
+            images = convert_from_path(file_path, output_folder=tempdir)
+            for img in images:
+                text += pytesseract.image_to_string(img) + "\n"
 
-def process_file_job(file_path):
-    try:
-        output_folder = "/data/output"
-        os.makedirs(output_folder, exist_ok=True)
+    # Save extracted text into a DOCX
+    doc = Document()
+    doc.add_paragraph(text.strip() if text.strip() else "⚠️ No text could be extracted.")
+    doc.save(output_path)
 
-        filename = os.path.basename(file_path)
-        name, ext = os.path.splitext(filename)
-        output_file = os.path.join(output_folder, f"{name}.txt")
-        ext = ext.lower()
-
-        if ext == ".pdf":
-            text = extract_text_from_pdf(file_path)
-        elif ext in [".jpg", ".jpeg", ".png", ".tiff", ".bmp"]:
-            text = extract_text_from_image(file_path)
-        else:
-            return f"Unsupported file type: {ext}"
-
-        with open(output_file, "w", encoding="utf-8") as f:
-            f.write(text.strip() or "[No readable text found]")
-
-        return os.path.basename(output_file)
-    except Exception as e:
-        return f"[Error processing file: {str(e)}]"
+    print(f"✅ Processing complete. Saved to {output_path}")
+    return output_path
