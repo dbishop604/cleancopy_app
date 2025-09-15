@@ -8,7 +8,9 @@ services:
       - key: PORT
         value: "10000"
       - key: REDIS_URL
-        value: redis://default:YOUR_REAL_UPSTASH_KEY@secure-wahoo-22016.upstash.io:6379
+        fromService:
+          name: seamlessdocs
+          type: redis
     healthCheckPath: /healthz
     disk:
       name: data
@@ -24,7 +26,9 @@ services:
     autoDeploy: true
     envVars:
       - key: REDIS_URL
-        value: redis://default:YOUR_REAL_UPSTASH_KEY@secure-wahoo-22016.upstash.io:6379
+        fromService:
+          name: seamlessdocs
+          type: redis
     disk:
       name: data
       mountPath: /data
