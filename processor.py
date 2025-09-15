@@ -7,22 +7,17 @@ from PyPDF2 import PdfReader
 def extract_text_from_pdf(pdf_path):
     text = ""
     try:
-        # Try extracting text using PyPDF2 first
         reader = PdfReader(pdf_path)
         for page in reader.pages:
             text += page.extract_text() or ""
-        text = text.strip()
 
-        # If no text was found (i.e. it's a scanned PDF), fall back to OCR
-        if not text:
+        if not text.strip():
             images = convert_from_path(pdf_path)
-            for i, image in enumerate(images):
+            for image in images:
                 text += pytesseract.image_to_string(image)
-
     except Exception as e:
         text = f"[Error processing PDF: {e}]"
     return text
-
 
 def extract_text_from_image(image_path):
     try:
@@ -31,30 +26,24 @@ def extract_text_from_image(image_path):
     except Exception as e:
         return f"[Error processing image: {e}]"
 
-
 def process_file_job(file_path):
     try:
-        # Output setup
         output_folder = "/data/output"
         os.makedirs(output_folder, exist_ok=True)
-        filename = os.path.basename(file_path)
-        name, ext = os.path.splitext(filename)
+
+        name, ext = os.path.splitext(os.path.basename(file_path))
         output_file = os.path.join(output_folder, f"{name}.txt")
 
-        # Determine file type
-        ext = ext.lower()
-        if ext == ".pdf":
+        if ext.lower() == ".pdf":
             text = extract_text_from_pdf(file_path)
-        elif ext in [".jpg", ".jpeg", ".png", ".tiff", ".bmp"]:
+        elif ext.lower() in [".jpg", ".jpeg", ".png", ".tiff", ".bmp"]:
             text = extract_text_from_image(file_path)
         else:
             return f"Unsupported file type: {ext}"
 
-        # Save the extracted text
         with open(output_file, "w", encoding="utf-8") as f:
             f.write(text.strip() or "[No readable text found]")
 
         return os.path.basename(output_file)
-
     except Exception as e:
-        return f"[Error processing file: {str(e)}]"
+        return f"[Error processing file: {e}]"
