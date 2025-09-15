@@ -1,108 +1,83 @@
 import os
-import redis
 from flask import Flask, request, render_template, jsonify, send_file
+from werkzeug.utils import secure_filename
+from redis import Redis
 from rq import Queue
 from worker import process_file_job
 
-app = Flask(__name__)
+UPLOAD_FOLDER = "/data/uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# -------------------
-# Redis Setup
-# -------------------
+app = Flask(__name__, static_folder="static", template_folder="templates")
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+# Redis connection from environment
 redis_url = os.getenv("REDIS_URL")
 if not redis_url:
-    raise RuntimeError("❌ REDIS_URL is not set in environment variables")
+    raise ValueError("❌ REDIS_URL environment variable is not set. Please configure it in Render.")
 
 try:
-    redis_conn = redis.Redis.from_url(redis_url, ssl=True, ssl_cert_reqs=None)
+    redis_conn = Redis.from_url(redis_url)
     redis_conn.ping()
-    print("✅ Connected to Redis!")
 except Exception as e:
-    print(f"❌ Redis connection failed: {e}")
-    redis_conn = None
+    raise RuntimeError(f"❌ Could not connect to Redis. Error: {e}")
 
-# Task queue
-q = Queue(connection=redis_conn) if redis_conn else None
+# Create the default RQ queue
+queue = Queue("default", connection=redis_conn)
 
 
-# -------------------
-# Routes
-# -------------------
 @app.route("/")
 def index():
-    """Upload form page"""
     return render_template("index.html")
 
 
-@app.route("/convert", methods=["POST"])
-def convert():
-    """Handle file upload and queue processing"""
-    if not redis_conn or not q:
-        return jsonify({"status": "error", "message": "Redis is not connected"}), 500
-
+@app.route("/upload", methods=["POST"])
+def upload_file():
     if "file" not in request.files:
-        return jsonify({"status": "error", "message": "No file uploaded"}), 400
+        return jsonify({"status": "error", "message": "No file part"}), 400
 
     file = request.files["file"]
     if file.filename == "":
-        return jsonify({"status": "error", "message": "Empty filename"}), 400
+        return jsonify({"status": "error", "message": "No selected file"}), 400
 
-    upload_dir = "/data/uploads"
-    os.makedirs(upload_dir, exist_ok=True)
-    file_path = os.path.join(upload_dir, file.filename)
-    file.save(file_path)
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    file.save(filepath)
 
-    job = q.enqueue(process_file_job, file_path)
-    return jsonify({"job_id": job.id, "message": "File uploaded and job queued"})
+    # Enqueue the file processing job
+    job = queue.enqueue(process_file_job, filepath)
+
+    return jsonify({"status": "success", "job_id": job.get_id()})
 
 
-@app.route("/status/<job_id>")
-def status(job_id):
-    """Check job status"""
-    if not redis_conn or not q:
-        return jsonify({"status": "error", "message": "Redis is not connected"}), 500
-
+@app.route("/progress/<job_id>")
+def job_status(job_id):
     from rq.job import Job
     try:
         job = Job.fetch(job_id, connection=redis_conn)
     except Exception:
-        return jsonify({"status": "error", "message": "Invalid Job ID"}), 404
+        return jsonify({"status": "error", "message": "Job not found"}), 404
 
     if job.is_finished:
-        return jsonify({"status": "done", "result": job.result})
+        return jsonify({"status": "finished", "result": job.result})
     elif job.is_failed:
-        return jsonify({"status": "error", "message": str(job.exc_info)})
+        return jsonify({"status": "failed", "message": str(job.exc_info)})
     else:
         return jsonify({"status": "processing"})
 
 
-@app.route("/download/<job_id>")
-def download(job_id):
-    """Download processed file"""
-    from rq.job import Job
-    try:
-        job = Job.fetch(job_id, connection=redis_conn)
-    except Exception:
-        return "Invalid Job ID", 404
-
-    if not job.is_finished or not job.result:
-        return "File not ready", 404
-
-    output_file = job.result
-    if not os.path.exists(output_file):
-        return "File missing", 404
-
-    return send_file(output_file, as_attachment=True)
+@app.route("/download/<path:filename>")
+def download_file(filename):
+    file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    if not os.path.exists(file_path):
+        return jsonify({"status": "error", "message": "File not found"}), 404
+    return send_file(file_path, as_attachment=True)
 
 
 @app.route("/healthz")
-def healthz():
-    """Health check for Render"""
+def health_check():
     return "OK", 200
 
 
-# -------------------
-# Run (local only)
-# -------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
