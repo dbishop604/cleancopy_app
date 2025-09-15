@@ -1,31 +1,26 @@
-import os
-from flask import Flask, request, jsonify
-from processor import process_file
+# Use an official Python runtime as a parent image
+FROM python:3.11-slim
 
-app = Flask(__name__)
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PORT=10000
 
+# Set working directory
+WORKDIR /app
 
-@app.route("/process", methods=["POST"])
-def handle_process():
-    if "file" not in request.files or "format" not in request.form:
-        return jsonify({"error": "Missing file or format."}), 400
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-    uploaded_file = request.files["file"]
-    output_format = request.form["format"]
-    filename = uploaded_file.filename
+# Copy project files
+COPY . .
 
-    if not filename.lower().endswith(".pdf"):
-        return jsonify({"error": "Only PDF files are supported."}), 400
+# Create folders for uploads if not already mounted
+RUN mkdir -p /data/uploads
 
-    file_path = os.path.join("/tmp", filename)
-    uploaded_file.save(file_path)
+# Expose port
+EXPOSE 10000
 
-    try:
-        output_path = process_file(file_path, output_format)
-        return jsonify({"success": True, "output_path": output_path})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+# Default command
+CMD ["python", "app.py"]
