@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify, render_template, send_from_directory
 from werkzeug.utils import secure_filename
 import redis
 from rq import Queue
-from worker import process_file_job as process_file  # Adjust if needed
+from worker import process_file_job as process_file  # or change to processor if needed
 
 # Flask app setup
 app = Flask(__name__)
@@ -13,8 +13,15 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 # Redis connection
 redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
-r = redis.Redis.from_url(redis_url)
-q = Queue(connection=r)
+try:
+    r = redis.Redis.from_url(redis_url)
+    r.ping()  # test connection
+    q = Queue(connection=r)
+    print(f"✅ Connected to Redis at: {redis_url}")
+except Exception as e:
+    print(f"❌ Redis connection failed: {e}")
+    r = None
+    q = None
 
 @app.route("/")
 def index():
@@ -22,6 +29,9 @@ def index():
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
+    if not q:
+        return jsonify({"status": "error", "message": "Redis is not connected"}), 500
+
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
@@ -30,41 +40,4 @@ def upload_file():
         return jsonify({"error": "Empty filename"}), 400
 
     filename = secure_filename(file.filename)
-    file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-    file.save(file_path)
-
-    # Queue the job
-    job = q.enqueue(process_file, file_path)
-
-    return jsonify({
-        "job_id": job.id,
-        "message": "File uploaded and job queued"
-    })
-
-@app.route("/status/<job_id>", methods=["GET"])
-def job_status(job_id):
-    job = q.fetch_job(job_id)
-    if job is None:
-        return jsonify({"error": "Job not found"}), 404
-
-    if job.is_finished:
-        return jsonify({"status": "finished", "result": job.result})
-    elif job.is_failed:
-        return jsonify({"status": "failed"})
-    else:
-        return jsonify({"status": "in_progress"})
-
-@app.route("/download/<filename>", methods=["GET"])
-def download_file(filename):
-    return send_from_directory(app.config["UPLOAD_FOLDER"], filename, as_attachment=True)
-
-@app.route("/healthz", methods=["GET"])
-def health_check():
-    try:
-        r.ping()
-        return jsonify({"status": "ok"})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    file_path = os.pat_
