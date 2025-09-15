@@ -1,28 +1,29 @@
+# processor.py
 import os
+import pytesseract
 from pdf2image import convert_from_path
 from PIL import Image
-import pytesseract
 from PyPDF2 import PdfReader
 
-def extract_text_from_pdf(pdf_path):
+def extract_text_from_pdf(file_path):
     text = ""
     try:
-        reader = PdfReader(pdf_path)
+        # Try text extraction first
+        reader = PdfReader(file_path)
         for page in reader.pages:
             text += page.extract_text() or ""
-        text = text.strip()
-
-        if not text:
-            images = convert_from_path(pdf_path)
-            for image in images:
-                text += pytesseract.image_to_string(image)
+        if text.strip():
+            return text
     except Exception as e:
-        text = f"[Error processing PDF: {e}]"
+        print(f"PDF text extraction failed, falling back to OCR: {e}")
+
+    # Fallback to OCR
+    images = convert_from_path(file_path)
+    for i, image in enumerate(images):
+        ocr_text = pytesseract.image_to_string(image)
+        text += ocr_text + "\n"
     return text
 
-def extract_text_from_image(image_path):
-    try:
-        image = Image.open(image_path)
-        return pytesseract.image_to_string(image)
-    except Exception as e:
-        return f"[Error processing image: {e}]"
+def extract_text_from_image(file_path):
+    image = Image.open(file_path)
+    return pytesseract.image_to_string(image)
