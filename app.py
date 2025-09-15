@@ -1,71 +1,72 @@
-# app.py
 import os
-import redis
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from flask_session import Session
+from werkzeug.utils import secure_filename
+import redis
 from rq import Queue
 from worker import process_file_job as process_file
 
+# Create app
 app = Flask(__name__)
 CORS(app)
+app.secret_key = os.getenv("SECRET_KEY", "super-secret-key")
+app.config['UPLOAD_FOLDER'] = '/data/uploads'
+app.config['SESSION_TYPE'] = 'filesystem'
+Session(app)
 
-# Ensure REDIS_URL is set
+# Ensure upload folder exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+# Redis connection
 redis_url = os.getenv("REDIS_URL")
 if not redis_url:
-    raise ValueError("REDIS_URL environment variable is not set.")
-
-# Connect to Redis
+    raise ValueError("REDIS_URL environment variable is not set")
 r = redis.Redis.from_url(redis_url)
 q = Queue(connection=r)
 
-@app.route("/healthz")
-def health():
-    try:
-        r.ping()
-        return jsonify({"status": "ok"})
-    except redis.exceptions.ConnectionError:
-        return jsonify({"status": "error", "message": "Redis is not connected"}), 500
 
-@app.route("/upload", methods=["POST"])
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+@app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return jsonify({"status": "error", "message": "No file part"})
+        return jsonify({"message": "No file part", "status": "error"}), 400
 
     file = request.files['file']
     if file.filename == '':
-        return jsonify({"status": "error", "message": "No selected file"})
+        return jsonify({"message": "No selected file", "status": "error"}), 400
 
-    save_path = os.path.join("/data/uploads", file.filename)
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    file.save(save_path)
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file.save(file_path)
 
-    job = q.enqueue(process_file, save_path)
-    return jsonify({"status": "queued", "job_id": job.get_id()})
+    job = q.enqueue(process_file, file_path)
+    return jsonify({"message": "File received", "job_id": job.id, "status": "success"})
 
-@app.route("/result/<job_id>")
-def get_result(job_id):
+
+@app.route('/status/<job_id>', methods=['GET'])
+def check_status(job_id):
     job = q.fetch_job(job_id)
     if not job:
-        return jsonify({"status": "error", "message": "Job not found"})
+        return jsonify({"message": "Invalid job ID", "status": "error"}), 404
+
     if job.is_finished:
-        return jsonify({"status": "done", "result": job.result})
+        return jsonify({"status": "complete", "result": job.result})
     elif job.is_failed:
-        return jsonify({"status": "failed", "message": str(job.exc_info)})
+        return jsonify({"status": "failed", "error": str(job.exc_info)})
     else:
-        return jsonify({"status": "pending"})
+        return jsonify({"status": "processing"})
+
+
+@app.route('/healthz')
+def health_check():
+    return "OK", 200
+
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
-
-
-# worker.py
-import os
-import redis
-from rq import Worker, Queue, Connection
-from processor import process_file_job
-
-# Ensure REDIS_URL is set
-redis_url = os.getenv("REDIS_URL")
-if not redis_url:
-    raise ValueError("REDIS_URL environment var
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
