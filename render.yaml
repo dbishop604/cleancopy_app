@@ -1,33 +1,16 @@
 services:
   - type: web
-    name: seamlessdocs
-    env: docker
-    plan: starter
-    autoDeploy: true
+    name: seamlessdocs-web
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
     envVars:
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: seamlessdocs-redis
       - key: PORT
-        value: "10000"
-      - key: REDIS_URL
-        value: redis://default:AVYAAAIncDE3ZGY5MTE5NDhhYzI0NTRhYmNlYjkzNDc3MDkxM2I5ZXAxMjIwMTY@secure-wahoo-22016.upstash.io:6379
-    healthCheckPath: /healthz
+        value: 10000
     disk:
-      name: data
+      name: shared
       mountPath: /data
-      sizeGB: 1
-    buildCommand: ""
-    startCommand: "python app.py"
-
-  - type: worker
-    name: seamlessdocs-worker
-    env: docker
-    plan: starter
-    autoDeploy: true
-    envVars:
-      - key: REDIS_URL
-        value: redis://default:AVYAAAIncDE3ZGY5MTE5NDhhYzI0NTRhYmNlYjkzNDc3MDkxM2I5ZXAxMjIwMTY@secure-wahoo-22016.upstash.io:6379
-    disk:
-      name: data
-      mountPath: /data
-      sizeGB: 1
-    buildCommand: ""
-    startCommand: "python worker.py"
