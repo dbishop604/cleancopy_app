@@ -1,22 +1,22 @@
 import os
 import redis
 from rq import Worker, Queue, Connection
-from processor import process_file_job  # import your processing function
 
-# Get Redis URL from environment variables
-redis_url = os.getenv("REDIS_URL")
-
-if not redis_url:
-    raise ValueError("❌ REDIS_URL environment variable is not set. Please configure it in Render.")
-
-# Create a Redis connection
+# Redis connection (from environment variable REDIS_URL)
+redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
 conn = redis.Redis.from_url(redis_url)
 
-# Create the default queue
+# Queues to listen on
 listen = ["default"]
 
-if __name__ == "__main__":
-    # Run worker with connection
+
+def run_worker():
+    """Start the RQ worker and listen for jobs on the 'default' queue."""
     with Connection(conn):
-        worker = Worker(list(map(Queue, listen)))
-        worker.work()
+        worker = Worker([Queue(name) for name in listen])
+        print("🚀 Worker started, listening for jobs on:", listen)
+        worker.work(with_scheduler=True)
+
+
+if __name__ == "__main__":
+    run_worker()
