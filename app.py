@@ -3,11 +3,8 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 from flask_session import Session
 from werkzeug.utils import secure_filename
-import redis
-from rq import Queue
-from worker import process_file_job as process_file
+from worker import get_queue
 
-# Create app
 app = Flask(__name__)
 CORS(app)
 app.secret_key = os.getenv("SECRET_KEY", "super-secret-key")
@@ -18,18 +15,9 @@ Session(app)
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Redis connection
-redis_url = os.getenv("REDIS_URL")
-if not redis_url:
-    raise ValueError("REDIS_URL environment variable is not set")
-r = redis.Redis.from_url(redis_url)
-q = Queue(connection=r)
-
-
 @app.route('/')
 def index():
     return render_template('index.html')
-
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -44,12 +32,16 @@ def upload_file():
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(file_path)
 
-    job = q.enqueue(process_file, file_path)
-    return jsonify({"message": "File received", "job_id": job.id, "status": "success"})
+    # Lazy load processor to avoid import-time Redis error
+    from processor import process_file_job
+    q = get_queue()
+    job = q.enqueue(process_file_job, file_path)
 
+    return jsonify({"message": "File received", "job_id": job.id, "status": "success"})
 
 @app.route('/status/<job_id>', methods=['GET'])
 def check_status(job_id):
+    q = get_queue()
     job = q.fetch_job(job_id)
     if not job:
         return jsonify({"message": "Invalid job ID", "status": "error"}), 404
@@ -61,11 +53,9 @@ def check_status(job_id):
     else:
         return jsonify({"status": "processing"})
 
-
 @app.route('/healthz')
 def health_check():
     return "OK", 200
-
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
