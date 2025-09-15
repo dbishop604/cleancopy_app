@@ -45,4 +45,16 @@ def process_file_job(file_path):
         ext = ext.lower()
         if ext == ".pdf":
             text = extract_text_from_pdf(file_path)
-        elif ext in [".jpg", ".jpeg", ".png", ".tiff", "]()
+        elif ext in [".jpg", ".jpeg", ".png", ".tiff", ".bmp"]:
+            text = extract_text_from_image(file_path)
+        else:
+            return f"Unsupported file type: {ext}"
+
+        # Save the extracted text
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(text.strip() or "[No readable text found]")
+
+        return os.path.basename(output_file)
+
+    except Exception as e:
+        return f"[Error processing file: {str(e)}]"
