@@ -1,4 +1,3 @@
-# render.yaml
 services:
   - type: web
     name: seamlessdocs
@@ -9,13 +8,13 @@ services:
       - key: PORT
         value: "10000"
       - key: REDIS_URL
-        value: "redis://...your-upstash-url..."
+        value: "redis://default:YOUR_REAL_UPSTASH_KEY@secure-xxxxx.upstash.io:6379"
     healthCheckPath: /healthz
     disk:
       name: data
       mountPath: /data
       sizeGB: 1
-    buildCommand: ""
+    buildCommand: ""  # Build handled via Dockerfile
     startCommand: "python app.py"
 
   - type: worker
@@ -25,7 +24,7 @@ services:
     autoDeploy: true
     envVars:
       - key: REDIS_URL
-        value: "redis://...your-upstash-url..."
+        value: "redis://default:YOUR_REAL_UPSTASH_KEY@secure-xxxxx.upstash.io:6379"
     disk:
       name: data
       mountPath: /data
