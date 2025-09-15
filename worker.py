@@ -1,14 +1,15 @@
 import os
 import redis
-from rq import Queue
+from rq import Worker, Queue, Connection
 from processor import extract_text_from_pdf, extract_text_from_image
 
+# Get Redis connection
 redis_url = os.getenv("REDIS_URL")
 if not redis_url:
     raise ValueError("REDIS_URL environment variable is not set.")
 redis_conn = redis.from_url(redis_url)
-queue = Queue(connection=redis_conn)
 
+# Define the job processing function
 def process_file_job(file_path):
     try:
         output_folder = "/data/output"
@@ -30,5 +31,5 @@ def process_file_job(file_path):
             f.write(text.strip() or "[No readable text found]")
 
         return os.path.basename(output_file)
-    except Exception as e:
-        return f"[Error processing file: {str(e)}]"
+
+    except Except
